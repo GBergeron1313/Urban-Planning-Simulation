@@ -10,21 +10,10 @@ Core Components
 ● Handles basic time controls (play/pause)  
 2. Population System  
 ● Manages up to 100 citizens  
-● Controls basic behaviors (home/work cycles)  
-● Handles simple pathfinding  
-● Tracks basic needs (housing, jobs)  
 3. City Grid  
 ● Maintains a 5x5 mile city grid  
 ● Handles three zone types  
 ● Controls basic building placement  
-● Manages land usage  
-4. Basic Analytics  
-● Tracks essential city statistics  
-● Generates simple reports  
-● Monitors basic population data  
-● Creates CSV exports  
-
-
 
 
 
