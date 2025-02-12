@@ -25,19 +25,19 @@ Getting Started##
 3. Install required packages
 4. Run the starter scene
 
-Tools Used:
-● Unity 2022.3 LTS
-● Basic Unity UI
-● ProBuilder (for simple shapes)
-● Standard Unity components
-● Unity NavMesh
-● Basic Animation system
-● Simple Unity Physics
-● Unity UI elements
-● SQLite 
-● C#
-● Simple JSON handling
-● CSV export tools
+Tools Used:  
+● Unity 2022.3 LTS  
+● Basic Unity UI  
+● ProBuilder (for simple shapes)  
+● Standard Unity components  
+● Unity NavMesh  
+● Basic Animation system  
+● Simple Unity Physics  
+● Unity UI elements  
+● SQLite    
+● C#  
+● Simple JSON handling  
+● CSV export tools  
 
 
 
