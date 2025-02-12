@@ -27,16 +27,15 @@ Getting Started##
 
 Tools Used:  
 ● Unity 2022.3 LTS  
-● Basic Unity UI  
+● Unity UI  
 ● ProBuilder (for simple shapes)  
 ● Standard Unity components  
 ● Unity NavMesh  
 ● Basic Animation system  
-● Simple Unity Physics  
-● Unity UI elements  
+● Unity Physics  
 ● SQLite    
 ● C#  
-● Simple JSON handling  
+● JSON handling  
 ● CSV export tools  
 
 
