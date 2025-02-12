@@ -11,7 +11,7 @@ Core Components
 ● Coordinates between other systems  
 ● Handles basic time controls (play/pause)
 
-3. #Population System  
+3. Population System  
 ● Manages up to 100 citizens
 
 5. City Grid  
@@ -40,7 +40,7 @@ Tools Used:
 
 
 
-##Contributing  
+Contributing  
 Karlene Bienaime  
 Reid Blankenship  
 Graham Bergeron  
