@@ -33,9 +33,18 @@ public class PopulationSystem : MonoBehaviour
         if (gridSystem == null)
             gridSystem = FindObjectOfType<GridSystem>();
 
-        // Initialize NavMesh if needed
-        if (!UnityEngine.AI.NavMesh.isActiveAndEnabled)
-            Debug.LogError("NavMesh is required for citizen movement!");
+        // Check if NavMesh is properly set up
+        if (!IsNavMeshValid())
+        {
+            Debug.LogError("NavMesh is not properly set up or baked. Please ensure the NavMesh is baked in the scene.");
+        }
+    }
+
+    private bool IsNavMeshValid()
+    {
+        // Sample a position on the NavMesh to check if it's valid
+        UnityEngine.AI.NavMeshHit hit;
+        return UnityEngine.AI.NavMesh.SamplePosition(Vector3.zero, out hit, 1.0f, UnityEngine.AI.NavMesh.AllAreas);
     }
 
     public void UpdatePopulation()
