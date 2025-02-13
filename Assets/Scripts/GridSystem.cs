@@ -1,234 +1,148 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class GridSystem : MonoBehaviour
 {
-    [SerializeField] private int gridSize = 5; // 5x5 mile grid
-    [SerializeField] private float cellSize = 1f; // Size of each grid cell in Unity units
+    [Header("Grid Settings")]
+    public int width = 10;
+    public int height = 10;
+    public float cellSize = 1f;
+    public float gridHeight = 0f;
+    public Material gridMaterial;
 
-    // References
-    [SerializeField] private GameObject residentialPrefab;
-    [SerializeField] private GameObject commercialPrefab;
-    [SerializeField] private GameObject industrialPrefab;
+    [Header("Interaction Settings")]
+    public Color hoverColor = Color.yellow;
+    public Color selectedColor = Color.green;
 
-    // Grid data
-    private GridCell[,] grid;
-    private Dictionary<Vector2Int, GameObject> buildingObjects = new Dictionary<Vector2Int, GameObject>();
+    private GameObject[,] gridCells;
+    private Material defaultMaterial;
+    private GameObject lastHovered;
+    private GameObject selectedCell;
 
     void Start()
     {
-        InitializeGrid();
+        gridCells = new GameObject[width, height];
+        GenerateGrid();
     }
 
-    private void InitializeGrid()
+    void GenerateGrid()
     {
-        grid = new GridCell[gridSize, gridSize];
+        // Create parent object for grid
+        GameObject gridParent = new GameObject("Grid");
+        gridParent.transform.parent = transform;
 
-        // Initialize each cell
-        for (int x = 0; x < gridSize; x++)
+        // Calculate starting position to center the grid
+        Vector3 startPos = transform.position - new Vector3(width * cellSize / 2f, 0, height * cellSize / 2f);
+
+        for (int x = 0; x < width; x++)
         {
-            for (int y = 0; y < gridSize; y++)
+            for (int z = 0; z < height; z++)
             {
-                grid[x, y] = new GridCell
+                // Create cell
+                GameObject cell = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                cell.name = $"Cell_{x}_{z}";
+                cell.transform.parent = gridParent.transform;
+
+                // Position and rotate cell
+                Vector3 pos = startPos + new Vector3(x * cellSize, gridHeight, z * cellSize);
+                cell.transform.position = pos;
+                cell.transform.rotation = Quaternion.Euler(90, 0, 0);
+                cell.transform.localScale = new Vector3(cellSize, cellSize, 1);
+
+                // Add material
+                if (gridMaterial != null)
                 {
-                    position = new Vector2Int(x, y),
-                    zoneType = ZoneType.Unzoned,
-                    isOccupied = false
-                };
+                    cell.GetComponent<Renderer>().material = gridMaterial;
+                }
+
+                // Add collider for interaction
+                BoxCollider collider = cell.AddComponent<BoxCollider>();
+                collider.size = new Vector3(1, 1, 0.1f);
+
+                // Store reference
+                gridCells[x, z] = cell;
             }
         }
-    }
 
-    // Update zone type for a cell
-    public bool SetZoneType(int x, int y, ZoneType newType)
-    {
-        if (!IsValidPosition(x, y)) return false;
-
-        grid[x, y].zoneType = newType;
-        UpdateCellVisual(x, y);
-        return true;
-    }
-
-    // Place a building in a cell
-    public bool PlaceBuilding(int x, int y)
-    {
-        if (!IsValidPosition(x, y)) return false;
-        if (grid[x, y].isOccupied) return false;
-        if (grid[x, y].zoneType == ZoneType.Unzoned) return false;
-
-        Vector2Int pos = new Vector2Int(x, y);
-        GameObject buildingPrefab = GetBuildingPrefab(grid[x, y].zoneType);
-
-        if (buildingPrefab != null)
+        // Store default material
+        if (gridCells[0, 0] != null)
         {
-            Vector3 worldPos = GetWorldPosition(x, y);
-            GameObject building = Instantiate(buildingPrefab, worldPos, Quaternion.identity);
+            defaultMaterial = gridCells[0, 0].GetComponent<Renderer>().material;
+        }
+    }
 
-            if (buildingObjects.ContainsKey(pos))
+    void Update()
+    {
+        HandleGridInteraction();
+    }
+
+    void HandleGridInteraction()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
+        {
+            GameObject hitObject = hit.collider.gameObject;
+
+            // Handle hover
+            if (lastHovered != hitObject)
             {
-                Destroy(buildingObjects[pos]);
-            }
-
-            buildingObjects[pos] = building;
-            grid[x, y].isOccupied = true;
-            return true;
-        }
-
-        return false;
-    }
-
-    // Convert grid position to world position
-    public Vector3 GetWorldPosition(int x, int y)
-    {
-        return new Vector3(x * cellSize, 0, y * cellSize);
-    }
-
-    // Convert world position to grid position
-    public Vector2Int GetGridPosition(Vector3 worldPosition)
-    {
-        int x = Mathf.FloorToInt(worldPosition.x / cellSize);
-        int y = Mathf.FloorToInt(worldPosition.z / cellSize);
-        return new Vector2Int(x, y);
-    }
-
-    private void UpdateCellVisual(int x, int y)
-    {
-        // Remove existing building if present
-        Vector2Int pos = new Vector2Int(x, y);
-        if (buildingObjects.ContainsKey(pos))
-        {
-            Destroy(buildingObjects[pos]);
-            buildingObjects.Remove(pos);
-        }
-
-        grid[x, y].isOccupied = false;
-    }
-
-    private GameObject GetBuildingPrefab(ZoneType zoneType)
-    {
-        switch (zoneType)
-        {
-            case ZoneType.Residential:
-                return residentialPrefab;
-            case ZoneType.Commercial:
-                return commercialPrefab;
-            case ZoneType.Industrial:
-                return industrialPrefab;
-            default:
-                return null;
-        }
-    }
-
-    private bool IsValidPosition(int x, int y)
-    {
-        return x >= 0 && x < gridSize && y >= 0 && y < gridSize;
-    }
-
-    // For SimCore save/load
-    public string GetSerializedData()
-    {
-        GridData data = new GridData
-        {
-            cells = new List<SerializableGridCell>()
-        };
-
-        for (int x = 0; x < gridSize; x++)
-        {
-            for (int y = 0; y < gridSize; y++)
-            {
-                data.cells.Add(new SerializableGridCell
+                // Reset last hovered cell
+                if (lastHovered != null && lastHovered != selectedCell)
                 {
-                    x = x,
-                    y = y,
-                    zoneType = grid[x, y].zoneType,
-                    isOccupied = grid[x, y].isOccupied
-                });
-            }
-        }
+                    lastHovered.GetComponent<Renderer>().material.color = defaultMaterial.color;
+                }
 
-        return JsonUtility.ToJson(data);
-    }
-
-    public void LoadFromData(string jsonData)
-    {
-        GridData data = JsonUtility.FromJson<GridData>(jsonData);
-
-        foreach (var cell in data.cells)
-        {
-            grid[cell.x, cell.y].zoneType = cell.zoneType;
-            grid[cell.x, cell.y].isOccupied = cell.isOccupied;
-
-            if (cell.isOccupied)
-            {
-                PlaceBuilding(cell.x, cell.y);
-            }
-        }
-    }
-
-    public void UpdateGrid()
-    {
-        // Update building states
-        for (int x = 0; x < gridSize; x++)
-        {
-            for (int y = 0; y < gridSize; y++)
-            {
-                if (grid[x, y].isOccupied)
+                // Highlight new cell
+                if (hitObject != selectedCell)
                 {
-                    // Update building logic here
-                    UpdateBuilding(x, y);
+                    hitObject.GetComponent<Renderer>().material.color = hoverColor;
+                }
+
+                lastHovered = hitObject;
+            }
+
+            // Handle selection
+            if (Input.GetMouseButtonDown(0))
+            {
+                // Reset previous selection
+                if (selectedCell != null)
+                {
+                    selectedCell.GetComponent<Renderer>().material.color = defaultMaterial.color;
+                }
+
+                // Set new selection
+                selectedCell = hitObject;
+                selectedCell.GetComponent<Renderer>().material.color = selectedColor;
+
+                // Get grid coordinates
+                string[] coordinates = hitObject.name.Split('_');
+                if (coordinates.Length >= 3)
+                {
+                    int x = int.Parse(coordinates[1]);
+                    int z = int.Parse(coordinates[2]);
+                    Debug.Log($"Selected grid cell at: ({x}, {z})");
                 }
             }
         }
-    }
-
-    private void UpdateBuilding(int x, int y)
-    {
-        // Add any per-building update logic here
-        // For example:
-        // - Check building conditions
-        // - Update building state
-        // - Handle building effects on surroundings
-
-        Vector2Int pos = new Vector2Int(x, y);
-        if (buildingObjects.ContainsKey(pos))
+        else
         {
-            // Update building visuals or state if needed
+            // Reset hover when not over grid
+            if (lastHovered != null && lastHovered != selectedCell)
+            {
+                lastHovered.GetComponent<Renderer>().material.color = defaultMaterial.color;
+                lastHovered = null;
+            }
         }
     }
-}
 
-
-
-// Data structures
-[Serializable]
-public class GridCell
-{
-    public Vector2Int position;
-    public ZoneType zoneType;
-    public bool isOccupied;
-}
-
-[Serializable]
-public class SerializableGridCell
-{
-    public int x;
-    public int y;
-    public ZoneType zoneType;
-    public bool isOccupied;
-}
-
-[Serializable]
-public class GridData
-{
-    public List<SerializableGridCell> cells;
-}
-
-public enum ZoneType
-{
-    Unzoned,
-    Residential,
-    Commercial,
-    Industrial
+    // Helper method to get cell at grid coordinates
+    public GameObject GetCellAt(int x, int z)
+    {
+        if (x >= 0 && x < width && z >= 0 && z < height)
+        {
+            return gridCells[x, z];
+        }
+        return null;
+    }
 }

@@ -78,8 +78,7 @@ public class SimCore : MonoBehaviour
     // Core Update Loop
     private void UpdateSimulation()
     {
-        // Update each system in order
-        gridSystem?.UpdateGrid();
+
         populationSystem?.UpdatePopulation();
         analyticsSystem?.UpdateAnalytics();
     }
@@ -92,7 +91,6 @@ public class SimCore : MonoBehaviour
             SimulationData data = new SimulationData
             {
                 timestamp = DateTime.Now.ToString(),
-                gridData = gridSystem.GetSerializedData(),
                 populationData = populationSystem.GetSerializedData(),
                 analyticsData = analyticsSystem.GetSerializedData()
             };
@@ -117,7 +115,6 @@ public class SimCore : MonoBehaviour
                 SimulationData data = JsonUtility.FromJson<SimulationData>(jsonData);
 
                 // Load data into each system
-                gridSystem.LoadFromData(data.gridData);
                 populationSystem.LoadFromData(data.populationData);
                 analyticsSystem.LoadFromData(data.analyticsData);
 

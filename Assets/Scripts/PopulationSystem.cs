@@ -10,32 +10,19 @@ public class PopulationSystem : MonoBehaviour
     [SerializeField] private GameObject citizenPrefab;
     [SerializeField] private float spawnInterval = 5f;
 
-    [Header("System References")]
-    [SerializeField] private GridSystem gridSystem;
-
     // Population tracking
     private List<Citizen> citizens = new List<Citizen>();
     private float spawnTimer;
 
     void Start()
     {
-        InitializeSystem();
+
     }
 
     void Update()
     {
         UpdatePopulation();
         HandleSpawning();
-    }
-
-    private void InitializeSystem()
-    {
-        if (gridSystem == null)
-            gridSystem = FindObjectOfType<GridSystem>();
-
-        // Initialize NavMesh if needed
-        //if (!UnityEngine.AI.NavMesh.isActiveAndEnabled)
-            //Debug.LogError("NavMesh is required for citizen movement!");
     }
 
     public void UpdatePopulation()
@@ -79,7 +66,7 @@ public class PopulationSystem : MonoBehaviour
 
         if (newCitizen != null)
         {
-            newCitizen.Initialize(this, gridSystem);
+            newCitizen.Initialize(this);
             citizens.Add(newCitizen);
             return true;
         }
@@ -139,7 +126,7 @@ public class PopulationSystem : MonoBehaviour
 
             if (citizen != null)
             {
-                citizen.Initialize(this, gridSystem);
+                citizen.Initialize(this);
                 citizen.LoadFromData(citizenData);
                 citizens.Add(citizen);
             }
@@ -159,10 +146,9 @@ public class Citizen : MonoBehaviour
     private Vector3 workLocation;
     private float stateTimer;
 
-    public void Initialize(PopulationSystem popSystem, GridSystem grid)
+    public void Initialize(PopulationSystem popSystem)
     {
         populationSystem = popSystem;
-        gridSystem = grid;
         agent = GetComponent<UnityEngine.AI.NavMeshAgent>();
 
         // Assign home and work locations
