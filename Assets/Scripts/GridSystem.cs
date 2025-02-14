@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class GridSystem : MonoBehaviour
@@ -18,10 +19,20 @@ public class GridSystem : MonoBehaviour
     private GameObject lastHovered;
     private GameObject selectedCell;
 
+    private bool[,] filledCells;
+
     void Start()
     {
         gridCells = new GameObject[width, height];
-        GenerateGrid();
+        filledCells = new bool[width, height];
+        for (int x = 0; x < width; x++)
+        {
+            for (int z = 0; z < height; z++)
+            {
+                filledCells[x, z] = false;
+            }
+        }
+                GenerateGrid();
     }
 
     void GenerateGrid()
@@ -144,5 +155,22 @@ public class GridSystem : MonoBehaviour
             return gridCells[x, z];
         }
         return null;
+    }
+
+    public bool isCellFilled(int x, int z)
+    {
+        if (filledCells[x, z])
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void fillCell(int x, int z)
+    {
+        filledCells[x, z] = true;
     }
 }

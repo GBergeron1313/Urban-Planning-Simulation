@@ -9,8 +9,10 @@ public class BuildingScript : MonoBehaviour
     RaycastHit hit;
 
     public Camera mainCam;
+    public GameObject mainGrid;
 
     private bool move;
+    private bool locked;
 
     // Start is called before the first frame update
     void Start()
@@ -29,16 +31,41 @@ public class BuildingScript : MonoBehaviour
                 if (hit.transform == transform)
                 move = true;
             }
+            if (Input.GetMouseButtonDown(1))
+            {
+                if (hit.transform == transform)
+                {
+                    if (!locked)
+                        locked = true;
+                    else
+                        locked = false;
+                }
+            }
+            
         }
-
         if (Input.GetMouseButtonUp(0))
-        {
-            move = false;
-            transform.position = new Vector3(Mathf.RoundToInt(transform.position.x), transform.position.y, Mathf.RoundToInt(transform.position.z));
-        }
+            {
+            if (move) { 
+                    move = false;
+                    transform.position = new Vector3(Mathf.RoundToInt(transform.position.x), transform.position.y, Mathf.RoundToInt(transform.position.z));
 
 
-        if (move)
+                    if (mainGrid.GetComponent<GridSystem>().isCellFilled(Mathf.RoundToInt(transform.position.x) + 5, Mathf.RoundToInt(transform.position.z) + 5) == false)
+                    {
+                        print("empty grid cell");
+                        mainGrid.GetComponent<GridSystem>().fillCell(Mathf.RoundToInt(transform.position.x) + 5, Mathf.RoundToInt(transform.position.z) + 5);
+                        locked = true;
+                    }
+                    else
+                    {
+                        Destroy(this.gameObject);
+                    }
+                }
+            }
+        
+
+
+        if (move && !locked)
         {
             transform.position += 0.5f * new Vector3(Input.GetAxis("Mouse X"), 0, Input.GetAxis("Mouse Y"));
         }
