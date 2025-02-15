@@ -269,4 +269,14 @@ public class GridSystem : MonoBehaviour
             filledCells[x, z] = true;
         }
     }
+
+    /// Marks a cell as empty if you move somthing off the cell
+    
+    public void emptyCell(int x, int z)
+    {
+        if (x >= 0 && x < width && z >= 0 && z < height)
+        {
+            filledCells[x, z] = false;
+        }
+    }
 }

@@ -33,8 +33,18 @@ public class BuildingScript : MonoBehaviour
             if (Input.GetMouseButtonDown(0))
             {
                 // If we hit this building, enable movement
-                if (hit.transform == transform)
+                if (hit.transform == transform) {
+                    GridSystem grid = mainGrid.GetComponent<GridSystem>();
+                    int gridX = Mathf.RoundToInt(transform.position.x) + 5;
+                    int gridZ = Mathf.RoundToInt(transform.position.z) + 5;
+
+                    // Check if the grid cell is available
+                    if (grid.isCellFilled(gridX, gridZ))
+                    {
+                        grid.emptyCell(gridX, gridZ);
+                    }
                     move = true;
+                }
             }
             // Right mouse button press
             if (Input.GetMouseButtonDown(1))
@@ -88,6 +98,7 @@ public class BuildingScript : MonoBehaviour
                 else
                 {
                     // If cell is occupied, destroy this building
+                    if(!locked)
                     Destroy(this.gameObject);
                 }
             }
