@@ -234,6 +234,14 @@ public class GridSystem : MonoBehaviour
         }
     }
 
+    ///Returns the Zone type of a cell
+    
+    public ZoneType GetZoneType(int x, int z)
+    {
+        return zoneGrid[x, z];
+    }
+
+
 
     /// Returns the GameObject at the specified grid coordinates
 

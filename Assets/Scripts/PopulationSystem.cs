@@ -25,6 +25,16 @@ public class PopulationSystem : MonoBehaviour
         HandleSpawning();
     }
 
+    private void InitializeSystem()
+    {
+        //if (gridSystem == null)
+          //  gridSystem = FindObjectOfType<GridSystem>();
+
+        // Initialize NavMesh if needed
+        //if (!UnityEngine.AI.NavMesh.isActiveAndEnabled)
+            //Debug.LogError("NavMesh is required for citizen movement!");
+    }
+
     public void UpdatePopulation()
     {
         // Update each citizen's behavior
