@@ -71,9 +71,6 @@ public class AnalyticsSystem : MonoBehaviour
     {
         int residential = 0, commercial = 0, industrial = 0;
 
-        // Example counting - implement based on your GridSystem implementation
-        // This should be replaced with actual grid data access
-
         currentStats["residentialZones"] = residential;
         currentStats["commercialZones"] = commercial;
         currentStats["industrialZones"] = industrial;
@@ -81,7 +78,6 @@ public class AnalyticsSystem : MonoBehaviour
 
     private void UpdatePopulationStats()
     {
-        // These should be implemented based on your actual systems
         float population = 0; // Get from PopulationSystem
         float employed = 0;   // Get from PopulationSystem
         float happiness = 0;  // Calculate from various factors
@@ -101,7 +97,6 @@ public class AnalyticsSystem : MonoBehaviour
 
         historicalData.Add(timeData);
 
-        // Keep only last 24 hours of data (assuming 1 update per minute)
         int maxDataPoints = 1440; // 24 * 60
         if (historicalData.Count > maxDataPoints)
         {

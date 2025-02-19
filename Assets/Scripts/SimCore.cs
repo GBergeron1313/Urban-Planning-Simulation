@@ -16,7 +16,16 @@ public class SimCore : MonoBehaviour
     // Simulation state
     private bool isSimulationRunning = false;
     private float simulationSpeed = 1f;
-    private float defaultTimeStep = 0.016f; // ~60fps
+    private float simulationTimer = 0f;
+    private float updateInterval = 1f; // One second intervals
+
+    private enum SimState
+    {
+        Initializing,
+        Running,
+        Paused
+    }
+
 
     // Save/Load functionality
     private string saveFilePath;
@@ -78,9 +87,15 @@ public class SimCore : MonoBehaviour
     // Core Update Loop
     private void UpdateSimulation()
     {
+        simulationTimer += Time.deltaTime * simulationSpeed;
 
-        populationSystem?.UpdatePopulation();
-        analyticsSystem?.UpdateAnalytics();
+        if (simulationTimer >= updateInterval)
+        {
+            gridSystem.Update();
+            populationSystem.UpdatePopulation();
+            analyticsSystem.UpdateAnalytics();
+            simulationTimer = 0f;
+        }
     }
 
     // Save/Load Operations
@@ -152,3 +167,4 @@ public class SimulationData
     public string populationData;
     public string analyticsData;
 }
+

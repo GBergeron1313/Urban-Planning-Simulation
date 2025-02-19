@@ -4,109 +4,105 @@ using UnityEngine;
 
 public class BuildingScript : MonoBehaviour
 {
-    // Original variables
     Ray ray;
     RaycastHit hit;
     public Camera mainCam;
     public GameObject mainGrid;
     private bool move;
     private bool locked;
-
-    // New variable for zone type
-    private ZoneType currentZoneType = ZoneType.None;
     private Material buildingMaterial;
+    private Vector3 lastValidPosition;
 
     void Start()
     {
-        // Store reference to building material
         buildingMaterial = GetComponent<Renderer>().material;
+        lastValidPosition = transform.position;
     }
 
     void Update()
     {
-        // Create a ray from the mouse position into the scene
         ray = mainCam.ScreenPointToRay(Input.mousePosition);
-        // Check if the ray hits something
+
         if (Physics.Raycast(ray, out hit))
         {
-            // Left mouse button press
             if (Input.GetMouseButtonDown(0))
             {
-                // If we hit this building, enable movement
-                if (hit.transform == transform) {
+                if (hit.transform == transform && !locked)
+                {
                     GridSystem grid = mainGrid.GetComponent<GridSystem>();
                     int gridX = Mathf.RoundToInt(transform.position.x) + 5;
                     int gridZ = Mathf.RoundToInt(transform.position.z) + 5;
 
-                    // Check if the grid cell is available
-                    if (grid.isCellFilled(gridX, gridZ))
-                    {
-                        grid.emptyCell(gridX, gridZ);
-                    }
+                    grid.emptyCell(gridX, gridZ);
                     move = true;
+                    lastValidPosition = transform.position;
                 }
             }
-            // Right mouse button press
+
             if (Input.GetMouseButtonDown(1))
             {
-                // If we hit this building, toggle locked state
                 if (hit.transform == transform)
                 {
-                    if (!locked)
-                        locked = true;
-                    else
-                        locked = false;
+                    locked = !locked;
                 }
             }
         }
-        // Left mouse button release
+
         if (Input.GetMouseButtonUp(0))
         {
             if (move)
             {
-                // Stop movement
                 move = false;
-                // Round position to nearest grid cell
-                transform.position = new Vector3(
+                Vector3 roundedPosition = new Vector3(
                     Mathf.RoundToInt(transform.position.x),
                     transform.position.y,
                     Mathf.RoundToInt(transform.position.z)
                 );
 
                 GridSystem grid = mainGrid.GetComponent<GridSystem>();
-                int gridX = Mathf.RoundToInt(transform.position.x) + 5;
-                int gridZ = Mathf.RoundToInt(transform.position.z) + 5;
+                int gridX = Mathf.RoundToInt(roundedPosition.x) + 5;
+                int gridZ = Mathf.RoundToInt(roundedPosition.z) + 5;
 
-                // Check if the grid cell is available
                 if (!grid.isCellFilled(gridX, gridZ))
                 {
-                    print("empty grid cell");
-                    // Get the zone type at this position
-                    GameObject cell = grid.GetCellAt(gridX, gridZ);
-                    if (cell != null)
+                    transform.position = roundedPosition;
+                    ZoneType zoneType = grid.GetZoneType(gridX, gridZ);
+
+                    switch (zoneType)
                     {
-                        // Copy zone color to building
-                        Color zoneColor = cell.GetComponent<Renderer>().material.color;
-                        buildingMaterial.color = new Color(zoneColor.r, zoneColor.g, zoneColor.b, 1f);
+                        case ZoneType.Residential:
+                            buildingMaterial.color = new Color(0.2f, 0.8f, 0.2f, 1f);
+                            break;
+                        case ZoneType.Commercial:
+                            buildingMaterial.color = new Color(0.2f, 0.2f, 0.8f, 1f);
+                            break;
+                        case ZoneType.Industrial:
+                            buildingMaterial.color = new Color(0.8f, 0.2f, 0.2f, 1f);
+                            break;
+                        default:
+                            buildingMaterial.color = Color.white;
+                            break;
                     }
 
-                    // Mark the cell as filled
                     grid.fillCell(gridX, gridZ);
-                    // Lock the building in place
                     locked = true;
+                    lastValidPosition = transform.position;
                 }
                 else
                 {
-                    // If cell is occupied, destroy this building
-                    if(!locked)
-                    Destroy(this.gameObject);
+                    if (!locked)
+                    {
+                        transform.position = lastValidPosition;
+                        int lastX = Mathf.RoundToInt(lastValidPosition.x) + 5;
+                        int lastZ = Mathf.RoundToInt(lastValidPosition.z) + 5;
+                        grid.fillCell(lastX, lastZ);
+                    }
                 }
             }
         }
-        // If building is being moved and not locked
+
         if (move && !locked)
         {
-            // Update position based on mouse movement
             transform.position += 0.5f * new Vector3(
                 Input.GetAxis("Mouse X"),
                 0,

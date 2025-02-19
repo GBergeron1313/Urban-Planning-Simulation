@@ -111,7 +111,7 @@ public class GridSystem : MonoBehaviour
 
     /// Updates grid state each frame
 
-    void Update()
+    public void Update()
     {
         HandleGridInteraction();
     }
@@ -121,14 +121,12 @@ public class GridSystem : MonoBehaviour
 
     void HandleGridInteraction()
     {
-        // Cast ray from mouse position
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit))
         {
             GameObject hitObject = hit.collider.gameObject;
-            // Extract grid coordinates from cell name
             string[] coordinates = hitObject.name.Split('_');
 
             if (coordinates.Length >= 3)
@@ -139,22 +137,22 @@ public class GridSystem : MonoBehaviour
                 // Handle hover effect
                 if (lastHovered != hitObject)
                 {
-                    // Reset previous hover effect
                     if (lastHovered != null && lastHovered != selectedCell)
                     {
                         UpdateCellColor(lastHovered);
                     }
 
-                    // Apply hover effect to new cell
                     if (hitObject != selectedCell)
                     {
-                        hitObject.GetComponent<Renderer>().material.color = hoverColor;
+                        Color baseColor = GetZoneColor(zoneGrid[x, z]);
+                        Color blendedHoverColor = Color.Lerp(baseColor, hoverColor, 0.5f);
+                        hitObject.GetComponent<Renderer>().material.color = blendedHoverColor;
                     }
 
                     lastHovered = hitObject;
                 }
 
-                // Zone assignment with Shift + number keys
+                // Zone assignment
                 if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                 {
                     if (Input.GetKeyDown(KeyCode.Alpha1)) SetZone(x, z, ZoneType.Residential);
@@ -164,30 +162,25 @@ public class GridSystem : MonoBehaviour
                     else if (Input.GetKeyDown(KeyCode.Alpha0)) SetZone(x, z, ZoneType.None);
                 }
 
-                // Handle cell selection with left click
+                // Handle selection
                 if (Input.GetMouseButtonDown(0))
                 {
-                    // Reset previous selection
                     if (selectedCell != null)
                     {
-                        selectedCell.GetComponent<Renderer>().material.color = defaultMaterial.color;
+                        UpdateCellColor(selectedCell);
                     }
 
-                    // Apply selection effect
                     selectedCell = hitObject;
-                    selectedCell.GetComponent<Renderer>().material.color = selectedColor;
-                    Debug.Log($"Selected grid cell at: ({x}, {z})");
+                    Color baseColor = GetZoneColor(zoneGrid[x, z]);
+                    Color blendedSelectColor = Color.Lerp(baseColor, selectedColor, 0.5f);
+                    selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
                 }
             }
         }
-        else
+        else if (lastHovered != null && lastHovered != selectedCell)
         {
-            // Reset hover effect when not over grid
-            if (lastHovered != null && lastHovered != selectedCell)
-            {
-                UpdateCellColor(lastHovered);
-                lastHovered = null;
-            }
+            UpdateCellColor(lastHovered);
+            lastHovered = null;
         }
     }
 
@@ -206,7 +199,7 @@ public class GridSystem : MonoBehaviour
 
     /// Updates the cell color based on its zone type
 
-    private void UpdateCellColor(GameObject cell)
+    public void UpdateCellColor(GameObject cell)
     {
         string[] coordinates = cell.name.Split('_');
         if (coordinates.Length >= 3)
