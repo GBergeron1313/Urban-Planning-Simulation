@@ -228,7 +228,7 @@ public class GridSystem : MonoBehaviour
     }
 
     ///Returns the Zone type of a cell
-    
+
     public ZoneType GetZoneType(int x, int z)
     {
         return zoneGrid[x, z];
@@ -272,7 +272,7 @@ public class GridSystem : MonoBehaviour
     }
 
     /// Marks a cell as empty if you move somthing off the cell
-    
+
     public void emptyCell(int x, int z)
     {
         if (x >= 0 && x < width && z >= 0 && z < height)
