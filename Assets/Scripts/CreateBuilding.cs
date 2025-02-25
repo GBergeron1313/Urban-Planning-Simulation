@@ -36,7 +36,7 @@ public class CreateBuilding: MonoBehaviour
 
     public void createBuilding(float x, float z)
     {
-        print("Button Clicked");
+        print($"Building Being placed at {x}, {z}");
         Instantiate(buildingPrefab);
         buildingPrefab.transform.position = new Vector3(x - 4.5f, 0.5f, z - 4.5f);
         buildingPrefab.GetComponent<BuildingScript>().mainCam = MainCam;

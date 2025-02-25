@@ -11,9 +11,9 @@ namespace SavingReloading
         private float lastSaveTime;
         private float lastLoadTime;
         private string savePath;
-        const string FileName = "save.data";
+        const string GridDataSaveFileName = "grid_data_save.data";
         GridSystem gridSystem;
-        private CreateBuilding creator;
+        private CreateBuilding buildingCreator;
 
 
         private void Start()
@@ -21,7 +21,7 @@ namespace SavingReloading
             savePath = Application.persistentDataPath;
             gridSystem = FindObjectOfType<GridSystem>();
             lastSaveTime = Time.time;
-            creator = FindObjectOfType<CreateBuilding>();
+            buildingCreator = FindObjectOfType<CreateBuilding>();
             // Let them load their data right on startup.
             // See LoadSaveData() for explanation.
             lastLoadTime = Time.time - 5.0f;
@@ -52,7 +52,7 @@ namespace SavingReloading
 
         private void LoadSaveData()
         {
-            string path = Path.Combine(savePath, FileName);
+            string path = Path.Combine(savePath, GridDataSaveFileName);
             using StreamReader reader = new StreamReader(path);
             string fmt = reader.ReadLine();
 
@@ -86,7 +86,7 @@ namespace SavingReloading
                     if (isFilled == 1)
                     {
                         gridSystem.fillCell(x, z);
-                        creator.createBuilding(x, z);
+                        buildingCreator.createBuilding(x, z);
                     }
                     else
                     {
@@ -99,7 +99,7 @@ namespace SavingReloading
 
         private void SaveCurrent()
         {
-            string path = Path.Combine(savePath, FileName);
+            string path = Path.Combine(savePath, GridDataSaveFileName);
             using StreamWriter writer = new StreamWriter(path, false);
             writer.WriteLine($"x,y=zone_type,is_filled");
             foreach (UInt32 z in Enumerable.Range(0, gridSystem.height))
@@ -110,7 +110,6 @@ namespace SavingReloading
                     int cellFilled = gridSystem.isCellFilled((int)x, (int)z) ? 1 : 0;
                     string output =
                         $"{x},{z}={zoneType},{cellFilled}";
-                    Debug.Log(output);
                     writer.WriteLine(output);
                 }
             }
