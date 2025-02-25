@@ -1,5 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class BuildingScript : MonoBehaviour
@@ -8,6 +7,7 @@ public class BuildingScript : MonoBehaviour
     RaycastHit hit;
     public Camera mainCam;
     public GameObject mainGrid;
+    private GridSystem grid;
     private bool move;
     private bool locked;
     private Material buildingMaterial;
@@ -15,40 +15,58 @@ public class BuildingScript : MonoBehaviour
 
     void Start()
     {
+        
         buildingMaterial = GetComponent<Renderer>().material;
+        grid = mainGrid.GetComponent<GridSystem>();
+        mainCam = Camera.main;
         lastValidPosition = transform.position;
     }
 
     void Update()
     {
-        ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        // The number of frames that a mouse button is down is less
+        // than the number of frames a Raycast is hitting an object.
+        //
+        // Calculating the Raycast every frame, unconditionally, is inefficient.
+        // Only calculating the Raycast if the mouse button/s was/were pressed is better.
+        // 
+        // The internals of Input.Get... is not actually polling for input from the hardware.
+        // Input is polled and stored somewhere. We're just accessing that stored data.
+        // Point Being: We're not hardware polling by accident, so this should be better, perf-wise.
+        bool mouseLeftPressed = Input.GetMouseButtonDown((int)MouseButton.Left);
+        bool mouseRightPressed = Input.GetMouseButtonDown((int)MouseButton.Right);
+        bool mouseLeftReleased = Input.GetMouseButtonUp((int)MouseButton.Left);
 
-        if (Physics.Raycast(ray, out hit))
+        if (mouseLeftPressed || mouseRightPressed)
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                if (hit.transform == transform && !locked)
-                {
-                    GridSystem grid = mainGrid.GetComponent<GridSystem>();
-                    int gridX = Mathf.RoundToInt(transform.position.x) + 5;
-                    int gridZ = Mathf.RoundToInt(transform.position.z) + 5;
+            ray = mainCam.ScreenPointToRay(Input.mousePosition);
 
-                    grid.emptyCell(gridX, gridZ);
-                    move = true;
-                    lastValidPosition = transform.position;
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (mouseLeftPressed)
+                {
+                    if (hit.transform == transform && !locked)
+                    {
+                        int gridX = Mathf.RoundToInt(transform.position.x) + 5;
+                        int gridZ = Mathf.RoundToInt(transform.position.z) + 5;
+
+                        grid.emptyCell(gridX, gridZ);
+                        move = true;
+                        lastValidPosition = transform.position;
+                    }
                 }
-            }
 
-            if (Input.GetMouseButtonDown(1))
-            {
-                if (hit.transform == transform)
+                if (mouseRightPressed)
                 {
-                    locked = !locked;
+                    if (hit.transform == transform)
+                    {
+                        locked = !locked;
+                    }
                 }
             }
         }
 
-        if (Input.GetMouseButtonUp(0))
+        if (mouseLeftReleased)
         {
             if (move)
             {
@@ -59,7 +77,6 @@ public class BuildingScript : MonoBehaviour
                     Mathf.RoundToInt(transform.position.z)
                 );
 
-                GridSystem grid = mainGrid.GetComponent<GridSystem>();
                 int gridX = Mathf.RoundToInt(roundedPosition.x) + 5;
                 int gridZ = Mathf.RoundToInt(roundedPosition.z) + 5;
 
