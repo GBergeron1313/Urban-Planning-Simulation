@@ -82,25 +82,7 @@ public class BuildingScript : MonoBehaviour
 
                 if (!grid.isCellFilled(gridX, gridZ))
                 {
-                    transform.position = roundedPosition;
-                    ZoneType zoneType = grid.GetZoneType(gridX, gridZ);
-
-                    switch (zoneType)
-                    {
-                        case ZoneType.Residential:
-                            buildingMaterial.color = new Color(0.2f, 0.8f, 0.2f, 1f);
-                            break;
-                        case ZoneType.Commercial:
-                            buildingMaterial.color = new Color(0.2f, 0.2f, 0.8f, 1f);
-                            break;
-                        case ZoneType.Industrial:
-                            buildingMaterial.color = new Color(0.8f, 0.2f, 0.2f, 1f);
-                            break;
-                        default:
-                            buildingMaterial.color = Color.white;
-                            break;
-                    }
-
+                    checkBuildingColor(gridX, gridZ);
                     grid.fillCell(gridX, gridZ);
                     locked = true;
                     lastValidPosition = transform.position;
@@ -109,6 +91,7 @@ public class BuildingScript : MonoBehaviour
                 {
                     if (!locked)
                     {
+                        transform.position = roundedPosition;
                         transform.position = lastValidPosition;
                         int lastX = Mathf.RoundToInt(lastValidPosition.x) + 5;
                         int lastZ = Mathf.RoundToInt(lastValidPosition.z) + 5;
@@ -126,5 +109,27 @@ public class BuildingScript : MonoBehaviour
                 Input.GetAxis("Mouse Y")
             );
         }
+    }
+
+    public void checkBuildingColor(int x, int z)
+    {
+        
+        ZoneType zoneType = grid.GetZoneType(x, z);
+
+        switch (zoneType)
+        {
+            case ZoneType.Residential:
+                buildingMaterial.color = new Color(0.2f, 0.8f, 0.2f, 1f);
+                break;
+            case ZoneType.Commercial:
+                buildingMaterial.color = new Color(0.2f, 0.2f, 0.8f, 1f);
+                break;
+            case ZoneType.Industrial:
+                buildingMaterial.color = new Color(0.8f, 0.2f, 0.2f, 1f);
+                break;
+            default:
+                buildingMaterial.color = Color.white;
+                break;
+        }        
     }
 }

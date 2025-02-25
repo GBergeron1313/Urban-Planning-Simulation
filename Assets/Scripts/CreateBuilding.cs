@@ -32,5 +32,6 @@ public class CreateBuilding: MonoBehaviour
         var nextBuilding = Instantiate(buildingPrefab);
         nextBuilding.transform.position = new Vector3(x - 4.5f, 0.5f, z - 4.5f);
         nextBuilding.GetComponent<BuildingScript>().mainGrid = MainGrid;
+        nextBuilding.GetComponent<BuildingScript>().checkBuildingColor((int)x,(int)z);
     }
 }
