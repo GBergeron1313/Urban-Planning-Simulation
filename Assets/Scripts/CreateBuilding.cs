@@ -38,7 +38,7 @@ public class CreateBuilding: MonoBehaviour
     {
         print("Button Clicked");
         Instantiate(buildingPrefab);
-        buildingPrefab.transform.position = new Vector3(x, 0.5f, z);
+        buildingPrefab.transform.position = new Vector3(x - 4.5f, 0.5f, z - 4.5f);
         buildingPrefab.GetComponent<BuildingScript>().mainCam = MainCam;
         buildingPrefab.GetComponent<BuildingScript>().mainGrid = MainGrid;
     }
