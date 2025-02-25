@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum ZoneType
 {
@@ -35,6 +36,8 @@ public class GridSystem : MonoBehaviour
     private GameObject lastHovered;
     private GameObject selectedCell;
     private bool[,] filledCells;
+
+    public GameObject uiText;
 
     /// Initializes the grid arrays and generates the grid structure
 
@@ -147,6 +150,7 @@ public class GridSystem : MonoBehaviour
                         Color baseColor = GetZoneColor(zoneGrid[x, z]);
                         Color blendedHoverColor = Color.Lerp(baseColor, hoverColor, 0.5f);
                         hitObject.GetComponent<Renderer>().material.color = blendedHoverColor;
+                        uiText.GetComponent<TMPro.TextMeshProUGUI>().text = "Cell (" + x + "," + z + ")\nZone Type: " + zoneGrid[x,z];
                     }
 
                     lastHovered = hitObject;
