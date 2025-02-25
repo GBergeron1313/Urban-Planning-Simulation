@@ -1,14 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Xml.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.UIElements;
 
 public class CreateBuilding: MonoBehaviour
 {
-    public Camera MainCam;
     public GameObject MainGrid;
 
     public GameObject buildingPrefab;
@@ -27,19 +20,17 @@ public class CreateBuilding: MonoBehaviour
 
     public void createBuilding()
     {
-        print("Button Clicked"); 
-        Instantiate(buildingPrefab);
-        buildingPrefab.transform.position = new Vector3(6.0f, 0.5f, 0.0f);
-        buildingPrefab.GetComponent<BuildingScript>().mainCam = MainCam;
-        buildingPrefab.GetComponent<BuildingScript>().mainGrid = MainGrid;        
+        print("Building Created"); 
+        var nextBuilding = Instantiate(buildingPrefab);
+        nextBuilding.transform.position = new Vector3(6.0f, 0.5f, 0.0f);
+        nextBuilding.GetComponent<BuildingScript>().mainGrid = MainGrid;        
     }
 
     public void createBuilding(float x, float z)
     {
         print($"Building Being placed at {x}, {z}");
-        Instantiate(buildingPrefab);
-        buildingPrefab.transform.position = new Vector3(x - 4.5f, 0.5f, z - 4.5f);
-        buildingPrefab.GetComponent<BuildingScript>().mainCam = MainCam;
-        buildingPrefab.GetComponent<BuildingScript>().mainGrid = MainGrid;
+        var nextBuilding = Instantiate(buildingPrefab);
+        nextBuilding.transform.position = new Vector3(x - 4.5f, 0.5f, z - 4.5f);
+        nextBuilding.GetComponent<BuildingScript>().mainGrid = MainGrid;
     }
 }
