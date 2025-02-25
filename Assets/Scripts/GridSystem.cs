@@ -264,6 +264,30 @@ public class GridSystem : MonoBehaviour
         return true; // Return true for out of bounds or restricted zones to prevent building
     }
 
+    public void InvalidateCells()
+    {
+        for (int i = 0; i < width; i++)
+        {
+            for (int j = 0;j < height; j++)
+            {
+                bool result = isCellFilled(i,j);
+
+                if (result)
+                {
+                    // if cell is filled, update cell color
+                    UpdateCellColor(gridCells[i,j]);
+
+                    Debug.Log("Grid Updated");
+
+                }
+
+            }
+
+
+        }
+
+    }
+
 
     /// Marks a cell as filled if it's within grid bounds
 

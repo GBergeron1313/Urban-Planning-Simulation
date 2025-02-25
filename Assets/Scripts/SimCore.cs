@@ -26,10 +26,6 @@ public class SimCore : MonoBehaviour
         Paused
     }
 
-
-    // Save/Load functionality
-    private string saveFilePath;
-
     void Awake()
     {
         // Singleton setup
@@ -43,7 +39,6 @@ public class SimCore : MonoBehaviour
             Destroy(gameObject);
         }
 
-        saveFilePath = Application.persistentDataPath + "/simulation_save.json";
     }
 
     void Start()
@@ -66,6 +61,8 @@ public class SimCore : MonoBehaviour
         isSimulationRunning = true;
         Time.timeScale = simulationSpeed;
         Debug.Log("Simulation Started");
+
+        gridSystem.InvalidateCells();
     }
 
     public void PauseSimulation()
@@ -98,54 +95,6 @@ public class SimCore : MonoBehaviour
         }
     }
 
-    // Save/Load Operations
-    public void SaveSimulation()
-    {
-        try
-        {
-            SimulationData data = new SimulationData
-            {
-                timestamp = DateTime.Now.ToString(),
-                populationData = populationSystem.GetSerializedData(),
-                analyticsData = analyticsSystem.GetSerializedData()
-            };
-
-            string jsonData = JsonUtility.ToJson(data, true);
-            System.IO.File.WriteAllText(saveFilePath, jsonData);
-            Debug.Log("Simulation saved successfully");
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error saving simulation: {e.Message}");
-        }
-    }
-
-    public void LoadSimulation()
-    {
-        try
-        {
-            if (System.IO.File.Exists(saveFilePath))
-            {
-                string jsonData = System.IO.File.ReadAllText(saveFilePath);
-                SimulationData data = JsonUtility.FromJson<SimulationData>(jsonData);
-
-                // Load data into each system
-                populationSystem.LoadFromData(data.populationData);
-                analyticsSystem.LoadFromData(data.analyticsData);
-
-                Debug.Log("Simulation loaded successfully");
-            }
-            else
-            {
-                Debug.LogWarning("No save file found");
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.LogError($"Error loading simulation: {e.Message}");
-        }
-    }
-
     private void InitializeSystems()
     {
         // Verify all required systems are present
@@ -156,15 +105,5 @@ public class SimCore : MonoBehaviour
         if (analyticsSystem == null)
             Debug.LogError("AnalyticsSystem reference missing in SimCore!");
     }
-}
-
-// Data structure for save/load operations
-[Serializable]
-public class SimulationData
-{
-    public string timestamp;
-    public string gridData;
-    public string populationData;
-    public string analyticsData;
 }
 

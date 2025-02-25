@@ -490,7 +490,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4bebe5ed9d59334aa61500bfde67a12, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MainCam: {fileID: 387247383}
   MainGrid: {fileID: 411880938}
   buildingPrefab: {fileID: 714108285956125173, guid: 6d3a41b827fd8cc4f8c40baf2a331df3, type: 3}
 --- !u!4 &418860677
@@ -1631,7 +1630,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 411880941}
         m_TargetAssemblyTypeName: SimCore, Assembly-CSharp
         m_MethodName: PauseSimulation
         m_Mode: 1
@@ -2001,8 +2000,8 @@ Transform:
   m_GameObject: {fileID: 1399472586}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 0, y: 0.25, z: 0}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -2090,7 +2089,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 411880941}
         m_TargetAssemblyTypeName: SimCore, Assembly-CSharp
         m_MethodName: PlaySimulation
         m_Mode: 1
