@@ -11,8 +11,6 @@ NavMeshProjectSettings:
     cost: 1
   - name: Jump
     cost: 2
-  - name: No charactor spawning allowed
-    cost: 6
   - name: 
     cost: 1
   - name: 
@@ -69,7 +67,9 @@ NavMeshProjectSettings:
     cost: 1
   - name: 
     cost: 1
-  m_LastAgentTypeID: 1479372276
+  - name: 
+    cost: 1
+  m_LastAgentTypeID: -1923039037
   m_Settings:
   - serializedVersion: 3
     agentTypeID: 0
