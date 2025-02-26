@@ -11,7 +11,6 @@ public class SimCore : MonoBehaviour
     // Core system references
     [SerializeField] private GridSystem gridSystem;
     [SerializeField] private PopulationSystem populationSystem;
-    [SerializeField] private AnalyticsSystem analyticsSystem;
 
     // Simulation state
     private bool isSimulationRunning = false;
@@ -89,8 +88,6 @@ public class SimCore : MonoBehaviour
         if (simulationTimer >= updateInterval)
         {
             gridSystem.Update();
-            populationSystem.UpdatePopulation();
-            analyticsSystem.UpdateAnalytics();
             simulationTimer = 0f;
         }
     }
@@ -102,8 +99,6 @@ public class SimCore : MonoBehaviour
             Debug.LogError("GridSystem reference missing in SimCore!");
         if (populationSystem == null)
             Debug.LogError("PopulationSystem reference missing in SimCore!");
-        if (analyticsSystem == null)
-            Debug.LogError("AnalyticsSystem reference missing in SimCore!");
     }
 }
 
