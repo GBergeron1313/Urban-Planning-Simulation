@@ -64,12 +64,10 @@ namespace SavingReloading
                 {
                     string[] coordToValue = reader.ReadLine()?.Split('=');
                     if (coordToValue == null) return;
-                    // Debug.Log($"coordToValue = \"{coordToValue[0]}, {coordToValue[1]}\"");
 
                     string[] coords = coordToValue[0].Split(',');
                     Assert.IsNotNull(coords);
                     Assert.IsTrue(coords.Length == 2);
-                    // Debug.Log($"coords = \"{coords[0]}, {coords[1]}\"");
                     
                     int cellX = int.Parse(coords[0]);
                     int cellY = int.Parse(coords[1]);
@@ -79,14 +77,14 @@ namespace SavingReloading
                     string[] zoneTypeAndIsFilled = coordToValue[1].Split(',');
                     Assert.IsNotNull(zoneTypeAndIsFilled);
                     Assert.IsTrue(zoneTypeAndIsFilled.Length == 2);
-                    // Debug.Log($"zoneTypeAndIsFilled = \"{zoneTypeAndIsFilled[0]}, {zoneTypeAndIsFilled[1]}\"");
                     
                     ZoneType zoneType = (ZoneType)int.Parse(zoneTypeAndIsFilled[0]);
                     int isFilled = int.Parse(zoneTypeAndIsFilled[1]);
                     if (isFilled == 1)
                     {
+                        Color color = gridSystem.GetZoneColor(zoneType);
                         gridSystem.fillCell(x, z);
-                        buildingCreator.createBuilding(x, z);
+                        buildingCreator.createBuilding(x, z, color);
                     }
                     else
                     {

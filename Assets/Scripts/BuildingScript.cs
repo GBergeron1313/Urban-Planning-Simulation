@@ -15,9 +15,12 @@ public class BuildingScript : MonoBehaviour
 
     void Start()
     {
-        
-        buildingMaterial = GetComponent<Renderer>().material;
-        grid = mainGrid.GetComponent<GridSystem>();
+        name = "BuildingScript";
+        buildingMaterial ??= GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>().buildingPrefab
+            .GetComponent<Renderer>().sharedMaterial;
+
+
+        grid = GameObject.Find("Grid").GetComponent<GridSystem>();
         mainCam = Camera.main;
         lastValidPosition = transform.position;
     }
@@ -111,10 +114,15 @@ public class BuildingScript : MonoBehaviour
         }
     }
 
+    
     public void checkBuildingColor(int x, int z)
     {
-        
+        grid ??= GameObject.Find("Grid").GetComponent<GridSystem>();
+
         ZoneType zoneType = grid.GetZoneType(x, z);
+
+        buildingMaterial ??= GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>().buildingPrefab
+            .GetComponent<Renderer>().sharedMaterial;
 
         switch (zoneType)
         {
@@ -128,8 +136,8 @@ public class BuildingScript : MonoBehaviour
                 buildingMaterial.color = new Color(0.8f, 0.2f, 0.2f, 1f);
                 break;
             default:
-                buildingMaterial.color = Color.white;
+                buildingMaterial.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
                 break;
-        }        
+        }
     }
 }
