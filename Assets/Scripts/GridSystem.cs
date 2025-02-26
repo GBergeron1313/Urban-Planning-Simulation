@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -219,7 +220,7 @@ public class GridSystem : MonoBehaviour
 
     /// Returns the color associated with a zone type
 
-    private Color GetZoneColor(ZoneType zoneType)
+    public Color GetZoneColor(ZoneType zoneType)
     {
         switch (zoneType)
         {
