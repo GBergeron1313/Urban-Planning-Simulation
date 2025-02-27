@@ -10,7 +10,6 @@ public class SimCore : MonoBehaviour
 
     // Core system references
     [SerializeField] private GridSystem gridSystem;
-    [SerializeField] private PopulationSystem populationSystem;
 
     // Simulation state
     private bool isSimulationRunning = false;
@@ -97,8 +96,6 @@ public class SimCore : MonoBehaviour
         // Verify all required systems are present
         if (gridSystem == null)
             Debug.LogError("GridSystem reference missing in SimCore!");
-        if (populationSystem == null)
-            Debug.LogError("PopulationSystem reference missing in SimCore!");
     }
 }
 
