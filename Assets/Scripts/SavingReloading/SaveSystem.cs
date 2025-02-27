@@ -46,13 +46,13 @@ namespace SavingReloading
             {
                 lastSaveTime = Time.time;
                 SaveCurrent();
-                SaveCurrentCitizenData();
+                // SaveCurrentCitizenData();
             }
             else if (l)
             {
                 lastLoadTime = Time.time;
                 LoadSaveData();
-                LoadCitizenData();
+                // LoadCitizenData();
             }
         }
 

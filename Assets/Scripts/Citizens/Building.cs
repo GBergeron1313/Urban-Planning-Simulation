@@ -84,6 +84,7 @@ namespace Citizens
         void Start()
         {
             road_button ??= GameObject.Find("RoadButton").GetComponent<Button>();
+            road_button.onClick.AddListener(RequestUpdate);
             road_button.onClick.AddListener(RedrawPaths);
             building_objects ??= FindObjectOfType<GridSystem>().GetBuildings();
             path_renderer ??= gameObject.AddComponent<LineRenderer>();
