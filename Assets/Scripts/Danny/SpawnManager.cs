@@ -3,6 +3,7 @@ using UnityEngine.UI;
 
 public class SpawnManager : MonoBehaviour
 {
+    private bool npcButtonClicked = false;
     public GameObject[] npcPrefabs; // Assign 4 prefabs in Inspector
     public Button npcButton; // Assign your button in Inspector
     public Transform spawnArea; // Assign an area where NPCs will spawn
@@ -10,11 +11,20 @@ public class SpawnManager : MonoBehaviour
 
     void Start()
     {
-        npcButton.onClick.AddListener(SpawnNPCs);
+        if (!npcButtonClicked)
+        {
+            npcButton.onClick.AddListener(SpawnNPCs);
+        }
     }
 
     void SpawnNPCs()
     {
+        // Don't let them spawn more NPCs
+        npcButton.interactable = false;
+        npcButton.onClick = null;
+        npcButton.enabled = false;
+        npcButtonClicked = true;
+        
         for (int i = 0; i < npcCount; i++)
         {
             Vector3 randomPosition = new Vector3(
