@@ -79,7 +79,7 @@ namespace SavingReloading
         
         private void SaveCurrentCitizenData()
         {
-            var building = GetComponent<Building>();
+            var building = GameObject.Find("BuildingController").GetComponent<Building>();
             var data = building.GetCitizens().Serialize().json;
             string path = Path.Combine(savePath, CitizenDataSaveFileName);
             
@@ -89,7 +89,7 @@ namespace SavingReloading
         
         private void LoadCitizenData()
         {
-            var building = GetComponent<Building>();
+            var building = GameObject.Find("BuildingController").GetComponent<Building>();
             building.RequestUpdate();
             string path = Path.Combine(savePath, CitizenDataSaveFileName);
 
