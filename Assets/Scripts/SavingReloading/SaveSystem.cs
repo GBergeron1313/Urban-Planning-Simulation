@@ -1,7 +1,9 @@
-using System;
 using System.IO;
 using System.Linq;
+using Citizens;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Assertions;
 
 namespace SavingReloading
@@ -12,8 +14,10 @@ namespace SavingReloading
         private float lastLoadTime;
         private string savePath;
         const string GridDataSaveFileName = "grid_data_save.data";
+        const string RoadDataSaveFileName = "road_data_save.data";
+        const string CitizenDataSaveFileName = "citizen_data_save.data";
         GridSystem gridSystem;
-        private CreateBuilding buildingCreator;
+        private CreateBuilding creator;
 
 
         private void Start()
@@ -21,7 +25,7 @@ namespace SavingReloading
             savePath = Application.persistentDataPath;
             gridSystem = FindObjectOfType<GridSystem>();
             lastSaveTime = Time.time;
-            buildingCreator = FindObjectOfType<CreateBuilding>();
+            creator = FindObjectOfType<CreateBuilding>();
             // Let them load their data right on startup.
             // See LoadSaveData() for explanation.
             lastLoadTime = Time.time - 5.0f;
@@ -42,12 +46,57 @@ namespace SavingReloading
             {
                 lastSaveTime = Time.time;
                 SaveCurrent();
+                SaveCurrentCitizenData();
             }
             else if (l)
             {
                 lastLoadTime = Time.time;
                 LoadSaveData();
+                LoadCitizenData();
             }
+        }
+
+        // private void SaveCurrentRoadData()
+        // {
+        //     var building = GetComponent<Building>();
+        //     var roadData = building.GetPathRenderer().Serialize().json;
+        //     string roadPath = Path.Combine(savePath, RoadDataSaveFileName);
+        //     
+        //     using StreamWriter roadWriter = new StreamWriter(roadPath);
+        //     roadWriter.Write(roadData);
+        // }
+        //
+        // private void LoadRoadData()
+        // {
+        //     var building = GetComponent<Building>();
+        //     string roadPath = Path.Combine(savePath, RoadDataSaveFileName);
+        //
+        //     using StreamReader roadReader = new StreamReader(roadPath);
+        //     string roadData = roadReader.ReadToEnd();
+        //     SerializationData fromJson = new SerializationData(roadData);
+        //     building.SetPathRenderer(fromJson.Deserialize() as LineRenderer);
+        // }
+        
+        private void SaveCurrentCitizenData()
+        {
+            var building = GetComponent<Building>();
+            var data = building.GetCitizens().Serialize().json;
+            string path = Path.Combine(savePath, CitizenDataSaveFileName);
+            
+            using StreamWriter writer = new StreamWriter(path);
+            writer.Write(data);
+        }
+        
+        private void LoadCitizenData()
+        {
+            var building = GetComponent<Building>();
+            building.RequestUpdate();
+            string path = Path.Combine(savePath, CitizenDataSaveFileName);
+
+            using StreamReader reader = new StreamReader(path);
+            string data = reader.ReadToEnd();
+            SerializationData fromJson = new SerializationData(data);
+            building.SetCitizens(fromJson.Deserialize() as NavMeshAgent[]);
         }
 
         private void LoadSaveData()
@@ -58,9 +107,9 @@ namespace SavingReloading
 
             Assert.AreEqual(fmt, "x,y=zone_type,is_filled");
 
-            foreach (var z in Enumerable.Range(0, gridSystem.height))
+            for (int x = 0; x < gridSystem.width; x++)
             {
-                foreach (var x in Enumerable.Range(0, gridSystem.width))
+                for (int z = 0; z < gridSystem.height; z++)
                 {
                     string[] coordToValue = reader.ReadLine()?.Split('=');
                     if (coordToValue == null) return;
@@ -68,7 +117,7 @@ namespace SavingReloading
                     string[] coords = coordToValue[0].Split(',');
                     Assert.IsNotNull(coords);
                     Assert.IsTrue(coords.Length == 2);
-                    
+
                     int cellX = int.Parse(coords[0]);
                     int cellY = int.Parse(coords[1]);
                     Assert.AreEqual(cellX, x);
@@ -77,19 +126,20 @@ namespace SavingReloading
                     string[] zoneTypeAndIsFilled = coordToValue[1].Split(',');
                     Assert.IsNotNull(zoneTypeAndIsFilled);
                     Assert.IsTrue(zoneTypeAndIsFilled.Length == 2);
-                    
+
                     ZoneType zoneType = (ZoneType)int.Parse(zoneTypeAndIsFilled[0]);
                     int isFilled = int.Parse(zoneTypeAndIsFilled[1]);
                     if (isFilled == 1)
                     {
                         Color color = gridSystem.GetZoneColor(zoneType);
                         gridSystem.fillCell(x, z);
-                        buildingCreator.createBuilding(x, z, color);
+                        creator.createBuilding(x, z, color);
                     }
                     else
                     {
                         gridSystem.emptyCell(x, z);
                     }
+
                     gridSystem.SetZone(x, z, zoneType);
                 }
             }
@@ -100,14 +150,21 @@ namespace SavingReloading
             string path = Path.Combine(savePath, GridDataSaveFileName);
             using StreamWriter writer = new StreamWriter(path, false);
             writer.WriteLine($"x,y=zone_type,is_filled");
-            foreach (UInt32 z in Enumerable.Range(0, gridSystem.height))
+            var cells = gridSystem.GetCells();
+            if (cells is null)
             {
-                foreach (UInt32 x in Enumerable.Range(0, gridSystem.width))
+                throw new UnityException("Cells was null");
+            }
+
+            for (int x = 0; x < gridSystem.width; x++)
+            {
+                for (int z = 0; z < gridSystem.height; z++)
                 {
-                    var zoneType = (int)gridSystem.GetZoneType((int)x, (int)z);
-                    int cellFilled = gridSystem.isCellFilled((int)x, (int)z) ? 1 : 0;
+                    var zt = (int)gridSystem.GetZoneType(x, z);
+                    var cellFilled = gridSystem.isCellFilled(x, z) ? 1 : 0;
                     string output =
-                        $"{x},{z}={zoneType},{cellFilled}";
+                        $"{x},{z}={zt},{cellFilled}";
+                    // Debug.Log(output);
                     writer.WriteLine(output);
                 }
             }

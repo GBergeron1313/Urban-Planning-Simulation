@@ -53,6 +53,8 @@ public class BuildingScript : MonoBehaviour
                         int gridX = Mathf.RoundToInt(transform.position.x) + 5;
                         int gridZ = Mathf.RoundToInt(transform.position.z) + 5;
 
+                        SetRoundedToGridCell(transform.position);
+
                         grid.emptyCell(gridX, gridZ);
                         move = true;
                         lastValidPosition = transform.position;
@@ -74,31 +76,28 @@ public class BuildingScript : MonoBehaviour
             if (move)
             {
                 move = false;
-                Vector3 roundedPosition = new Vector3(
-                    Mathf.RoundToInt(transform.position.x),
-                    transform.position.y,
-                    Mathf.RoundToInt(transform.position.z)
-                );
+                Vector3 roundedPosition = RoundToGridCell(transform.position);
 
-                int gridX = Mathf.RoundToInt(roundedPosition.x) + 5;
-                int gridZ = Mathf.RoundToInt(roundedPosition.z) + 5;
+                int gridX = (int)roundedPosition.x + 5;
+                int gridZ = (int)roundedPosition.z + 5;
 
                 if (!grid.isCellFilled(gridX, gridZ))
                 {
                     checkBuildingColor(gridX, gridZ);
                     grid.fillCell(gridX, gridZ);
                     locked = true;
-                    lastValidPosition = transform.position;
+                    transform.position = roundedPosition;
+                    lastValidPosition = roundedPosition;
                 }
                 else
                 {
                     if (!locked)
                     {
                         transform.position = roundedPosition;
-                        transform.position = lastValidPosition;
-                        int lastX = Mathf.RoundToInt(lastValidPosition.x) + 5;
-                        int lastZ = Mathf.RoundToInt(lastValidPosition.z) + 5;
-                        grid.fillCell(lastX, lastZ);
+                        lastValidPosition = roundedPosition;
+                        // int lastX = Mathf.RoundToInt(lastValidPosition.x) + 5;
+                        // int lastZ = Mathf.RoundToInt(lastValidPosition.z) + 5;
+                        grid.fillCell(gridX, gridZ);
                     }
                 }
             }
@@ -114,15 +113,34 @@ public class BuildingScript : MonoBehaviour
         }
     }
 
-    
+    private Vector3 RoundToGridCell(Vector3 v)
+    {
+        return new Vector3(
+            Mathf.RoundToInt(v.x + 0.5f) - 0.5f,
+            v.y,
+            Mathf.RoundToInt(v.z - 0.25f) + 0.5f
+        );
+    }
+
+    private void SetRoundedToGridCell(Vector3 v)
+    {
+        v.Set(
+            Mathf.RoundToInt(v.x + 0.5f) - 0.5f,
+            v.y,
+            Mathf.RoundToInt(v.z - 0.25f) + 0.5f
+        );
+    }
+
+
     public void checkBuildingColor(int x, int z)
     {
         grid ??= GameObject.Find("Grid").GetComponent<GridSystem>();
 
         ZoneType zoneType = grid.GetZoneType(x, z);
 
+        // What do you mean the game is unoptimized?
         buildingMaterial ??= GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>().buildingPrefab
-            .GetComponent<Renderer>().sharedMaterial;
+            .GetComponent<Renderer>().material;
 
         switch (zoneType)
         {

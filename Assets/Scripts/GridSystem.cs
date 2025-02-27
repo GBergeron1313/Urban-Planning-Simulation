@@ -1,7 +1,9 @@
-using System;
-using System.Reflection;
+using System.Collections.Generic;
+using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.UI;
+using static UnityEngine.Vector3;
+using UnityEngine.Assertions;
+using UnityEngine.UIElements;
 
 public enum ZoneType
 {
@@ -14,21 +16,18 @@ public enum ZoneType
 
 public class GridSystem : MonoBehaviour
 {
-    [Header("Grid Settings")]
-    public int width = 10;
+    [Header("Grid Settings")] public int width = 10;
     public int height = 10;
     public float cellSize = 1f;
     public float gridHeight = 0f;
     public Material gridMaterial;
 
-    [Header("Zone Settings")]
-    public Color residentialZoneColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+    [Header("Zone Settings")] public Color residentialZoneColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
     public Color commercialZoneColor = new Color(0.2f, 0.2f, 0.8f, 0.5f);
     public Color industrialZoneColor = new Color(0.8f, 0.2f, 0.2f, 0.5f);
     public Color restrictedZoneColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
 
-    [Header("Interaction Settings")]
-    public Color hoverColor = Color.yellow;
+    [Header("Interaction Settings")] public Color hoverColor = Color.yellow;
     public Color selectedColor = Color.green;
 
     private GameObject[,] gridCells;
@@ -40,8 +39,19 @@ public class GridSystem : MonoBehaviour
 
     public GameObject uiText;
 
-    /// Initializes the grid arrays and generates the grid structure
+    private BuildingMode currentMode;
 
+    private enum BuildingMode
+    {
+        None,
+        PlacingBuilding,
+        MarkingZoneType,
+
+        // Always keep TotalModes at the end
+        TotalModes
+    }
+
+    /// Initializes the grid arrays and generates the grid structure
     void Start()
     {
         // Initialize arrays to store grid cells, zone types, and occupancy status
@@ -58,12 +68,12 @@ public class GridSystem : MonoBehaviour
                 zoneGrid[x, z] = ZoneType.None;
             }
         }
+
         GenerateGrid();
     }
 
 
     /// Creates the visual grid structure with cell objects and colliders
-
     void GenerateGrid()
     {
         // Create a parent object to organize all grid cells
@@ -80,13 +90,13 @@ public class GridSystem : MonoBehaviour
             {
                 // Create a quad primitive for the cell
                 GameObject cell = GameObject.CreatePrimitive(PrimitiveType.Quad);
-                cell.name = $"Cell_{x}_{z}";  // Name format used for position lookup
+                cell.name = $"Cell_{x}_{z}"; // Name format used for position lookup
                 cell.transform.parent = gridParent.transform;
 
                 // Position the cell in the grid
                 Vector3 pos = startPos + new Vector3(x * cellSize, gridHeight, z * cellSize);
                 cell.transform.position = pos;
-                cell.transform.rotation = Quaternion.Euler(90, 0, 0);  // Rotate to lay flat
+                cell.transform.rotation = Quaternion.Euler(90, 0, 0); // Rotate to lay flat
                 cell.transform.localScale = new Vector3(cellSize, cellSize, 1);
 
                 // Apply material if provided
@@ -97,8 +107,9 @@ public class GridSystem : MonoBehaviour
                 }
 
                 // Add thin collider for mouse interaction
-                BoxCollider collider = cell.AddComponent<BoxCollider>();
-                collider.size = new Vector3(1, 1, 0.1f);
+                BoxCollider collide = cell.AddComponent<BoxCollider>();
+                // The name "collider" was causing conflicts
+                collide.size = new Vector3(1, 1, 0.1f);
 
                 // Store reference to cell
                 gridCells[x, z] = cell;
@@ -114,15 +125,31 @@ public class GridSystem : MonoBehaviour
 
 
     /// Updates grid state each frame
-
     public void Update()
     {
+        UpdateBuildingMode();
         HandleGridInteraction();
+    }
+
+    private void UpdateBuildingMode()
+    {
+        // Toggles between PlacingBuilding and MarkingZoneType
+        var e = Input.GetKeyDown(KeyCode.E);
+
+        if (e)
+        {
+            currentMode++;
+            if (currentMode >= BuildingMode.TotalModes)
+            {
+                currentMode = BuildingMode.None;
+            }
+
+            Debug.Log($"Switched to {currentMode}");
+        }
     }
 
 
     /// Handles mouse interaction with the grid including hover effects and zone assignment
-
     void HandleGridInteraction()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -151,7 +178,8 @@ public class GridSystem : MonoBehaviour
                         Color baseColor = GetZoneColor(zoneGrid[x, z]);
                         Color blendedHoverColor = Color.Lerp(baseColor, hoverColor, 0.5f);
                         hitObject.GetComponent<Renderer>().material.color = blendedHoverColor;
-                        uiText.GetComponent<TMPro.TextMeshProUGUI>().text = "Cell (" + x + "," + z + ")\nZone Type: " + zoneGrid[x,z];
+                        uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
+                            "Cell (" + x + "," + z + ")\nZone Type: " + zoneGrid[x, z];
                     }
 
                     lastHovered = hitObject;
@@ -167,19 +195,59 @@ public class GridSystem : MonoBehaviour
                     else if (Input.GetKeyDown(KeyCode.Alpha0)) SetZone(x, z, ZoneType.None);
                 }
 
-                // Handle selection
-                if (Input.GetMouseButtonDown(0))
-                {
-                    if (selectedCell != null)
-                    {
-                        UpdateCellColor(selectedCell);
-                    }
+                bool mouseLeftDown = Input.GetMouseButtonDown((int)MouseButton.LeftMouse);
+                bool mouseLeftDragging = Input.GetMouseButton((int)MouseButton.LeftMouse);
+                Color nextColor = GetZoneColor(zoneGrid[x, z]);
 
-                    selectedCell = hitObject;
-                    Color baseColor = GetZoneColor(zoneGrid[x, z]);
-                    Color blendedSelectColor = Color.Lerp(baseColor, selectedColor, 0.5f);
-                    selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
+                switch (currentMode)
+                {
+                    case BuildingMode.MarkingZoneType:
+                        if (mouseLeftDragging)
+                        {
+                            if (selectedCell != null)
+                            {
+                                UpdateCellColor(selectedCell);
+                            }
+
+                            selectedCell = hitObject;
+
+                            Color blendedSelectColor = Color.Lerp(nextColor, selectedColor, 0.5f);
+                            selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
+                        }
+
+                        break;
+
+                    case BuildingMode.PlacingBuilding:
+                        if (mouseLeftDown)
+                        {
+                            GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>().createBuilding(
+                                x,
+                                z,
+                                nextColor
+                            );
+                            fillCell(x, z);
+                        }
+
+                        break;
+
+                    default:
+                    case BuildingMode.None:
+                        break;
                 }
+
+                // // Handle selection
+                // if (Input.GetMouseButtonDown(0))
+                // {
+                //     if (selectedCell != null)
+                //     {
+                //         UpdateCellColor(selectedCell);
+                //     }
+                //
+                //     selectedCell = hitObject;
+                //     Color baseColor = GetZoneColor(zoneGrid[x, z]);
+                //     Color blendedSelectColor = Color.Lerp(baseColor, selectedColor, 0.5f);
+                //     selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
+                // }
             }
         }
         else if (lastHovered != null && lastHovered != selectedCell)
@@ -189,9 +257,47 @@ public class GridSystem : MonoBehaviour
         }
     }
 
+    [CanBeNull]
+    public List<GameObject> GetBuildings()
+    {
+        if (filledCells is null || gridCells is null) return null;
+        List<GameObject> buildings = new List<GameObject>();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int z = 0; z < height; z++)
+            {
+                if (filledCells[x, z])
+                {
+                    buildings.Add(gridCells[x, z]);
+                }
+            }
+        }
+
+        return buildings;
+    }
+
+    [CanBeNull]
+    public List<GameObject> GetCells()
+    {
+        if (filledCells is null || gridCells is null) return null;
+        Assert.AreEqual(filledCells.GetLength(0), width);
+        Assert.AreEqual(filledCells.GetLength(1), height);
+        List<GameObject> buildings = new List<GameObject>();
+
+        for (int x = 0; x < width; x++)
+        {
+            for (int z = 0; z < height; z++)
+            {
+                buildings.Add(gridCells[x, z]);
+            }
+        }
+
+        return buildings;
+    }
+
 
     /// Assigns a zone type to a grid cell
-
     public void SetZone(int x, int z, ZoneType zoneType)
     {
         if (x >= 0 && x < width && z >= 0 && z < height)
@@ -203,7 +309,6 @@ public class GridSystem : MonoBehaviour
 
 
     /// Updates the cell color based on its zone type
-
     public void UpdateCellColor(GameObject cell)
     {
         string[] coordinates = cell.name.Split('_');
@@ -219,7 +324,6 @@ public class GridSystem : MonoBehaviour
 
 
     /// Returns the color associated with a zone type
-
     public Color GetZoneColor(ZoneType zoneType)
     {
         switch (zoneType)
@@ -233,35 +337,33 @@ public class GridSystem : MonoBehaviour
     }
 
     ///Returns the Zone type of a cell
-
     public ZoneType GetZoneType(int x, int z)
     {
         return zoneGrid[x, z];
     }
 
 
-
     /// Returns the GameObject at the specified grid coordinates
-
     public GameObject GetCellAt(int x, int z)
     {
         if (x >= 0 && x < width && z >= 0 && z < height)
         {
             return gridCells[x, z];
         }
+
         return null;
     }
 
 
     /// Checks if a cell is filled or restricted
     /// Returns true if cell is filled, restricted, or out of bounds
-
     public bool isCellFilled(int x, int z)
     {
         if (x >= 0 && x < width && z >= 0 && z < height && zoneGrid[x, z] != ZoneType.Restricted)
         {
             return filledCells[x, z];
         }
+
         return true; // Return true for out of bounds or restricted zones to prevent building
     }
 
@@ -269,39 +371,36 @@ public class GridSystem : MonoBehaviour
     {
         for (int i = 0; i < width; i++)
         {
-            for (int j = 0;j < height; j++)
+            for (int j = 0; j < height; j++)
             {
-                bool result = isCellFilled(i,j);
+                bool result = isCellFilled(i, j);
 
                 if (result)
                 {
                     // if cell is filled, update cell color
-                    UpdateCellColor(gridCells[i,j]);
+                    UpdateCellColor(gridCells[i, j]);
 
                     Debug.Log("Grid Updated");
-
                 }
-
             }
-
-
         }
-
     }
 
 
     /// Marks a cell as filled if it's within grid bounds
-
     public void fillCell(int x, int z)
     {
         if (x >= 0 && x < width && z >= 0 && z < height)
         {
             filledCells[x, z] = true;
         }
+        else
+        {
+            throw new UnityException($"Attempted to Fill Cell {x}, {z}");
+        }
     }
 
     /// Marks a cell as empty if you move somthing off the cell
-
     public void emptyCell(int x, int z)
     {
         if (x >= 0 && x < width && z >= 0 && z < height)

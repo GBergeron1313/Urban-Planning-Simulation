@@ -1,9 +1,10 @@
+using Citizens;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class SpawnManager : MonoBehaviour
 {
-    private bool npcButtonClicked = false;
     public GameObject[] npcPrefabs; // Assign 4 prefabs in Inspector
     public Button npcButton; // Assign your button in Inspector
     public Transform spawnArea; // Assign an area where NPCs will spawn
@@ -11,10 +12,7 @@ public class SpawnManager : MonoBehaviour
 
     void Start()
     {
-        if (!npcButtonClicked)
-        {
-            npcButton.onClick.AddListener(SpawnNPCs);
-        }
+        npcButton.onClick.AddListener(SpawnNPCs);
     }
 
     void SpawnNPCs()
@@ -23,24 +21,33 @@ public class SpawnManager : MonoBehaviour
         npcButton.interactable = false;
         npcButton.onClick = null;
         npcButton.enabled = false;
-        npcButtonClicked = true;
-        
+
         for (int i = 0; i < npcCount; i++)
         {
             Vector3 randomPosition = new Vector3(
-                Random.Range(-5f, 5f),  // Adjust X range for a closer spread
+                Random.Range(-5f, 5f), // Adjust X range for a closer spread
                 0f, // Adjust Y based on terrain
-                Random.Range(-5f, 5f)   // Adjust Z range
+                Random.Range(-5f, 5f) // Adjust Z range
             );
             int randomIndex = Random.Range(0, npcPrefabs.Length);
             GameObject npc = Instantiate(npcPrefabs[randomIndex], randomPosition, Quaternion.identity);
 
+            // For gathering of citizens
+            npc.name = "Citizen";
+
             // Ensure the animator is enabled
             Animator npcAnimator = npc.GetComponent<Animator>();
+            npc.AddComponent<Building>();
             if (npcAnimator != null)
             {
-                npcAnimator.SetTrigger("Idle");  // Ensure NPC starts animating
+                npcAnimator.SetTrigger("Idle"); // Ensure NPC starts animating
+            }
+            else
+            {
+                throw new UnityException("NPCAnimator was null");
             }
         }
+
+        Building.citizens_enabled = true;
     }
 }
