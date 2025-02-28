@@ -2,15 +2,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Citizens;
 
 public class SimCore : MonoBehaviour
 {
-    // Singleton pattern for easy access
+    // Singleton
     public static SimCore Instance { get; private set; }
 
-    // Core system references
+    // References
     [SerializeField] private GridSystem gridSystem;
-    [SerializeField] private PopulationSystem populationSystem;
+    [SerializeField] private CreateBuilding buildingCreate;
+    [SerializeField] private Building citizenBuilding;
+    [SerializeField] private CameraControls cameraControls;
 
     // Simulation state
     private bool isSimulationRunning = false;
@@ -18,12 +21,24 @@ public class SimCore : MonoBehaviour
     private float simulationTimer = 0f;
     private float updateInterval = 1f; // One second intervals
 
-    private enum SimState
+    // Stats
+    [Header("City Statistics")]
+    public int totalBuildings = 0;
+    public int redidentalBuilding = 0;
+    public int commercialBuilding = 0;
+    public int industrialBuilding = 0;
+    public int citizenPopulation = 0;
+    public float cityHappiness = 0;
+
+    public enum SimState
     {
         Initializing,
+        Planning,
         Running,
         Paused
     }
+
+    public SimState currentState = SimState.Initializing;
 
     void Awake()
     {
@@ -43,7 +58,12 @@ public class SimCore : MonoBehaviour
     void Start()
     {
         // Initialize systems
-        InitializeSystems();
+        if(gridSystem == null) gridSystem = FindAnyObjectByType<GridSystem>();
+        if(buildingCreate == null) buildingCreate = FindAnyObjectByType<CreateBuilding>();
+        if (citizenBuilding == null) citizenBuilding = FindAnyObjectByType<Building>();
+        if (cameraControls == null) cameraControls = FindAnyObjectByType<CameraControls>();
+
+        currentState = SimState.Planning;
     }
 
     void Update()
@@ -51,6 +71,7 @@ public class SimCore : MonoBehaviour
         if (isSimulationRunning)
         {
             UpdateSimulation();
+            SpeedControls();
         }
     }
 
@@ -62,6 +83,7 @@ public class SimCore : MonoBehaviour
         Debug.Log("Simulation Started");
 
         gridSystem.InvalidateCells();
+        CityStatistics();
     }
 
     public void PauseSimulation()
@@ -74,9 +96,26 @@ public class SimCore : MonoBehaviour
     public void SetSimulationSpeed(float speed)
     {
         simulationSpeed = Mathf.Clamp(speed, 0.1f, 3f);
+
         if (isSimulationRunning)
         {
             Time.timeScale = simulationSpeed;
+        }
+    }
+
+    private void SpeedControls()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1))
+        {
+            SetSimulationSpeed(1f);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            SetSimulationSpeed(2f);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            SetSimulationSpeed(3f);
         }
     }
 
@@ -92,13 +131,29 @@ public class SimCore : MonoBehaviour
         }
     }
 
-    private void InitializeSystems()
+    public void CityStatistics()
     {
-        // Verify all required systems are present
-        if (gridSystem == null)
-            Debug.LogError("GridSystem reference missing in SimCore!");
-        if (populationSystem == null)
-            Debug.LogError("PopulationSystem reference missing in SimCore!");
+        totalBuildings = gridSystem.GetBuildings().Count;
+        citizenPopulation = citizenBuilding.GetCitizens().Length;
+
+        for (int i = 0; i < gridSystem.width; i++)
+        {
+            for (int j = 0; j < gridSystem.height; j++)
+            {
+                if (gridSystem.GetZoneType(i,j) == ZoneType.Residential)
+                {
+                    redidentalBuilding++;
+                }
+                if (gridSystem.GetZoneType(i, j) == ZoneType.Commercial)
+                {
+                    commercialBuilding++;
+                }
+                if (gridSystem.GetZoneType(i,j) == ZoneType.Industrial)
+                {
+                    industrialBuilding++;
+                }
+            }
+        }
     }
 }
 
