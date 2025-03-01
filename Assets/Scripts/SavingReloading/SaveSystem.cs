@@ -1,6 +1,6 @@
 using System.IO;
-using System.Linq;
 using Citizens;
+using Danny;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
@@ -13,8 +13,10 @@ namespace SavingReloading
         private float lastSaveTime;
         private float lastLoadTime;
         private string savePath;
+
         const string GridDataSaveFileName = "grid_data_save.data";
-        const string RoadDataSaveFileName = "road_data_save.data";
+
+        // const string RoadDataSaveFileName = "road_data_save.data";
         const string CitizenDataSaveFileName = "citizen_data_save.data";
         GridSystem gridSystem;
         private CreateBuilding creator;
@@ -46,7 +48,8 @@ namespace SavingReloading
             {
                 lastSaveTime = Time.time;
                 SaveCurrent();
-                // SaveCurrentCitizenData();
+                if (Building.citizens_enabled)
+                    SaveCurrentCitizenData();
             }
             else if (l)
             {
@@ -56,47 +59,86 @@ namespace SavingReloading
             }
         }
 
-        // private void SaveCurrentRoadData()
-        // {
-        //     var building = GetComponent<Building>();
-        //     var roadData = building.GetPathRenderer().Serialize().json;
-        //     string roadPath = Path.Combine(savePath, RoadDataSaveFileName);
-        //     
-        //     using StreamWriter roadWriter = new StreamWriter(roadPath);
-        //     roadWriter.Write(roadData);
-        // }
-        //
-        // private void LoadRoadData()
-        // {
-        //     var building = GetComponent<Building>();
-        //     string roadPath = Path.Combine(savePath, RoadDataSaveFileName);
-        //
-        //     using StreamReader roadReader = new StreamReader(roadPath);
-        //     string roadData = roadReader.ReadToEnd();
-        //     SerializationData fromJson = new SerializationData(roadData);
-        //     building.SetPathRenderer(fromJson.Deserialize() as LineRenderer);
-        // }
-        
         private void SaveCurrentCitizenData()
         {
-            var building = GameObject.Find("BuildingController").GetComponent<Building>();
-            var data = building.GetCitizens().Serialize().json;
+            if (!Building.citizens_enabled)
+            {
+                throw new UnityException("Attempted to save Citizens but citizens weren't enabled");
+            }
+
+            var citizens = GameObject.FindGameObjectsWithTag("Citizens");
+
             string path = Path.Combine(savePath, CitizenDataSaveFileName);
-            
-            using StreamWriter writer = new StreamWriter(path);
-            writer.Write(data);
+            using StreamWriter writer = new StreamWriter(path, false);
+
+            for (int i = 0; i < citizens.Length; i++)
+            {
+                string citizen_name = citizens[i].gameObject.name;
+
+                // Making sure I have the right gameObject.
+                if (!citizen_name.StartsWith("Citizen"))
+                {
+                    Debug.LogError($"citizen_name = {citizen_name}");
+                }
+
+                var nma = citizens[i].GetComponent<NavMeshAgent>();
+
+                Vector3 pos = nma.nextPosition;
+                Vector3 dest = nma.destination;
+                Vector3 velocity = nma.velocity;
+                int stopped = nma.isStopped ? 1 : 0;
+
+                string s_pos = JsonUtility.ToJson(pos);
+                string s_dest = JsonUtility.ToJson(dest);
+                string s_velocity = JsonUtility.ToJson(velocity);
+
+                writer.WriteLine($"{citizen_name}={s_pos}|{s_dest}|{s_velocity}|{stopped}");
+            }
         }
-        
+
         private void LoadCitizenData()
         {
-            var building = GameObject.Find("BuildingController").GetComponent<Building>();
-            building.RequestUpdate();
             string path = Path.Combine(savePath, CitizenDataSaveFileName);
-
             using StreamReader reader = new StreamReader(path);
-            string data = reader.ReadToEnd();
-            SerializationData fromJson = new SerializationData(data);
-            building.SetCitizens(fromJson.Deserialize() as NavMeshAgent[]);
+
+            for (int i = 0; i < SpawnManager.npcCount; i++)
+            {
+                string line = reader.ReadLine();
+                if (line is null)
+                {
+                    throw new UnityException("Attempted to Load citizen data: Line was null");
+                }
+
+                string[] name_values = line.Split('=');
+                string citizen_name = name_values[0];
+                string values = name_values[1];
+
+                // Making sure I have the right gameObject.
+                Assert.IsTrue(citizen_name.StartsWith("Citizen"));
+
+                string[] pos_dest_velocity_stopped = values.Split('|');
+                Assert.IsNotNull(pos_dest_velocity_stopped);
+                print($"pos_dest_velocity_stopped.Length = {pos_dest_velocity_stopped.Length}");
+                string output = "";
+                foreach (var s in pos_dest_velocity_stopped)
+                {
+                    output += s;
+                }
+
+                print($"pos_dest_velocity_stopped.Length = {output}");
+
+                string s_pos = pos_dest_velocity_stopped[0];
+                string s_dest = pos_dest_velocity_stopped[1];
+                string s_velocity = pos_dest_velocity_stopped[2];
+                string s_stopped = pos_dest_velocity_stopped[3];
+
+                Vector3 pos = JsonUtility.FromJson<Vector3>(s_pos);
+                Vector3 dest = JsonUtility.FromJson<Vector3>(s_dest);
+                Vector3 velocity = JsonUtility.FromJson<Vector3>(s_velocity);
+                int stopped = int.Parse(s_stopped);
+
+                print($"{citizen_name} is {stopped} stopped at {pos} heading to {dest} with velocity {velocity}");
+            }
         }
 
         private void LoadSaveData()
@@ -133,7 +175,7 @@ namespace SavingReloading
                     {
                         Color color = gridSystem.GetZoneColor(zoneType);
                         gridSystem.fillCell(x, z);
-                        creator.createBuilding(x, z, color);
+                        creator.createBuilding(x, z, color, zoneType);
                     }
                     else
                     {

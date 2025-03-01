@@ -60,7 +60,7 @@ public class SimCore : MonoBehaviour
         Time.timeScale = simulationSpeed;
         Debug.Log("Simulation Started");
 
-        gridSystem.InvalidateCells();
+        // gridSystem.InvalidateCells();
     }
 
     public void PauseSimulation()

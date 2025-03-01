@@ -16,27 +16,17 @@ namespace Citizens
         private static List<GameObject> building_objects;
         private static LineRenderer path_renderer;
         private static Button road_button;
-        private static NavMeshAgent[] citizens;
+        public NavMeshAgent[] citizens;
         public static bool citizens_enabled;
 
-        // private List<GameObject> citizens;
-        public LineRenderer GetPathRenderer()
+        public static List<GameObject> go_citizens;
+
+        public void push_citizen(GameObject go_citizen)
         {
-            return path_renderer;
-        }
-        public void SetPathRenderer(LineRenderer lineRenderer)
-        {
-            path_renderer = lineRenderer;
+            go_citizens.Add(go_citizen);
         }
         
-        public NavMeshAgent[] GetCitizens()
-        {
-            return citizens;
-        }
-        public void SetCitizens(NavMeshAgent[] in_citizens)
-        {
-            citizens = in_citizens;
-        }
+        
 
         public static void RedrawPaths()
         {
@@ -59,21 +49,24 @@ namespace Citizens
             }
         }
 
+        public void TrackBuilding()
+        {
+            
+        }
+
         public void RequestUpdate()
         {
-            building_objects ??= FindObjectOfType<GridSystem>().GetBuildings();
+            building_objects = FindObjectOfType<GridSystem>().GetBuildings();
         }
 
         public void UpdateCitizens()
         {
-            citizens ??= FindObjectsOfType<NavMeshAgent>();
-            int mod = building_objects.Count;
+            int mod = building_objects.Count - 1;
             foreach (var citizen in citizens)
             {
                 Assert.IsTrue(citizen.isOnNavMesh);
                 if (citizen.remainingDistance < 0.25f)
                 {
-                    print($"{citizen.name} Reached Destination");
                     int rand = Random.Range(0, mod);
                     citizen.SetDestination(building_objects[rand].transform.position);
                 }

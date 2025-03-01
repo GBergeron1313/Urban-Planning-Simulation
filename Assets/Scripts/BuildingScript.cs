@@ -36,81 +36,81 @@ public class BuildingScript : MonoBehaviour
         // The internals of Input.Get... is not actually polling for input from the hardware.
         // Input is polled and stored somewhere. We're just accessing that stored data.
         // Point Being: We're not hardware polling by accident, so this should be better, perf-wise.
-        bool mouseLeftPressed = Input.GetMouseButtonDown((int)MouseButton.Left);
-        bool mouseRightPressed = Input.GetMouseButtonDown((int)MouseButton.Right);
-        bool mouseLeftReleased = Input.GetMouseButtonUp((int)MouseButton.Left);
+        // bool mouseLeftPressed = Input.GetMouseButtonDown((int)MouseButton.Left);
+        // bool mouseRightPressed = Input.GetMouseButtonDown((int)MouseButton.Right);
+        // bool mouseLeftReleased = Input.GetMouseButtonUp((int)MouseButton.Left);
 
-        if (mouseLeftPressed || mouseRightPressed)
-        {
-            ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        // if (mouseLeftPressed || mouseRightPressed)
+        // {
+        //     ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        //
+        //     if (Physics.Raycast(ray, out hit))
+        //     {
+        //         if (mouseLeftPressed)
+        //         {
+        //             if (hit.transform == transform && !locked)
+        //             {
+        //                 int gridX = Mathf.RoundToInt(transform.position.x) + 5;
+        //                 int gridZ = Mathf.RoundToInt(transform.position.z) + 5;
+        //
+        //                 SetRoundedToGridCell(transform.position);
+        //
+        //                 grid.emptyCell(gridX, gridZ);
+        //                 move = true;
+        //                 lastValidPosition = transform.position;
+        //             }
+        //         }
+        //
+        //         if (mouseRightPressed)
+        //         {
+        //             if (hit.transform == transform)
+        //             {
+        //                 locked = !locked;
+        //             }
+        //         }
+        //     }
+        // }
 
-            if (Physics.Raycast(ray, out hit))
-            {
-                if (mouseLeftPressed)
-                {
-                    if (hit.transform == transform && !locked)
-                    {
-                        int gridX = Mathf.RoundToInt(transform.position.x) + 5;
-                        int gridZ = Mathf.RoundToInt(transform.position.z) + 5;
+        // if (mouseLeftReleased)
+        // {
+        //     if (move)
+        //     {
+        //         move = false;
+        //         Vector3 roundedPosition = RoundToGridCell(transform.position);
+        //
+        //         int gridX = (int)roundedPosition.x + 5;
+        //         int gridZ = (int)roundedPosition.z + 5;
+        //
+        //         if (!grid.isCellFilled(gridX, gridZ))
+        //         {
+        //             checkBuildingColor(gridX, gridZ);
+        //             grid.fillCell(gridX, gridZ);
+        //             locked = true;
+        //             transform.position = roundedPosition;
+        //             lastValidPosition = roundedPosition;
+        //         }
+        //         else
+        //         {
+        //             if (!locked)
+        //             {
+        //                 transform.position = roundedPosition;
+        //                 lastValidPosition = roundedPosition;
+        //                 // int lastX = Mathf.RoundToInt(lastValidPosition.x) + 5;
+        //                 // int lastZ = Mathf.RoundToInt(lastValidPosition.z) + 5;
+        //                 grid.fillCell(gridX, gridZ);
+        //             }
+        //         }
+        //     }
+        // }
 
-                        SetRoundedToGridCell(transform.position);
-
-                        grid.emptyCell(gridX, gridZ);
-                        move = true;
-                        lastValidPosition = transform.position;
-                    }
-                }
-
-                if (mouseRightPressed)
-                {
-                    if (hit.transform == transform)
-                    {
-                        locked = !locked;
-                    }
-                }
-            }
-        }
-
-        if (mouseLeftReleased)
-        {
-            if (move)
-            {
-                move = false;
-                Vector3 roundedPosition = RoundToGridCell(transform.position);
-
-                int gridX = (int)roundedPosition.x + 5;
-                int gridZ = (int)roundedPosition.z + 5;
-
-                if (!grid.isCellFilled(gridX, gridZ))
-                {
-                    checkBuildingColor(gridX, gridZ);
-                    grid.fillCell(gridX, gridZ);
-                    locked = true;
-                    transform.position = roundedPosition;
-                    lastValidPosition = roundedPosition;
-                }
-                else
-                {
-                    if (!locked)
-                    {
-                        transform.position = roundedPosition;
-                        lastValidPosition = roundedPosition;
-                        // int lastX = Mathf.RoundToInt(lastValidPosition.x) + 5;
-                        // int lastZ = Mathf.RoundToInt(lastValidPosition.z) + 5;
-                        grid.fillCell(gridX, gridZ);
-                    }
-                }
-            }
-        }
-
-        if (move && !locked)
-        {
-            transform.position += 0.5f * new Vector3(
-                Input.GetAxis("Mouse X"),
-                0,
-                Input.GetAxis("Mouse Y")
-            );
-        }
+        // if (move && !locked)
+        // {
+        //     transform.position += 0.5f * new Vector3(
+        //         Input.GetAxis("Mouse X"),
+        //         0,
+        //         Input.GetAxis("Mouse Y")
+        //     );
+        // }
     }
 
     private Vector3 RoundToGridCell(Vector3 v)

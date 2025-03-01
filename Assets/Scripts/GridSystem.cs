@@ -1,9 +1,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
-using static UnityEngine.Vector3;
 using UnityEngine.Assertions;
-using UnityEngine.UIElements;
 
 public enum ZoneType
 {
@@ -13,6 +11,17 @@ public enum ZoneType
     Industrial,
     Restricted
 }
+
+public enum BuildingMode
+{
+    None,
+    PlacingBuilding,
+    MarkingZoneType,
+
+    // Always keep TotalModes at the end
+    TotalModes
+}
+
 
 public class GridSystem : MonoBehaviour
 {
@@ -41,15 +50,12 @@ public class GridSystem : MonoBehaviour
 
     private BuildingMode currentMode;
 
-    private enum BuildingMode
-    {
-        None,
-        PlacingBuilding,
-        MarkingZoneType,
-
-        // Always keep TotalModes at the end
-        TotalModes
-    }
+    public static readonly Color g_residentialZoneColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
+    public static readonly Color g_commercialZoneColor = new Color(0.2f, 0.2f, 0.8f, 0.5f);
+    public static readonly Color g_industrialZoneColor = new Color(0.8f, 0.2f, 0.2f, 0.5f);
+    public static readonly Color g_restrictedZoneColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
+    public static Color g_defaultColor = Color.green;
+    public static readonly Color g_hoverColor = Color.yellow;
 
     /// Initializes the grid arrays and generates the grid structure
     void Start()
@@ -111,6 +117,11 @@ public class GridSystem : MonoBehaviour
                 // The name "collider" was causing conflicts
                 collide.size = new Vector3(1, 1, 0.1f);
 
+                Cell c = cell.AddComponent<Cell>();
+                c.location = new Vector2Int(x, z);
+                c.zone_type = ZoneType.None;
+                c.grid = this;
+
                 // Store reference to cell
                 gridCells[x, z] = cell;
             }
@@ -120,6 +131,8 @@ public class GridSystem : MonoBehaviour
         if (gridCells[0, 0] != null)
         {
             defaultMaterial = new Material(gridCells[0, 0].GetComponent<Renderer>().material);
+            Cell.default_color = defaultMaterial.color;
+            g_defaultColor = defaultMaterial.color;
         }
     }
 
@@ -149,114 +162,225 @@ public class GridSystem : MonoBehaviour
     }
 
 
-    /// Handles mouse interaction with the grid including hover effects and zone assignment
     void HandleGridInteraction()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
+        if (!Cell.hovering) return;
+        GameObject hitObject = Cell.hovering.gameObject;
+        int x = Cell.hovering.location.x;
+        int z = Cell.hovering.location.y;
 
-        if (Physics.Raycast(ray, out hit))
+        // Toggles between PlacingBuilding and MarkingZoneType
+        var e = Input.GetKeyDown(KeyCode.E);
+
+        // Cycles paintbrush settings
+        bool r = Input.GetKeyDown(KeyCode.R);
+
+        if (e)
         {
-            GameObject hitObject = hit.collider.gameObject;
-            string[] coordinates = hitObject.name.Split('_');
-
-            if (coordinates.Length >= 3)
+            Cell.building_mode++;
+            if (Cell.building_mode >= BuildingMode.TotalModes)
             {
-                int x = int.Parse(coordinates[1]);
-                int z = int.Parse(coordinates[2]);
-
-                // Handle hover effect
-                if (lastHovered != hitObject)
-                {
-                    if (lastHovered != null && lastHovered != selectedCell)
-                    {
-                        UpdateCellColor(lastHovered);
-                    }
-
-                    if (hitObject != selectedCell)
-                    {
-                        Color baseColor = GetZoneColor(zoneGrid[x, z]);
-                        Color blendedHoverColor = Color.Lerp(baseColor, hoverColor, 0.5f);
-                        hitObject.GetComponent<Renderer>().material.color = blendedHoverColor;
-                        uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
-                            "Cell (" + x + "," + z + ")\nZone Type: " + zoneGrid[x, z];
-                    }
-
-                    lastHovered = hitObject;
-                }
-
-                // Zone assignment
-                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-                {
-                    if (Input.GetKeyDown(KeyCode.Alpha1)) SetZone(x, z, ZoneType.Residential);
-                    else if (Input.GetKeyDown(KeyCode.Alpha2)) SetZone(x, z, ZoneType.Commercial);
-                    else if (Input.GetKeyDown(KeyCode.Alpha3)) SetZone(x, z, ZoneType.Industrial);
-                    else if (Input.GetKeyDown(KeyCode.Alpha4)) SetZone(x, z, ZoneType.Restricted);
-                    else if (Input.GetKeyDown(KeyCode.Alpha0)) SetZone(x, z, ZoneType.None);
-                }
-
-                bool mouseLeftDown = Input.GetMouseButtonDown((int)MouseButton.LeftMouse);
-                bool mouseLeftDragging = Input.GetMouseButton((int)MouseButton.LeftMouse);
-                Color nextColor = GetZoneColor(zoneGrid[x, z]);
-
-                switch (currentMode)
-                {
-                    case BuildingMode.MarkingZoneType:
-                        if (mouseLeftDragging)
-                        {
-                            if (selectedCell != null)
-                            {
-                                UpdateCellColor(selectedCell);
-                            }
-
-                            selectedCell = hitObject;
-
-                            Color blendedSelectColor = Color.Lerp(nextColor, selectedColor, 0.5f);
-                            selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
-                        }
-
-                        break;
-
-                    case BuildingMode.PlacingBuilding:
-                        if (mouseLeftDown)
-                        {
-                            GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>().createBuilding(
-                                x,
-                                z,
-                                nextColor
-                            );
-                            fillCell(x, z);
-                        }
-
-                        break;
-
-                    default:
-                    case BuildingMode.None:
-                        break;
-                }
-
-                // // Handle selection
-                // if (Input.GetMouseButtonDown(0))
-                // {
-                //     if (selectedCell != null)
-                //     {
-                //         UpdateCellColor(selectedCell);
-                //     }
-                //
-                //     selectedCell = hitObject;
-                //     Color baseColor = GetZoneColor(zoneGrid[x, z]);
-                //     Color blendedSelectColor = Color.Lerp(baseColor, selectedColor, 0.5f);
-                //     selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
-                // }
+                Cell.building_mode = BuildingMode.None;
             }
         }
-        else if (lastHovered != null && lastHovered != selectedCell)
+
+        if (r)
         {
-            UpdateCellColor(lastHovered);
-            lastHovered = null;
+            print($"Paintbrush = {Cell.paintbrush}");
+            Cell.paintbrush++;
+            if (Cell.paintbrush > ZoneType.Restricted)
+            {
+                Cell.paintbrush = ZoneType.Residential;
+            }
         }
+
+        Vector2Int loc;
+
+        if (Cell.hovering is null)
+        {
+            loc = Cell.last_hovered?.location ?? new Vector2Int(-1, -1);
+        }
+        else
+        {
+            loc = Cell.hovering.location;
+        }
+
+        ZoneType zt_displayed = Cell.hovering?.zone_type ?? Cell.last_hovered?.zone_type ?? ZoneType.None;
+
+        uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
+            $"Cell ({loc.x},{loc.y})\n" +
+            $"Zone Type: {zt_displayed}\n" +
+            $"Paintbrush: {Cell.paintbrush}\n" +
+            $"Building Placement Mode: {Cell.building_mode}";
+
+
+        // bool mouseLeftDown = Input.GetMouseButtonDown((int)MouseButton.LeftMouse);
+        // bool mouseLeftDragging = Input.GetMouseButton((int)MouseButton.LeftMouse);
+        // Color nextColor = GetZoneColor(zoneGrid[x, z]);
+
+        // switch (currentMode)
+        // {
+        //     case BuildingMode.MarkingZoneType:
+        //         if (mouseLeftDragging)
+        //         {
+        //             if (selectedCell)
+        //             {
+        //                 UpdateCellColor(selectedCell);
+        //             }
+        //
+        //             selectedCell = hitObject;
+        //
+        //             Color blendedSelectColor = Color.Lerp(nextColor, selectedColor, 0.5f);
+        //             selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
+        //         }
+        //
+        //         break;
+        //
+        //     case BuildingMode.PlacingBuilding:
+        //         if (mouseLeftDown)
+        //         {
+        //             GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>().createBuilding(
+        //                 x,
+        //                 z,
+        //                 nextColor
+        //             );
+        //             fillCell(x, z);
+        //         }
+        //
+        //         break;
+        //
+        //     default:
+        //     case BuildingMode.None:
+        //         break;
+        // }
+
+        // // Handle selection
+        // if (Input.GetMouseButtonDown(0))
+        // {
+        //     if (selectedCell != null)
+        //     {
+        //         UpdateCellColor(selectedCell);
+        //     }
+        //
+        //     selectedCell = hitObject;
+        //     Color baseColor = GetZoneColor(zoneGrid[x, z]);
+        //     Color blendedSelectColor = Color.Lerp(baseColor, selectedColor, 0.5f);
+        //     selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
+        // }
+        // if (lastHovered != null && lastHovered != selectedCell)
+        // {
+        //     UpdateCellColor(lastHovered);
+        //     lastHovered = null;
+        // }
     }
 
+    /// Handles mouse interaction with the grid including hover effects and zone assignment
+    // void HandleGridInteraction()
+    // {
+    //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+    //     RaycastHit hit;
+    //
+    //     if (Physics.Raycast(ray, out hit))
+    //     {
+    //         GameObject hitObject = hit.collider.gameObject;
+    //         string[] coordinates = hitObject.name.Split('_');
+    //
+    //         if (coordinates.Length >= 3)
+    //         {
+    //             int x = int.Parse(coordinates[1]);
+    //             int z = int.Parse(coordinates[2]);
+    //
+    //             // Handle hover effect
+    //             if (lastHovered != hitObject)
+    //             {
+    //                 if (lastHovered != null && lastHovered != selectedCell)
+    //                 {
+    //                     UpdateCellColor(lastHovered);
+    //                 }
+    //
+    //                 if (hitObject != selectedCell)
+    //                 {
+    //                     Color baseColor = GetZoneColor(zoneGrid[x, z]);
+    //                     Color blendedHoverColor = Color.Lerp(baseColor, hoverColor, 0.5f);
+    //                     hitObject.GetComponent<Renderer>().material.color = blendedHoverColor;
+    //                     uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
+    //                         "Cell (" + x + "," + z + ")\nZone Type: " + zoneGrid[x, z];
+    //                 }
+    //
+    //                 lastHovered = hitObject;
+    //             }
+    //
+    //             // Zone assignment
+    //             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+    //             {
+    //                 if (Input.GetKeyDown(KeyCode.Alpha1)) SetZone(x, z, ZoneType.Residential);
+    //                 else if (Input.GetKeyDown(KeyCode.Alpha2)) SetZone(x, z, ZoneType.Commercial);
+    //                 else if (Input.GetKeyDown(KeyCode.Alpha3)) SetZone(x, z, ZoneType.Industrial);
+    //                 else if (Input.GetKeyDown(KeyCode.Alpha4)) SetZone(x, z, ZoneType.Restricted);
+    //                 else if (Input.GetKeyDown(KeyCode.Alpha0)) SetZone(x, z, ZoneType.None);
+    //             }
+    //
+    //             bool mouseLeftDown = Input.GetMouseButtonDown((int)MouseButton.LeftMouse);
+    //             bool mouseLeftDragging = Input.GetMouseButton((int)MouseButton.LeftMouse);
+    //             Color nextColor = GetZoneColor(zoneGrid[x, z]);
+    //
+    //             switch (currentMode)
+    //             {
+    //                 case BuildingMode.MarkingZoneType:
+    //                     if (mouseLeftDragging)
+    //                     {
+    //                         if (selectedCell != null)
+    //                         {
+    //                             UpdateCellColor(selectedCell);
+    //                         }
+    //
+    //                         selectedCell = hitObject;
+    //
+    //                         Color blendedSelectColor = Color.Lerp(nextColor, selectedColor, 0.5f);
+    //                         selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
+    //                     }
+    //
+    //                     break;
+    //
+    //                 case BuildingMode.PlacingBuilding:
+    //                     if (mouseLeftDown)
+    //                     {
+    //                         GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>().createBuilding(
+    //                             x,
+    //                             z,
+    //                             nextColor
+    //                         );
+    //                         fillCell(x, z);
+    //                     }
+    //
+    //                     break;
+    //
+    //                 default:
+    //                 case BuildingMode.None:
+    //                     break;
+    //             }
+    //
+    //             // // Handle selection
+    //             // if (Input.GetMouseButtonDown(0))
+    //             // {
+    //             //     if (selectedCell != null)
+    //             //     {
+    //             //         UpdateCellColor(selectedCell);
+    //             //     }
+    //             //
+    //             //     selectedCell = hitObject;
+    //             //     Color baseColor = GetZoneColor(zoneGrid[x, z]);
+    //             //     Color blendedSelectColor = Color.Lerp(baseColor, selectedColor, 0.5f);
+    //             //     selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
+    //             // }
+    //         }
+    //     }
+    //     else if (lastHovered != null && lastHovered != selectedCell)
+    //     {
+    //         UpdateCellColor(lastHovered);
+    //         lastHovered = null;
+    //     }
+    // }
     [CanBeNull]
     public List<GameObject> GetBuildings()
     {
@@ -300,26 +424,15 @@ public class GridSystem : MonoBehaviour
     /// Assigns a zone type to a grid cell
     public void SetZone(int x, int z, ZoneType zoneType)
     {
-        if (x >= 0 && x < width && z >= 0 && z < height)
-        {
-            zoneGrid[x, z] = zoneType;
-            UpdateCellColor(gridCells[x, z]);
-        }
+        zoneGrid[x, z] = zoneType;
     }
 
 
     /// Updates the cell color based on its zone type
-    public void UpdateCellColor(GameObject cell)
+    public void UpdateCellColor(GameObject cell, int x, int z)
     {
-        string[] coordinates = cell.name.Split('_');
-        if (coordinates.Length >= 3)
-        {
-            int x = int.Parse(coordinates[1]);
-            int z = int.Parse(coordinates[2]);
-
-            Color zoneColor = GetZoneColor(zoneGrid[x, z]);
-            cell.GetComponent<Renderer>().material.color = zoneColor;
-        }
+        Color zoneColor = GetZoneColor(zoneGrid[x, z]);
+        cell.GetComponent<Renderer>().material.color = zoneColor;
     }
 
 
@@ -333,6 +446,18 @@ public class GridSystem : MonoBehaviour
             case ZoneType.Industrial: return industrialZoneColor;
             case ZoneType.Restricted: return restrictedZoneColor;
             default: return defaultMaterial.color;
+        }
+    }
+
+    public static Color ZoneColor(ZoneType zoneType)
+    {
+        switch (zoneType)
+        {
+            case ZoneType.Residential: return g_residentialZoneColor;
+            case ZoneType.Commercial: return g_commercialZoneColor;
+            case ZoneType.Industrial: return g_industrialZoneColor;
+            case ZoneType.Restricted: return g_restrictedZoneColor;
+            default: return g_defaultColor;
         }
     }
 
@@ -367,24 +492,24 @@ public class GridSystem : MonoBehaviour
         return true; // Return true for out of bounds or restricted zones to prevent building
     }
 
-    public void InvalidateCells()
-    {
-        for (int i = 0; i < width; i++)
-        {
-            for (int j = 0; j < height; j++)
-            {
-                bool result = isCellFilled(i, j);
-
-                if (result)
-                {
-                    // if cell is filled, update cell color
-                    UpdateCellColor(gridCells[i, j]);
-
-                    Debug.Log("Grid Updated");
-                }
-            }
-        }
-    }
+    // public void InvalidateCells()
+    // {
+    //     for (int i = 0; i < width; i++)
+    //     {
+    //         for (int j = 0; j < height; j++)
+    //         {
+    //             bool result = isCellFilled(i, j);
+    //
+    //             if (result)
+    //             {
+    //                 // if cell is filled, update cell color
+    //                 UpdateCellColor(gridCells[i, j], x, z);
+    //
+    //                 Debug.Log("Grid Updated");
+    //             }
+    //         }
+    //     }
+    // }
 
 
     /// Marks a cell as filled if it's within grid bounds
