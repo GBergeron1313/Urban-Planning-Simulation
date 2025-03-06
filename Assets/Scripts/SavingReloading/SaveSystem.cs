@@ -1,7 +1,6 @@
 using System.IO;
 using Citizens;
 using Danny;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Assertions;
@@ -144,45 +143,50 @@ namespace SavingReloading
         private void LoadSaveData()
         {
             string path = Path.Combine(savePath, GridDataSaveFileName);
-            using StreamReader reader = new StreamReader(path);
+            StreamReader reader = new StreamReader(path);
             string fmt = reader.ReadLine();
+            Assert.AreEqual(fmt, "x,y=zone_type,cell_type");
+            string[] lines = reader.ReadToEnd().Split('\n');
+            reader.Dispose();
 
-            Assert.AreEqual(fmt, "x,y=zone_type,is_filled");
-
-            for (int x = 0; x < gridSystem.width; x++)
+            var buildings = gridSystem.GetCells();
+            if (buildings is null)
             {
-                for (int z = 0; z < gridSystem.height; z++)
+                throw new UnityException("Couldn't access Cells from SaveSystem");
+            }
+
+            for (int i = 0; i < buildings.Count; i++)
+            {
+                string[] cell_serial = lines[i].Split('=');
+                string[] xz = cell_serial[0].Split(',');
+
+                int x = int.Parse(xz[0]);
+                int z = int.Parse(xz[1]);
+
+                var cell = buildings[i].GetComponent<Cell>();
+
+                Assert.AreEqual(cell.location.x, x);
+                Assert.AreEqual(cell.location.y, z);
+
+                string[] zt_ct = cell_serial[1].Split(',');
+
+                ZoneType zt = (ZoneType)int.Parse(zt_ct[0]);
+                CellType ct = (CellType)int.Parse(zt_ct[1]);
+
+                cell.SetZoneTypeAndUpdate(zt);
+
+                switch (ct)
                 {
-                    string[] coordToValue = reader.ReadLine()?.Split('=');
-                    if (coordToValue == null) return;
-
-                    string[] coords = coordToValue[0].Split(',');
-                    Assert.IsNotNull(coords);
-                    Assert.IsTrue(coords.Length == 2);
-
-                    int cellX = int.Parse(coords[0]);
-                    int cellY = int.Parse(coords[1]);
-                    Assert.AreEqual(cellX, x);
-                    Assert.AreEqual(cellY, z);
-
-                    string[] zoneTypeAndIsFilled = coordToValue[1].Split(',');
-                    Assert.IsNotNull(zoneTypeAndIsFilled);
-                    Assert.IsTrue(zoneTypeAndIsFilled.Length == 2);
-
-                    ZoneType zoneType = (ZoneType)int.Parse(zoneTypeAndIsFilled[0]);
-                    int isFilled = int.Parse(zoneTypeAndIsFilled[1]);
-                    if (isFilled == 1)
-                    {
-                        Color color = gridSystem.GetZoneColor(zoneType);
-                        gridSystem.fillCell(x, z);
-                        creator.createBuilding(x, z, color, zoneType);
-                    }
-                    else
-                    {
-                        gridSystem.emptyCell(x, z);
-                    }
-
-                    gridSystem.SetZone(x, z, zoneType);
+                    case CellType.Building:
+                        cell.PushBuilding();
+                        break;
+                    case CellType.Road:
+                        cell.PushRoad();
+                        break;
+                    case CellType.None:
+                        break;
+                    default:
+                        throw new UnityException("Default shouldn't ever happen");
                 }
             }
         }
@@ -191,24 +195,28 @@ namespace SavingReloading
         {
             string path = Path.Combine(savePath, GridDataSaveFileName);
             using StreamWriter writer = new StreamWriter(path, false);
-            writer.WriteLine($"x,y=zone_type,is_filled");
-            var cells = gridSystem.GetCells();
-            if (cells is null)
+            writer.WriteLine($"x,y=zone_type,cell_type");
+            var buildings = gridSystem.GetCells();
+            if (buildings is null)
             {
                 throw new UnityException("Cells was null");
             }
 
-            for (int x = 0; x < gridSystem.width; x++)
+            foreach (var building in buildings)
             {
-                for (int z = 0; z < gridSystem.height; z++)
+                var cell = building.GetComponent<Cell>();
+                if (cell is null)
                 {
-                    var zt = (int)gridSystem.GetZoneType(x, z);
-                    var cellFilled = gridSystem.isCellFilled(x, z) ? 1 : 0;
-                    string output =
-                        $"{x},{z}={zt},{cellFilled}";
-                    // Debug.Log(output);
-                    writer.WriteLine(output);
+                    throw new UnityException($"Cell was null on building: {building}");
                 }
+                int zt = (int)cell.zone_type;
+                int ct = (int)cell.cell_type;
+                int x = cell.location.x;
+                int z = cell.location.y;
+                string output =
+                    $"{x},{z}={zt},{ct}";
+                Debug.Log(output);
+                writer.WriteLine(output);
             }
         }
     }

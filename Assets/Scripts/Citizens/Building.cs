@@ -6,8 +6,7 @@ using UnityEngine.Assertions;
 
 namespace Citizens
 {
-    // basically a singleton
-    // manages buildings and the way citizens interact with them
+
     public class Building : MonoBehaviour
     {
         // private static int MAX_CITIZENS => 100;
@@ -21,7 +20,7 @@ namespace Citizens
 
         public static List<GameObject> go_citizens;
 
-        public void push_citizen(GameObject go_citizen)
+        public void PushCitizen(GameObject go_citizen)
         {
             go_citizens.Add(go_citizen);
         }

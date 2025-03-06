@@ -22,9 +22,30 @@ public class CreateBuilding : MonoBehaviour
         nextBuilding.GetComponent<BuildingScript>().mainGrid = MainGrid;
     }
 
+    public void createBuilding(float x, float z, Color color, ZoneType zone_type, CellType cell_type)
+    {
+        print($"CreateBuilding: {x}, {z}, {color}, {zone_type}, {cell_type}");
+        var nextBuilding = Instantiate(buildingPrefab);
+        nextBuilding.transform.position = new Vector3(x - 4.5f, 0.5f, z - 4.5f);
+        Cell c;
+        if (!nextBuilding.TryGetComponent<Cell>(out c))
+        {
+            Debug.Log("Cell wasn't attached. Attaching...");
+
+            c = nextBuilding.AddComponent<Cell>();
+        }
+        /*c.color = GridSystem.ZoneColor(zone_type);*/
+        c.location = new Vector2Int((int)x, (int)z);
+        c.grid = GameObject.Find("Grid").GetComponent<GridSystem>();
+        /*c.zone_type = zone_type;*/
+        c.cell_type = cell_type;
+        c.SetZoneTypeAndUpdate(zone_type);
+        /*c.GetComponent<Renderer>().material.color = color;*/
+    }
+
     public void createBuilding(float x, float z, Color color, ZoneType zone_type)
     {
-        print($"Building Being placed at {x}, {z}");
+        print($"CreateBuilding: {x}, {z}, {color}, {zone_type}");
         var nextBuilding = Instantiate(buildingPrefab);
         nextBuilding.transform.position = new Vector3(x - 4.5f, 0.5f, z - 4.5f);
         Cell c = nextBuilding.AddComponent<Cell>();
