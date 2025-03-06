@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Citizens;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 
 namespace Danny
@@ -12,6 +13,7 @@ namespace Danny
         public Button npcButton; // Assign your button in Inspector
         public Transform spawnArea; // Assign an area where NPCs will spawn
         public static readonly int npcCount = 100; // Number of NPCs to spawn
+        public static bool spawned_and_moving = false;
 
         void Start()
         {
@@ -40,6 +42,9 @@ namespace Danny
                             Quaternion.identity);
 
                 npc.name = citizen_names[i];
+                npc.transform.position = positions[i];
+                npc.transform.position += Vector3.up * 10;
+
 
                 npc.tag = "Citizens";
 
@@ -48,8 +53,13 @@ namespace Danny
                 if (npcAnimator is not null)
                 {
                     var nma = npcAnimator.GetComponent<NavMeshAgent>();
-                    nma.SetDestination(destinations[i]);
-                    nma.nextPosition = positions[i];
+                    Assert.IsTrue(nma.Warp(positions[i]));
+                    Assert.IsTrue(nma.SetDestination(destinations[i]));
+                    nma.radius /= 10.0f;
+                    nma.acceleration /= 10.0f;
+                    nma.speed /= 10.0f;
+                    nma.updateRotation = true;
+                    nma.autoRepath = true;
                     Building.go_citizens.Add(npc);
                 }
                 else
@@ -57,6 +67,8 @@ namespace Danny
                     throw new UnityException("NPCAnimator was null");
                 }
             }
+
+            spawned_and_moving = true;
 
             Building.citizens_enabled = true;
         }

@@ -387,7 +387,6 @@ public class GridSystem : MonoBehaviour
     {
         if (filledCells is null || gridCells is null) return null;
         List<GameObject> buildings = new List<GameObject>();
-        GameObject.FindObjectsOfType<Cell>();
 
 
 

@@ -82,7 +82,7 @@ namespace Citizens
                 if (nma.remainingDistance < 0.25f)
                 {
                     int rand = Random.Range(0, mod);
-                    nma.SetDestination(building_positions[rand] + (Vector3.up * 0.5f));
+                    nma.SetDestination(building_positions[rand]);
                 }
             }
         }
