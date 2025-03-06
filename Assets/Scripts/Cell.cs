@@ -1,4 +1,5 @@
 using UnityEngine;
+using Citizens;
 
 public enum CellType
 {
@@ -44,6 +45,13 @@ public class Cell : MonoBehaviour
     {
         cell_type = CellType.Building;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        var b = GameObject.Find("Building").GetComponent<Building>();
+        if (b is null)
+        {
+            throw new UnityException("Why Was Building NULL?");
+        }
+        b.TrackPosition(this.transform.position);
+
     }
 
     public void PushRoad()

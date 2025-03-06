@@ -13,26 +13,21 @@ namespace Danny
 
         void Start()
         {
-            agent = GetComponent<NavMeshAgent>();
-            agent.radius /= 10.0f;
-            agent.acceleration /= 10.0f;
-            agent.speed /= 10.0f;
-            agent.updateRotation = true;
-            ;
-            timer = wanderTimer;
+            if (!SpawnManager.spawned_and_moving)
+            {
+                agent = GetComponent<NavMeshAgent>();
+                agent.radius /= 10.0f;
+                agent.acceleration /= 10.0f;
+                agent.speed /= 10.0f;
+                agent.updateRotation = true;
+                agent.autoRepath = true;
+                timer = wanderTimer;
+            }
         }
 
-        // void Update()
-        // {
-        //     // timer += Time.deltaTime;
-        //
-        //     // if (timer >= wanderTimer)
-        //     // {
-        //     //     Vector3 newPos = GetRandomPoint(transform.position, wanderRadius);
-        //     //     agent.SetDestination(newPos);
-        //     //     timer = 0;
-        //     // }
-        // }
+        void Update()
+        {
+        }
 
         // static void UpdateCitizen(GameObject citizen)
         // {

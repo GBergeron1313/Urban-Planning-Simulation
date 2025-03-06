@@ -13,10 +13,13 @@ namespace Citizens
         // private static int total_citizens = 0;
 
         private static List<GameObject> building_objects;
+        private static List<Vector3> building_positions = new List<Vector3>();
         private static LineRenderer path_renderer;
         private static Button road_button;
         public NavMeshAgent[] citizens;
         public static bool citizens_enabled;
+
+        private float last_citizen_update;
 
         public static List<GameObject> go_citizens;
 
@@ -24,8 +27,6 @@ namespace Citizens
         {
             go_citizens.Add(go_citizen);
         }
-        
-        
 
         public static void RedrawPaths()
         {
@@ -48,26 +49,40 @@ namespace Citizens
             }
         }
 
-        public void TrackBuilding()
+        public void TrackPosition(Vector3 tracked)
         {
-            
+            building_positions.Add(tracked);
         }
 
         public void RequestUpdate()
         {
-            building_objects = FindObjectOfType<GridSystem>().GetBuildings();
+            GridSystem grid = GameObject.Find("Grid").GetComponent<GridSystem>();
+            List<GameObject> cells = grid.GetCells();
+            building_positions.Clear();
+            foreach (var cell in cells)
+            {
+                Cell c = cell.GetComponent<Cell>();
+                if (c.cell_type == CellType.Building)
+                {
+                    Debug.LogWarning(c.gameObject.transform.position);
+                    building_positions.Add(c.gameObject.transform.position);
+                }
+            }
+            Debug.LogWarning(JsonUtility.ToJson(building_positions));
         }
 
         public void UpdateCitizens()
         {
-            int mod = building_objects.Count - 1;
-            foreach (var citizen in citizens)
+            Debug.LogWarning("Updating Citizens");
+            int mod = building_positions.Count;
+            foreach (var citizen in go_citizens)
             {
-                Assert.IsTrue(citizen.isOnNavMesh);
-                if (citizen.remainingDistance < 0.25f)
+                var nma = citizen.GetComponent<NavMeshAgent>();
+                Assert.IsTrue(nma.isOnNavMesh);
+                if (nma.remainingDistance < 0.25f)
                 {
                     int rand = Random.Range(0, mod);
-                    citizen.SetDestination(building_objects[rand].transform.position);
+                    nma.SetDestination(building_positions[rand]);
                 }
             }
         }
@@ -75,6 +90,8 @@ namespace Citizens
         // Start is called before the first frame update
         void Start()
         {
+            name = "Building";
+            last_citizen_update = Time.time;
             road_button ??= GameObject.Find("RoadButton").GetComponent<Button>();
             road_button.onClick.AddListener(RequestUpdate);
             road_button.onClick.AddListener(RedrawPaths);
@@ -92,7 +109,11 @@ namespace Citizens
 
             if (citizens_enabled)
             {
-                UpdateCitizens();
+                if (Time.time - last_citizen_update > 5.0f)
+                {
+                    last_citizen_update = Time.time;
+                    UpdateCitizens();
+                }
             }
         }
     }
