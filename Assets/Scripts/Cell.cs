@@ -36,6 +36,7 @@ public class Cell : MonoBehaviour
 
     private void PushBuilding(Color color)
     {
+        if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Building;
         this.color = color;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
@@ -43,6 +44,7 @@ public class Cell : MonoBehaviour
 
     public void PushBuilding()
     {
+        if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Building;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
         var b = GameObject.Find("Building").GetComponent<Building>();
@@ -51,7 +53,11 @@ public class Cell : MonoBehaviour
             throw new UnityException("Why Was Building NULL?");
         }
         b.TrackPosition(this.transform.position);
+    }
 
+    public bool Buildable()
+    {
+        return zone_type != ZoneType.Restricted;
     }
 
     public void PushRoad()
@@ -160,9 +166,12 @@ public class Cell : MonoBehaviour
         }
         else if (building_mode == BuildingMode.PlacingBuilding)
         {
-            grid.fillCell(hovering.location.x, hovering.location.y);
-            color = GridSystem.ZoneColor(zone_type);
-            PushBuilding(color);
+            if (Buildable())
+            {
+                grid.fillCell(hovering.location.x, hovering.location.y);
+                color = GridSystem.ZoneColor(zone_type);
+                PushBuilding(color);
+            }
         }
     }
 

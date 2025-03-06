@@ -21,6 +21,18 @@ namespace Citizens
 
     public class Citizen : MonoBehaviour
     {
+        public static bool citizens_enabled = false;
+
+        public static void ClearCitizens()
+        {
+            var citizens = GameObject.FindGameObjectsWithTag("Citizens");
+            foreach (var citizen in citizens)
+            {
+                Destroy(citizen);
+            }
+            citizens_enabled = false;
+        }
+
         private void Start()
         {
             throw new NotImplementedException();
