@@ -17,11 +17,16 @@ namespace Citizens
         private static LineRenderer path_renderer;
         private static Button road_button;
         public NavMeshAgent[] citizens;
-        public static bool citizens_enabled;
 
         private float last_citizen_update;
 
         public static List<GameObject> go_citizens;
+
+        public static void ClearBuildings()
+        {
+            building_objects.Clear();
+            building_positions.Clear();
+        }
 
         public void PushCitizen(GameObject go_citizen)
         {
@@ -107,7 +112,7 @@ namespace Citizens
                 RequestUpdate();
             }
 
-            if (citizens_enabled)
+            if (Citizen.citizens_enabled)
             {
                 if (Time.time - last_citizen_update > 5.0f)
                 {

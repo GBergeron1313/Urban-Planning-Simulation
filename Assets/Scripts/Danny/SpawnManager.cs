@@ -70,7 +70,7 @@ namespace Danny
 
             spawned_and_moving = true;
 
-            Building.citizens_enabled = true;
+            Citizen.citizens_enabled = true;
         }
 
         void SpawnNPCs()
@@ -113,7 +113,7 @@ namespace Danny
                 }
             }
 
-            Building.citizens_enabled = true;
+            Citizen.citizens_enabled = true;
         }
     }
 }

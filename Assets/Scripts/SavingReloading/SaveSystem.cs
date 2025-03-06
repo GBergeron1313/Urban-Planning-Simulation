@@ -47,15 +47,24 @@ namespace SavingReloading
             {
                 lastSaveTime = Time.time;
                 SaveCurrent();
-                if (Building.citizens_enabled)
+                if (Citizen.citizens_enabled)
                     SaveCurrentCitizenData();
             }
             else if (l)
             {
                 lastLoadTime = Time.time;
+                ClearCurrentData();
                 LoadSaveData();
                 LoadCitizenData();
             }
+        }
+
+        private void ClearCurrentData()
+        {
+            creator.clearBuildings();
+            gridSystem.ClearGridReset();
+            Building.ClearBuildings();
+            Citizen.ClearCitizens();
         }
 
         private void SaveCurrentCitizenData()
@@ -95,6 +104,8 @@ namespace SavingReloading
             }
         }
 
+        // This is just a pile of trash, this function.
+        // But it does work.
         private void LoadCitizenData()
         {
             string path = Path.Combine(savePath, CitizenDataSaveFileName);

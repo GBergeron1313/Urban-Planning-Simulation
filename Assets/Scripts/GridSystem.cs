@@ -78,6 +78,20 @@ public class GridSystem : MonoBehaviour
         GenerateGrid();
     }
 
+    public void ClearGridReset()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int z = 0; z < height; z++)
+            {
+                // Don't want dangling prefabs
+                GameObject.Destroy(gridCells[x, z].GetComponent<Cell>());
+                GameObject.Destroy(gridCells[x, z]);
+            }
+        }
+        Start();
+    }
+
 
     /// Creates the visual grid structure with cell objects and colliders
     void GenerateGrid()
