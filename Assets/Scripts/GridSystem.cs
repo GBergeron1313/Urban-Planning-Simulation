@@ -16,6 +16,7 @@ public enum BuildingMode
 {
     None,
     PlacingBuilding,
+    PlacingRoad,
     MarkingZoneType,
 
     // Always keep TotalModes at the end

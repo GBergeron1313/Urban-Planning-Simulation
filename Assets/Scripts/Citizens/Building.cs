@@ -28,7 +28,7 @@ namespace Citizens
             building_positions.Clear();
         }
 
-        public void PushCitizen(GameObject go_citizen)
+        public void AddCitizen(GameObject go_citizen)
         {
             go_citizens.Add(go_citizen);
         }

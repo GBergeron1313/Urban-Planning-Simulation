@@ -60,13 +60,18 @@ public class Cell : MonoBehaviour
         return zone_type != ZoneType.Restricted;
     }
 
+    public void PushRoad(Color color)
+    {
+        if (zone_type == ZoneType.Restricted) return;
+        cell_type = CellType.Road;
+        creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+    }
+
     public void PushRoad()
     {
+        if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Road;
-        GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        road.transform.position = transform.position;
-        road.transform.Translate(new Vector3(0f, 0.05f, 0f));
-        road.transform.localScale = new Vector3(1.0f, 0.1f, 1.0f);
+        creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
     }
 
     public void SetCellTypeAndUpdate(CellType ct)
@@ -164,13 +169,25 @@ public class Cell : MonoBehaviour
             grid_tile.GetComponent<Cell>().SetZoneTypeAndUpdate(paintbrush);
             this.SetZoneTypeAndUpdate(paintbrush);
         }
-        else if (building_mode == BuildingMode.PlacingBuilding)
+        else
         {
             if (Buildable())
             {
-                grid.fillCell(hovering.location.x, hovering.location.y);
-                color = GridSystem.ZoneColor(zone_type);
-                PushBuilding(color);
+                switch (building_mode)
+                {
+                    case BuildingMode.PlacingBuilding:
+                        grid.fillCell(hovering.location.x, hovering.location.y);
+                        color = GridSystem.ZoneColor(zone_type);
+                        PushBuilding(color);
+                        break;
+                    case BuildingMode.PlacingRoad:
+                        grid.fillCell(hovering.location.x, hovering.location.y);
+                        color = GridSystem.ZoneColor(zone_type);
+                        PushRoad(color);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
