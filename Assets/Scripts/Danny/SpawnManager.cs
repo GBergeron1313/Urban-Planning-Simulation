@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using Citizens;
-using Unity.VisualScripting;
-using UnityEditor;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 
 namespace Danny
@@ -16,7 +15,50 @@ namespace Danny
 
         void Start()
         {
+            name = "SpawnManager";
             npcButton.onClick.AddListener(SpawnNPCs);
+        }
+
+        public void SpawnNPCsFrom(string[] citizen_names, Vector3[] positions, Vector3[] destinations)
+        {
+            // Don't let them spawn more NPCs
+            npcButton.interactable = false;
+            npcButton.onClick = null;
+            npcButton.enabled = false;
+
+
+            Building.go_citizens = new List<GameObject>(npcCount);
+
+            for (int i = 0; i < npcCount; i++)
+            {
+                string[] name_id_index = citizen_names[i].Split('_');
+                int prefab_index = int.Parse(name_id_index[2]);
+                Debug.LogWarning($"citizens[{i}] = {citizen_names[i]}");
+                GameObject npc =
+                    Instantiate(npcPrefabs[prefab_index],
+                            positions[i],
+                            Quaternion.identity);
+
+                npc.name = citizen_names[i];
+
+                npc.tag = "Citizens";
+
+                // Ensure the animator is enabled
+                Animator npcAnimator = npc.GetComponent<Animator>();
+                if (npcAnimator is not null)
+                {
+                    var nma = npcAnimator.GetComponent<NavMeshAgent>();
+                    nma.SetDestination(destinations[i]);
+                    nma.nextPosition = positions[i];
+                    Building.go_citizens.Add(npc);
+                }
+                else
+                {
+                    throw new UnityException("NPCAnimator was null");
+                }
+            }
+
+            Building.citizens_enabled = true;
         }
 
         void SpawnNPCs()
@@ -40,7 +82,9 @@ namespace Danny
                 GameObject npc = Instantiate(npcPrefabs[randomIndex], randomPosition, Quaternion.identity);
 
                 // For Saving and reloading, each citizen needs a unique name.
-                npc.name = $"Citizen_{i}";
+                // Saving the prefab index is somewhat hacky, but it works for now.
+                // TODO: Make a real "Citizen" class to store this kind of info.
+                npc.name = $"Citizen_{i}_{randomIndex}";
 
                 npc.tag = "Citizens";
 
@@ -50,8 +94,6 @@ namespace Danny
                 {
                     // npcAnimator.SetTrigger("Idle"); // Ensure NPC starts animating
                     Building.go_citizens.Add(npc);
-                    string foo = npc.Serialize().json;
-                    print(foo);
                 }
                 else
                 {

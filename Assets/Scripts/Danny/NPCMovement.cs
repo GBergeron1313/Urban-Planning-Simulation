@@ -18,7 +18,6 @@ namespace Danny
             agent.acceleration /= 10.0f;
             agent.speed /= 10.0f;
             agent.updateRotation = true;
-            ;
             timer = wanderTimer;
         }
 

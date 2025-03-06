@@ -381,11 +381,15 @@ public class GridSystem : MonoBehaviour
     //         lastHovered = null;
     //     }
     // }
+
     [CanBeNull]
     public List<GameObject> GetBuildings()
     {
         if (filledCells is null || gridCells is null) return null;
         List<GameObject> buildings = new List<GameObject>();
+        GameObject.FindObjectsOfType<Cell>();
+
+
 
         for (int x = 0; x < width; x++)
         {
