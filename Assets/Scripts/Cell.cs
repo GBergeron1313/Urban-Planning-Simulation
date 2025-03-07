@@ -1,5 +1,6 @@
 using UnityEngine;
 using Citizens;
+using UnityEngine.AI;
 
 public enum CellType
 {
@@ -24,6 +25,7 @@ public class Cell : MonoBehaviour
     public Color color;
     public GridSystem grid;
     public CellType cell_type;
+    public bool walkable;
 
 
     public void SetZoneTypeAndUpdate(ZoneType zt)
@@ -40,6 +42,12 @@ public class Cell : MonoBehaviour
         cell_type = CellType.Building;
         this.color = color;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        var nmm = GetComponent<NavMeshObstacle>();
+        Destroy(nmm);
+        GameObject grid_tile = grid.GetCellAt((int)(gameObject.transform.position.x + 4.5),
+                (int)(gameObject.transform.position.z + 4.5));
+        var grid_tile_nmm = grid_tile.GetComponent<NavMeshObstacle>();
+        Destroy(grid_tile_nmm);
     }
 
     public void PushBuilding()
@@ -47,6 +55,14 @@ public class Cell : MonoBehaviour
         if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Building;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+
+        var nmm = GetComponent<NavMeshObstacle>();
+        Destroy(nmm);
+        GameObject grid_tile = grid.GetCellAt((int)(gameObject.transform.position.x + 4.5),
+                (int)(gameObject.transform.position.z + 4.5));
+        var grid_tile_nmm = grid_tile.GetComponent<NavMeshObstacle>();
+        Destroy(grid_tile_nmm);
+
         var b = GameObject.Find("Building").GetComponent<Building>();
         if (b is null)
         {
@@ -65,6 +81,8 @@ public class Cell : MonoBehaviour
         if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Road;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        var nmm = GetComponent<NavMeshObstacle>();
+        Destroy(nmm);
     }
 
     public void PushRoad()
@@ -72,6 +90,12 @@ public class Cell : MonoBehaviour
         if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Road;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        var nmm = GetComponent<NavMeshObstacle>();
+        Destroy(nmm);
+        GameObject grid_tile = grid.GetCellAt((int)(gameObject.transform.position.x + 4.5),
+                (int)(gameObject.transform.position.z + 4.5));
+        var grid_tile_nmm = grid_tile.GetComponent<NavMeshObstacle>();
+        Destroy(grid_tile_nmm);
     }
 
     public void SetCellTypeAndUpdate(CellType ct)
@@ -167,7 +191,13 @@ public class Cell : MonoBehaviour
             GameObject grid_tile = grid.GetCellAt((int)(gameObject.transform.position.x + 4.5),
                     (int)(gameObject.transform.position.z + 4.5));
             grid_tile.GetComponent<Cell>().SetZoneTypeAndUpdate(paintbrush);
-            this.SetZoneTypeAndUpdate(paintbrush);
+            SetZoneTypeAndUpdate(paintbrush);
+        }
+        else if (building_mode == BuildingMode.None)
+        {
+            var nmo = gameObject.AddComponent<NavMeshObstacle>();
+            nmo.size = new Vector3(0.25f, 1f, 0.25f);
+            nmo.carving = true;
         }
         else
         {

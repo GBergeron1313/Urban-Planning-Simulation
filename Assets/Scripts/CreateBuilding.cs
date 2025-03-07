@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+/*using Unity.AI.Navigation;*/
 using UnityEngine;
+using UnityEngine.AI;
 
 public class CreateBuilding : MonoBehaviour
 {
@@ -53,6 +55,8 @@ public class CreateBuilding : MonoBehaviour
         road.transform.position = new Vector3(x - 4.5f, 0f, z - 4.5f);
         road.transform.Translate(new Vector3(0f, 0.05f, 0f));
         road.transform.localScale = new Vector3(1.0f, 0.1f, 1.0f);
+
+
         Cell c;
         if (!road.TryGetComponent<Cell>(out c))
         {

@@ -23,6 +23,10 @@ namespace Citizens
     {
         public static bool citizens_enabled = false;
 
+        public static Cell CitizenCellLocation(Vector3 position) {
+            return new Cell();
+        }
+        
         public static void ClearCitizens()
         {
             var citizens = GameObject.FindGameObjectsWithTag("Citizens");

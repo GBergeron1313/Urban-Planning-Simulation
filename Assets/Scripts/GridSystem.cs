@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.Assertions;
 
 public enum ZoneType
@@ -136,6 +137,12 @@ public class GridSystem : MonoBehaviour
                 c.location = new Vector2Int(x, z);
                 c.zone_type = ZoneType.None;
                 c.grid = this;
+                if (x < 5)
+                {
+                    var nma = cell.AddComponent<NavMeshObstacle>();
+                    nma.carving = true;
+                    nma.size = new Vector3(0.25f, 1, 0.25f);
+                }
 
                 // Store reference to cell
                 gridCells[x, z] = cell;
@@ -159,6 +166,11 @@ public class GridSystem : MonoBehaviour
         HandleGridInteraction();
     }
 
+    public static Vector2Int Vec3ToCoords(Vector3 vec)
+    {
+        return new Vector2Int((int)(vec.x - 4.5f), (int)(vec.z - 4.5f));
+    }
+
     private void UpdateBuildingMode()
     {
         // Toggles between PlacingBuilding and MarkingZoneType
@@ -180,6 +192,23 @@ public class GridSystem : MonoBehaviour
     void HandleGridInteraction()
     {
         if (!Cell.hovering) return;
+
+        /*if (Input.GetMouseButton(0) && Cell.building_mode == BuildingMode.None)*/
+        /*{*/
+        /*    if (Cell.hovering.cell_type == CellType.Building)*/
+        /*    {*/
+        /*        Cell c = GetCellAt(Cell.hovering.location.x, Cell.hovering.location.y).GetComponent<Cell>();*/
+        /*        Destroy(c.gameObject.GetComponent<NavMeshObstacle>());*/
+        /*        Destroy(c.GetComponent<NavMeshObstacle>());*/
+        /*    }*/
+        /*    else*/
+        /*    {*/
+        /*        Destroy(Cell.hovering.GetComponent<NavMeshObstacle>());*/
+        /*        Destroy(Cell.hovering.gameObject.GetComponent<NavMeshObstacle>());*/
+        /*    }*/
+        /*}*/
+
+
         GameObject hitObject = Cell.hovering.gameObject;
         int x = Cell.hovering.location.x;
         int z = Cell.hovering.location.y;
