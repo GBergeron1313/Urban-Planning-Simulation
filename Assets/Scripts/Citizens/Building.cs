@@ -13,7 +13,7 @@ namespace Citizens
         // private static int total_citizens = 0;
 
         private static List<GameObject> building_objects;
-        private static List<Vector3> building_positions = new List<Vector3>();
+        public static List<Vector3> building_positions = new List<Vector3>();
         private static Button road_button;
         public NavMeshAgent[] citizens;
 
@@ -32,7 +32,7 @@ namespace Citizens
             go_citizens.Add(go_citizen);
         }
 
-        public void TrackPosition(Vector3 tracked)
+        public static void TrackPosition(Vector3 tracked)
         {
             building_positions.Add(tracked);
         }
@@ -47,11 +47,9 @@ namespace Citizens
                 Cell c = cell.GetComponent<Cell>();
                 if (c.cell_type == CellType.Building)
                 {
-                    Debug.LogWarning(c.gameObject.transform.position);
                     building_positions.Add(c.gameObject.transform.position);
                 }
             }
-            Debug.LogWarning(JsonUtility.ToJson(building_positions));
         }
 
         public void UpdateCitizens()

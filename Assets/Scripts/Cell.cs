@@ -43,8 +43,9 @@ public class Cell : MonoBehaviour
         else
         {
             var nmo = gameObject.AddComponent<NavMeshObstacle>();
+            /*Debug.LogError($"Size = {nmo.size}, Shape = {nmo.shape}, center = {nmo.center}");*/
             nmo.carving = true;
-            nmo.size = new Vector3(0.25f, 1, 0.25f);
+            nmo.size = new Vector3(0.4f, 0.4f, 0.5f);
         }
     }
 
@@ -63,12 +64,8 @@ public class Cell : MonoBehaviour
         this.color = color;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
         SetWalkableAndUpdate(true);
-        /*var nmm = GetComponent<NavMeshObstacle>();*/
-        /*Destroy(nmm);*/
-        /*GameObject grid_tile = grid.GetCellAt((int)(gameObject.transform.position.x + 4.5),*/
-        /*        (int)(gameObject.transform.position.z + 4.5));*/
-        /*var grid_tile_nmm = grid_tile.GetComponent<NavMeshObstacle>();*/
-        /*Destroy(grid_tile_nmm);*/
+
+        Building.building_positions.Add(this.transform.position);
     }
 
     public void PushBuilding()
@@ -78,19 +75,7 @@ public class Cell : MonoBehaviour
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
         SetWalkableAndUpdate(true);
 
-        /*var nmm = GetComponent<NavMeshObstacle>();*/
-        /*Destroy(nmm);*/
-        /*GameObject grid_tile = grid.GetCellAt((int)(gameObject.transform.position.x + 4.5),*/
-        /*        (int)(gameObject.transform.position.z + 4.5));*/
-        /*var grid_tile_nmm = grid_tile.GetComponent<NavMeshObstacle>();*/
-        /*Destroy(grid_tile_nmm);*/
-
-        var b = GameObject.Find("Building").GetComponent<Building>();
-        if (b is null)
-        {
-            throw new UnityException("Why Was Building NULL?");
-        }
-        b.TrackPosition(this.transform.position);
+        Building.building_positions.Add(this.transform.position);
     }
 
     public bool Buildable()
@@ -104,8 +89,6 @@ public class Cell : MonoBehaviour
         cell_type = CellType.Road;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
         SetWalkableAndUpdate(true);
-        /*var nmm = GetComponent<NavMeshObstacle>();*/
-        /*Destroy(nmm);*/
     }
 
     public void PushRoad()
@@ -114,12 +97,6 @@ public class Cell : MonoBehaviour
         cell_type = CellType.Road;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
         SetWalkableAndUpdate(true);
-        /*var nmm = GetComponent<NavMeshObstacle>();*/
-        /*Destroy(nmm);*/
-        /*GameObject grid_tile = grid.GetCellAt((int)(gameObject.transform.position.x + 4.5),*/
-        /*        (int)(gameObject.transform.position.z + 4.5));*/
-        /*var grid_tile_nmm = grid_tile.GetComponent<NavMeshObstacle>();*/
-        /*Destroy(grid_tile_nmm);*/
     }
 
     public void SetCellTypeAndUpdate(CellType ct)
@@ -131,6 +108,11 @@ public class Cell : MonoBehaviour
         else if (cell_type == CellType.Road)
         {
             PushRoad();
+        }
+        else
+        {
+            cell_type = ct;
+            SetWalkableAndUpdate(false);
         }
     }
 
@@ -225,9 +207,6 @@ public class Cell : MonoBehaviour
         else if (building_mode == BuildingMode.None)
         {
             SetWalkableAndUpdate(false);
-            /*var nmo = gameObject.AddComponent<NavMeshObstacle>();*/
-            /*nmo.size = new Vector3(0.25f, 1f, 0.25f);*/
-            /*nmo.carving = true;*/
         }
         else
         {

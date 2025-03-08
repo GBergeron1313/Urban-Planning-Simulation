@@ -138,6 +138,7 @@ public class GridSystem : MonoBehaviour
                 gridCells[x, z] = cell;
 
                 Cell c = cell.AddComponent<Cell>();
+
                 c.location = new Vector2Int(x, z);
                 c.zone_type = ZoneType.None;
             }

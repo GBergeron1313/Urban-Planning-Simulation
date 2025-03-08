@@ -46,7 +46,7 @@ namespace SavingReloading
             if (s)
             {
                 lastSaveTime = Time.time;
-                SaveCurrent();
+                SaveGridData();
                 if (Citizen.citizens_enabled)
                     SaveCurrentCitizenData();
             }
@@ -54,7 +54,7 @@ namespace SavingReloading
             {
                 lastLoadTime = Time.time;
                 ClearCurrentData();
-                LoadSaveData();
+                LoadGridData();
                 LoadCitizenData();
             }
         }
@@ -170,7 +170,7 @@ namespace SavingReloading
             spawner.SpawnNPCsFrom(citizen_names, positions, destinations);
         }
 
-        private void LoadSaveData()
+        private void LoadGridData()
         {
             string path = Path.Combine(savePath, GridDataSaveFileName);
             StreamReader reader = new StreamReader(path);
@@ -179,13 +179,13 @@ namespace SavingReloading
             string[] lines = reader.ReadToEnd().Split('\n');
             reader.Dispose();
 
-            var buildings = gridSystem.GetCells();
-            if (buildings is null)
+            var cells = gridSystem.GetCells();
+            if (cells is null)
             {
                 throw new UnityException("Couldn't access Cells from SaveSystem");
             }
 
-            for (int i = 0; i < buildings.Count; i++)
+            for (int i = 0; i < cells.Count; i++)
             {
                 string[] cell_serial = lines[i].Split('=');
                 string[] xz = cell_serial[0].Split(',');
@@ -193,7 +193,7 @@ namespace SavingReloading
                 int x = int.Parse(xz[0]);
                 int z = int.Parse(xz[1]);
 
-                var cell = buildings[i].GetComponent<Cell>();
+                var cell = cells[i].GetComponent<Cell>();
 
                 Assert.AreEqual(cell.location.x, x);
                 Assert.AreEqual(cell.location.y, z);
@@ -204,6 +204,7 @@ namespace SavingReloading
                 CellType ct = (CellType)int.Parse(zt_ct[1]);
 
                 cell.SetZoneTypeAndUpdate(zt);
+                /*cell.SetCellTypeAndUpdate(ct);*/
 
                 switch (ct)
                 {
@@ -214,6 +215,7 @@ namespace SavingReloading
                         cell.PushRoad();
                         break;
                     case CellType.None:
+                        cell.SetWalkableAndUpdate(false);
                         break;
                     default:
                         throw new UnityException("Default shouldn't ever happen");
@@ -221,7 +223,7 @@ namespace SavingReloading
             }
         }
 
-        private void SaveCurrent()
+        private void SaveGridData()
         {
             string path = Path.Combine(savePath, GridDataSaveFileName);
             using StreamWriter writer = new StreamWriter(path, false);
