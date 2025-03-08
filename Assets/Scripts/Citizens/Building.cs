@@ -13,7 +13,6 @@ namespace Citizens
 
         private float last_citizen_update;
 
-
         public static void ClearBuildings()
         {
             building_positions.Clear();

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Citizens;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -89,6 +90,7 @@ public class GridSystem : MonoBehaviour
                 GameObject.Destroy(gridCells[x, z]);
             }
         }
+        Cell.all_cells.Clear();
         Start();
     }
 
@@ -184,11 +186,13 @@ public class GridSystem : MonoBehaviour
             }
         }
 
+
         uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
             $"Cell: {(Cell.hovering is null ? "N/A" : Cell.hovering.location)}\n" +
             $"Zone Type: {(Cell.hovering is null ? "N/A" : Cell.hovering.zone_type)}\n" +
             $"Paintbrush: {Cell.paintbrush}\n" +
-            $"Building Placement Mode: {Cell.building_mode}";
+            $"Building Placement Mode: {Cell.building_mode}\n" +
+            $"Number of Buildings: {Building.building_positions.Count}";
 
     }
 
@@ -220,17 +224,17 @@ public class GridSystem : MonoBehaviour
         if (filledCells is null || gridCells is null) return null;
         Assert.AreEqual(filledCells.GetLength(0), width);
         Assert.AreEqual(filledCells.GetLength(1), height);
-        List<GameObject> buildings = new List<GameObject>();
+        List<GameObject> cells = new List<GameObject>();
 
         for (int x = 0; x < width; x++)
         {
             for (int z = 0; z < height; z++)
             {
-                buildings.Add(gridCells[x, z]);
+                cells.Add(gridCells[x, z]);
             }
         }
 
-        return buildings;
+        return cells;
     }
 
 

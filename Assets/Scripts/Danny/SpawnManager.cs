@@ -23,6 +23,9 @@ namespace Danny
 
         public void SpawnNPCsFrom(string[] citizen_names, Vector3[] positions, Vector3[] destinations)
         {
+            if (Building.building_positions.Count == 0)
+                throw new UnityException("Can't spawn npcs when there are no buildings");
+
             // Don't let them spawn more NPCs
             npcButton.interactable = false;
             npcButton.onClick = null;
@@ -74,28 +77,28 @@ namespace Danny
 
         void SpawnNPCs()
         {
+            if (Building.building_positions.Count == 0)
+                throw new UnityException("Can't spawn npcs when there are no buildings");
+
             // Don't let them spawn more NPCs
             npcButton.interactable = false;
             npcButton.onClick = null;
             npcButton.enabled = false;
-
-
             Building.go_citizens = new List<GameObject>(npcCount);
 
             for (int i = 0; i < npcCount; i++)
             {
-                Vector3 randomPosition = new Vector3(
-                    Random.Range(-5f, 5f), // Adjust X range for a closer spread
-                    0f, // Adjust Y based on terrain
-                    Random.Range(-5f, 5f) // Adjust Z range
-                );
-                int randomIndex = Random.Range(0, npcPrefabs.Length);
-                GameObject npc = Instantiate(npcPrefabs[randomIndex], randomPosition, Quaternion.identity);
+                int rand_prefab_idx = Random.Range(0, npcPrefabs.Length);
+                int rand_position_idx = Random.Range(0, Building.building_positions.Count);
+                GameObject npc = Instantiate(
+                        npcPrefabs[rand_prefab_idx],
+                        Building.building_positions[rand_position_idx],
+                        Quaternion.identity);
 
                 // For Saving and reloading, each citizen needs a unique name.
                 // Saving the prefab index is somewhat hacky, but it works for now.
                 // TODO: Make a real "Citizen" class to store this kind of info.
-                npc.name = $"Citizen_{i}_{randomIndex}";
+                npc.name = $"Citizen_{i}_{rand_prefab_idx}";
 
                 npc.tag = "Citizens";
 

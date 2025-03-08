@@ -1,6 +1,7 @@
 using UnityEngine;
 using Citizens;
 using UnityEngine.AI;
+using System.Collections.Generic;
 
 public enum CellType
 {
@@ -17,6 +18,7 @@ public class Cell : MonoBehaviour
     public static bool dragging;
     public static CreateBuilding creator;
     public static GridSystem grid;
+    public static List<Cell> all_cells = new List<Cell>();
 
     private new Renderer renderer;
 
@@ -254,6 +256,7 @@ public class Cell : MonoBehaviour
     void Start()
     {
         creator ??= GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>();
+        all_cells.Add(this);
     }
 
     // Update is called once per frame
