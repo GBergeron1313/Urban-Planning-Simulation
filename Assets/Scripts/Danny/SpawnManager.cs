@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Citizens;
+/*using Unity.AI.Navigation;*/
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Assertions;
@@ -31,7 +32,6 @@ namespace Danny
             npcButton.onClick = null;
             npcButton.enabled = false;
 
-
             Building.go_citizens = new List<GameObject>(npcCount);
 
             for (int i = 0; i < npcCount; i++)
@@ -44,8 +44,7 @@ namespace Danny
                             Quaternion.identity);
 
                 npc.name = citizen_names[i];
-                npc.transform.position = positions[i];
-                npc.transform.position += Vector3.up * 10;
+                Debug.LogWarning($"For {npc}: {npc.transform.position}");
 
 
                 npc.tag = "Citizens";
@@ -54,7 +53,12 @@ namespace Danny
                 Animator npcAnimator = npc.GetComponent<Animator>();
                 if (npcAnimator is not null)
                 {
-                    var nma = npcAnimator.GetComponent<NavMeshAgent>();
+                    var nma = npc.GetComponent<NavMeshAgent>();
+                    Debug.LogWarning($"For {nma}: {nma.transform.position}");
+                    Debug.LogWarning($"Bound? {nma.isOnNavMesh}");
+                    nma.autoRepath = true;
+
+                    nma.nextPosition = positions[i];
                     Assert.IsTrue(nma.Warp(positions[i]));
                     Assert.IsTrue(nma.SetDestination(destinations[i]));
                     nma.radius /= 10.0f;
@@ -75,7 +79,7 @@ namespace Danny
             Citizen.citizens_enabled = true;
         }
 
-        void SpawnNPCs()
+        public void SpawnNPCs()
         {
             if (Building.building_positions.Count == 0)
                 throw new UnityException("Can't spawn npcs when there are no buildings");

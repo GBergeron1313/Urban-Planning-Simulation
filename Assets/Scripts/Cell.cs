@@ -43,7 +43,11 @@ public class Cell : MonoBehaviour
         }
         else
         {
-            var nmo = gameObject.AddComponent<NavMeshObstacle>();
+            NavMeshObstacle nmo;
+            if (!gameObject.TryGetComponent<NavMeshObstacle>(out nmo))
+            {
+                nmo = gameObject.AddComponent<NavMeshObstacle>();
+            }
             nmo.carving = true;
             // The "gridCells", in GridSystem, are rotated quads.
             // This makes the X and Y dimensions responsible for
@@ -114,11 +118,11 @@ public class Cell : MonoBehaviour
 
     public void SetCellTypeAndUpdate(CellType ct)
     {
-        if (cell_type == CellType.Building)
+        if (ct == CellType.Building)
         {
             PushBuilding();
         }
-        else if (cell_type == CellType.Road)
+        else if (ct == CellType.Road)
         {
             PushRoad();
         }
@@ -141,6 +145,7 @@ public class Cell : MonoBehaviour
 
     private void OnMouseEnter()
     {
+        Debug.Log($"transform.position = {gameObject.transform.position}");
         hovering = this;
 
         if (building_mode == BuildingMode.MarkingZoneType)

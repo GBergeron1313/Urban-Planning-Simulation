@@ -33,6 +33,8 @@ namespace SavingReloading
             Assert.IsTrue(gridSystem != null);
         }
 
+        bool first_load = true;
+
         private void Update()
         {
             // Most of the time, they just won't be holding control,
@@ -52,11 +54,33 @@ namespace SavingReloading
             }
             else if (l)
             {
-                lastLoadTime = Time.time;
-                ClearCurrentData();
-                LoadGridData();
-                LoadCitizenData();
+                // Bandaid solution for loading.
+                // Double work but for some reason:
+                // NavMeshAgent doesn't want to comply
+                // the first time around. 
+                //
+                // It works just fine the second time...
+                //
+                // Don't ask me why, because I don't know
+                // why.
+                //
+                // TODO: Fix this abomination.
+                if (first_load)
+                {
+                    first_load = false;
+                    LoadAllData();
+                } else {
+                    lastLoadTime = Time.time;
+                    LoadAllData();
+                }
             }
+        }
+
+        private void LoadAllData()
+        {
+            ClearCurrentData();
+            LoadGridData();
+            LoadCitizenData();
         }
 
         private void ClearCurrentData()
@@ -138,14 +162,11 @@ namespace SavingReloading
 
                 string[] pos_dest_velocity_stopped_prefab = values.Split('|');
                 Assert.IsNotNull(pos_dest_velocity_stopped_prefab);
-                Debug.LogWarning($"pos_dest_velocity_stopped_prefab.Length = {pos_dest_velocity_stopped_prefab.Length}");
                 string output = "";
                 foreach (var s in pos_dest_velocity_stopped_prefab)
                 {
                     output += s;
                 }
-
-                Debug.LogWarning($"pos_dest_velocity_stopped_prefab = {output}");
 
                 string s_pos = pos_dest_velocity_stopped_prefab[0];
                 string s_dest = pos_dest_velocity_stopped_prefab[1];
@@ -159,12 +180,9 @@ namespace SavingReloading
                 int stopped = int.Parse(s_stopped);
                 int prefab_index = int.Parse(s_prefab_index);
 
-                /*citizens[i].gameObject.transform.position = pos;*/
+                positions[i] = pos;
                 citizen_names[i] = citizen_name;
                 destinations[i] = dest;
-
-
-                print($"{citizen_name}, Prefab: {prefab_index} is {stopped} stopped at {pos} heading to {dest} with velocity {velocity}");
             }
 
             spawner.SpawnNPCsFrom(citizen_names, positions, destinations);
@@ -204,22 +222,24 @@ namespace SavingReloading
                 CellType ct = (CellType)int.Parse(zt_ct[1]);
 
                 cell.SetZoneTypeAndUpdate(zt);
-                /*cell.SetCellTypeAndUpdate(ct);*/
+                cell.SetCellTypeAndUpdate(ct);
 
-                switch (ct)
-                {
-                    case CellType.Building:
-                        cell.PushBuilding();
-                        break;
-                    case CellType.Road:
-                        cell.PushRoad();
-                        break;
-                    case CellType.None:
-                        cell.SetWalkableAndUpdate(false);
-                        break;
-                    default:
-                        throw new UnityException("Default shouldn't ever happen");
-                }
+                /*switch (ct)*/
+                /*{*/
+                /*    case CellType.Building:*/
+                /*        cell.PushBuilding();*/
+                /*        /*cell.SetWalkableAndUpdate(true);*/
+                /*        break;*/
+                /*    case CellType.Road:*/
+                /*        cell.PushRoad();*/
+                /*        /*cell.SetWalkableAndUpdate(true);*/
+                /*        break;*/
+                /*    case CellType.None:*/
+                /*        /*cell.SetWalkableAndUpdate(false);*/
+                /*        break;*/
+                /*    default:*/
+                /*        throw new UnityException("Default shouldn't ever happen");*/
+                /*}*/
             }
         }
 

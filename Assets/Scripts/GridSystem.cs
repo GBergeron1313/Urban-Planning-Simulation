@@ -141,7 +141,8 @@ public class GridSystem : MonoBehaviour
                 Cell c = cell.AddComponent<Cell>();
 
                 c.location = new Vector2Int(x, z);
-                c.zone_type = ZoneType.None;
+                c.SetZoneTypeAndUpdate(ZoneType.None);
+                c.SetWalkableAndUpdate(false);
             }
         }
 

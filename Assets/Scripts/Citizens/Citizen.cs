@@ -12,7 +12,6 @@ namespace Citizens
         CITIZEN_MODELS_MAX
     }
 
-    [Serializable]
     public struct CitizenInfo
     {
         public CitizenModel model_type;
