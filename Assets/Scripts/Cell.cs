@@ -14,7 +14,6 @@ public class Cell : MonoBehaviour
     public static Cell last_hovered;
     public static ZoneType paintbrush;
     public static BuildingMode building_mode;
-    public static Color default_color;
     public static bool dragging;
     public static CreateBuilding creator;
     public static GridSystem grid;
@@ -64,7 +63,7 @@ public class Cell : MonoBehaviour
     {
         zone_type = zt;
         color = GridSystem.ZoneColor(zone_type);
-        renderer ??= gameObject.GetComponent<Renderer>();
+        /*renderer ??= gameObject.GetComponent<Renderer>();*/
         renderer.material.color = color;
     }
 
@@ -97,6 +96,7 @@ public class Cell : MonoBehaviour
     public void PushRoad(Color color)
     {
         if (zone_type == ZoneType.Restricted) return;
+        this.color = color;
         cell_type = CellType.Road;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
         SetWalkableAndUpdate(true);
@@ -227,13 +227,11 @@ public class Cell : MonoBehaviour
                 {
                     case BuildingMode.PlacingBuilding:
                         grid.fillCell(hovering.location.x, hovering.location.y);
-                        color = GridSystem.ZoneColor(zone_type);
-                        PushBuilding(color);
+                        PushBuilding(GridSystem.ZoneColor(zone_type));
                         break;
                     case BuildingMode.PlacingRoad:
                         grid.fillCell(hovering.location.x, hovering.location.y);
-                        color = GridSystem.ZoneColor(zone_type);
-                        PushRoad(color);
+                        PushRoad(GridSystem.ZoneColor(zone_type));
                         break;
                     default:
                         break;
@@ -247,11 +245,14 @@ public class Cell : MonoBehaviour
         dragging = false;
     }
 
+    void Awake()
+    {
+        renderer ??= gameObject.GetComponent<Renderer>();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        renderer = GetComponent<Renderer>();
-        grid = GameObject.Find("Grid").GetComponent<GridSystem>();
         creator ??= GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>();
     }
 

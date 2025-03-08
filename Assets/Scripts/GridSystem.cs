@@ -86,7 +86,6 @@ public class GridSystem : MonoBehaviour
             for (int z = 0; z < height; z++)
             {
                 // Don't want dangling prefabs
-                GameObject.Destroy(gridCells[x, z].GetComponent<Cell>());
                 GameObject.Destroy(gridCells[x, z]);
             }
         }
@@ -148,8 +147,6 @@ public class GridSystem : MonoBehaviour
         if (gridCells[0, 0] != null)
         {
             defaultMaterial = new Material(gridCells[0, 0].GetComponent<Renderer>().material);
-            Cell.default_color = defaultMaterial.color;
-            g_defaultColor = defaultMaterial.color;
         }
     }
 
@@ -160,17 +157,12 @@ public class GridSystem : MonoBehaviour
         HandleGridInteraction();
     }
 
-    public static Vector2Int Vec3ToCoords(Vector3 vec)
-    {
-        return new Vector2Int((int)(vec.x - 4.5f), (int)(vec.z - 4.5f));
-    }
-
     void HandleGridInteraction()
     {
-        // Toggles between PlacingBuilding and MarkingZoneType
+        // Cycles between PlacingBuilding, MarkingZoneType, and None
         var e = Input.GetKeyDown(KeyCode.E);
 
-        // Cycles paintbrush settings
+        // Cycles paintbrush settings for ZoneType assignment
         bool r = Input.GetKeyDown(KeyCode.R);
 
         if (e)
@@ -193,8 +185,8 @@ public class GridSystem : MonoBehaviour
         }
 
         uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
-            $"Cell: {(Cell.hovering is null ? "No Cell Selected" : Cell.hovering.location)}\n" +
-            $"Zone Type: {(Cell.hovering is null ? "No Cell Selected" : Cell.hovering.zone_type)}\n" +
+            $"Cell: {(Cell.hovering is null ? "N/A" : Cell.hovering.location)}\n" +
+            $"Zone Type: {(Cell.hovering is null ? "N/A" : Cell.hovering.zone_type)}\n" +
             $"Paintbrush: {Cell.paintbrush}\n" +
             $"Building Placement Mode: {Cell.building_mode}";
 
@@ -243,32 +235,32 @@ public class GridSystem : MonoBehaviour
 
 
     /// Assigns a zone type to a grid cell
-    public void SetZone(int x, int z, ZoneType zoneType)
-    {
-        zoneGrid[x, z] = zoneType;
-    }
+    /*public void SetZone(int x, int z, ZoneType zoneType)*/
+    /*{*/
+    /*    zoneGrid[x, z] = zoneType;*/
+    /*}*/
 
 
     /// Updates the cell color based on its zone type
-    public void UpdateCellColor(GameObject cell, int x, int z)
-    {
-        Color zoneColor = GetZoneColor(zoneGrid[x, z]);
-        cell.GetComponent<Renderer>().material.color = zoneColor;
-    }
+    /*public void UpdateCellColor(GameObject cell, int x, int z)*/
+    /*{*/
+    /*    Color zoneColor = GetZoneColor(zoneGrid[x, z]);*/
+    /*    cell.GetComponent<Renderer>().material.color = zoneColor;*/
+    /*}*/
 
 
     /// Returns the color associated with a zone type
-    public Color GetZoneColor(ZoneType zoneType)
-    {
-        switch (zoneType)
-        {
-            case ZoneType.Residential: return residentialZoneColor;
-            case ZoneType.Commercial: return commercialZoneColor;
-            case ZoneType.Industrial: return industrialZoneColor;
-            case ZoneType.Restricted: return restrictedZoneColor;
-            default: return defaultMaterial.color;
-        }
-    }
+    /*public Color GetZoneColor(ZoneType zoneType)*/
+    /*{*/
+    /*    switch (zoneType)*/
+    /*    {*/
+    /*        case ZoneType.Residential: return residentialZoneColor;*/
+    /*        case ZoneType.Commercial: return commercialZoneColor;*/
+    /*        case ZoneType.Industrial: return industrialZoneColor;*/
+    /*        case ZoneType.Restricted: return restrictedZoneColor;*/
+    /*        default: return defaultMaterial.color;*/
+    /*    }*/
+    /*}*/
 
     public static Color ZoneColor(ZoneType zoneType)
     {

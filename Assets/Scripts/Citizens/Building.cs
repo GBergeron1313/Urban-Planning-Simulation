@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEngine.Assertions;
@@ -9,21 +8,14 @@ namespace Citizens
 
     public class Building : MonoBehaviour
     {
-        // private static int MAX_CITIZENS => 100;
-        // private static int total_citizens = 0;
-
-        private static List<GameObject> building_objects;
         public static List<Vector3> building_positions = new List<Vector3>();
-        private static Button road_button;
-        public NavMeshAgent[] citizens;
+        public static List<GameObject> go_citizens;
 
         private float last_citizen_update;
 
-        public static List<GameObject> go_citizens;
 
         public static void ClearBuildings()
         {
-            building_objects.Clear();
             building_positions.Clear();
         }
 
@@ -72,7 +64,6 @@ namespace Citizens
         {
             name = "Building";
             last_citizen_update = Time.time;
-            building_objects ??= FindObjectOfType<GridSystem>().GetBuildings();
         }
 
         // Update is called once per frame
