@@ -25,15 +25,6 @@ namespace Danny
             }
         }
 
-        void Update()
-        {
-        }
-
-        // static void UpdateCitizen(GameObject citizen)
-        // {
-        //     
-        // }
-
         Vector3 GetRandomPoint(Vector3 origin, float dist)
         {
             Vector3 randomDirection = new Vector3(Random.insideUnitCircle.x, 0, Random.insideUnitCircle.y);

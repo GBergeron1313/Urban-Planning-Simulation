@@ -1,5 +1,7 @@
 using UnityEngine;
 using Citizens;
+using UnityEngine.AI;
+using System.Collections.Generic;
 
 public enum CellType
 {
@@ -13,33 +15,73 @@ public class Cell : MonoBehaviour
     public static Cell last_hovered;
     public static ZoneType paintbrush;
     public static BuildingMode building_mode;
-    public static Color default_color;
     public static bool dragging;
     public static CreateBuilding creator;
+    public static GridSystem grid;
+    public static List<Cell> all_cells = new List<Cell>();
 
     private new Renderer renderer;
 
     public Vector2Int location;
     public ZoneType zone_type;
     public Color color;
-    public GridSystem grid;
     public CellType cell_type;
+    public bool walkable;
 
+    public void SetWalkableAndUpdate(bool is_walkable)
+    {
+        walkable = is_walkable;
+
+        if (walkable)
+        {
+            var nmo = GetComponent<NavMeshObstacle>();
+            if (nmo)
+                Destroy(nmo);
+            var grid_tile_nmo = AtCoords(location.x, location.y)?.GetComponent<NavMeshObstacle>();
+            if (grid_tile_nmo)
+                Destroy(grid_tile_nmo);
+        }
+        else
+        {
+            NavMeshObstacle nmo;
+            if (!gameObject.TryGetComponent<NavMeshObstacle>(out nmo))
+            {
+                nmo = gameObject.AddComponent<NavMeshObstacle>();
+            }
+            nmo.carving = true;
+            // The "gridCells", in GridSystem, are rotated quads.
+            // This makes the X and Y dimensions responsible for
+            // width and height. Maybe not in that order, but the
+            // important thing to note is that Z, in the local space,
+            // refers to height. 
+            // This is why nmo.size is:
+            // (0.15, 0.15, 0.5) 
+            // instead of:
+            // (0.15, 0.5, 0.15)
+
+            nmo.size = new Vector3(0.15f, 0.15f, 0.5f);
+            // TODO: Change gridCells and the way they work to more 
+            // idiomatically represent themselves.
+        }
+    }
 
     public void SetZoneTypeAndUpdate(ZoneType zt)
     {
         zone_type = zt;
         color = GridSystem.ZoneColor(zone_type);
-        renderer ??= gameObject.GetComponent<Renderer>();
+        /*renderer ??= gameObject.GetComponent<Renderer>();*/
         renderer.material.color = color;
     }
 
-    private void PushBuilding(Color color)
+    public void PushBuilding(Color color)
     {
         if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Building;
         this.color = color;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        SetWalkableAndUpdate(true);
+
+        Building.building_positions.Add(this.transform.position);
     }
 
     public void PushBuilding()
@@ -47,12 +89,9 @@ public class Cell : MonoBehaviour
         if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Building;
         creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
-        var b = GameObject.Find("Building").GetComponent<Building>();
-        if (b is null)
-        {
-            throw new UnityException("Why Was Building NULL?");
-        }
-        b.TrackPosition(this.transform.position);
+        SetWalkableAndUpdate(true);
+
+        Building.building_positions.Add(this.transform.position);
     }
 
     public bool Buildable()
@@ -60,25 +99,43 @@ public class Cell : MonoBehaviour
         return zone_type != ZoneType.Restricted;
     }
 
+    public void PushRoad(Color color)
+    {
+        if (zone_type == ZoneType.Restricted) return;
+        this.color = color;
+        cell_type = CellType.Road;
+        creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        SetWalkableAndUpdate(true);
+    }
+
     public void PushRoad()
     {
+        if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Road;
-        GameObject road = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        road.transform.position = transform.position;
-        road.transform.Translate(new Vector3(0f, 0.05f, 0f));
-        road.transform.localScale = new Vector3(1.0f, 0.1f, 1.0f);
+        creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        SetWalkableAndUpdate(true);
     }
 
     public void SetCellTypeAndUpdate(CellType ct)
     {
-        if (cell_type == CellType.Building)
+        if (ct == CellType.Building)
         {
             PushBuilding();
         }
-        else if (cell_type == CellType.Road)
+        else if (ct == CellType.Road)
         {
             PushRoad();
         }
+        else
+        {
+            cell_type = ct;
+            SetWalkableAndUpdate(false);
+        }
+    }
+
+    public static Cell AtCoords(int x, int z)
+    {
+        return grid.GetCellAt(x, z).GetComponent<Cell>();
     }
 
     public override string ToString()
@@ -88,6 +145,7 @@ public class Cell : MonoBehaviour
 
     private void OnMouseEnter()
     {
+        Debug.Log($"transform.position = {gameObject.transform.position}");
         hovering = this;
 
         if (building_mode == BuildingMode.MarkingZoneType)
@@ -162,15 +220,29 @@ public class Cell : MonoBehaviour
             GameObject grid_tile = grid.GetCellAt((int)(gameObject.transform.position.x + 4.5),
                     (int)(gameObject.transform.position.z + 4.5));
             grid_tile.GetComponent<Cell>().SetZoneTypeAndUpdate(paintbrush);
-            this.SetZoneTypeAndUpdate(paintbrush);
+            SetZoneTypeAndUpdate(paintbrush);
         }
-        else if (building_mode == BuildingMode.PlacingBuilding)
+        else if (building_mode == BuildingMode.None)
+        {
+            SetWalkableAndUpdate(false);
+        }
+        else
         {
             if (Buildable())
             {
-                grid.fillCell(hovering.location.x, hovering.location.y);
-                color = GridSystem.ZoneColor(zone_type);
-                PushBuilding(color);
+                switch (building_mode)
+                {
+                    case BuildingMode.PlacingBuilding:
+                        grid.fillCell(hovering.location.x, hovering.location.y);
+                        PushBuilding(GridSystem.ZoneColor(zone_type));
+                        break;
+                    case BuildingMode.PlacingRoad:
+                        grid.fillCell(hovering.location.x, hovering.location.y);
+                        PushRoad(GridSystem.ZoneColor(zone_type));
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
@@ -180,12 +252,16 @@ public class Cell : MonoBehaviour
         dragging = false;
     }
 
+    void Awake()
+    {
+        renderer ??= gameObject.GetComponent<Renderer>();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        renderer = GetComponent<Renderer>();
-        grid = GameObject.Find("Grid").GetComponent<GridSystem>();
         creator ??= GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>();
+        all_cells.Add(this);
     }
 
     // Update is called once per frame

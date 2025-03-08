@@ -33,6 +33,8 @@ namespace SavingReloading
             Assert.IsTrue(gridSystem != null);
         }
 
+        bool first_load = true;
+
         private void Update()
         {
             // Most of the time, they just won't be holding control,
@@ -46,17 +48,39 @@ namespace SavingReloading
             if (s)
             {
                 lastSaveTime = Time.time;
-                SaveCurrent();
+                SaveGridData();
                 if (Citizen.citizens_enabled)
                     SaveCurrentCitizenData();
             }
             else if (l)
             {
-                lastLoadTime = Time.time;
-                ClearCurrentData();
-                LoadSaveData();
-                LoadCitizenData();
+                // Bandaid solution for loading.
+                // Double work but for some reason:
+                // NavMeshAgent doesn't want to comply
+                // the first time around. 
+                //
+                // It works just fine the second time...
+                //
+                // Don't ask me why, because I don't know
+                // why.
+                //
+                // TODO: Fix this abomination.
+                if (first_load)
+                {
+                    first_load = false;
+                    LoadAllData();
+                } else {
+                    lastLoadTime = Time.time;
+                    LoadAllData();
+                }
             }
+        }
+
+        private void LoadAllData()
+        {
+            ClearCurrentData();
+            LoadGridData();
+            LoadCitizenData();
         }
 
         private void ClearCurrentData()
@@ -138,14 +162,11 @@ namespace SavingReloading
 
                 string[] pos_dest_velocity_stopped_prefab = values.Split('|');
                 Assert.IsNotNull(pos_dest_velocity_stopped_prefab);
-                Debug.LogWarning($"pos_dest_velocity_stopped_prefab.Length = {pos_dest_velocity_stopped_prefab.Length}");
                 string output = "";
                 foreach (var s in pos_dest_velocity_stopped_prefab)
                 {
                     output += s;
                 }
-
-                Debug.LogWarning($"pos_dest_velocity_stopped_prefab = {output}");
 
                 string s_pos = pos_dest_velocity_stopped_prefab[0];
                 string s_dest = pos_dest_velocity_stopped_prefab[1];
@@ -159,18 +180,15 @@ namespace SavingReloading
                 int stopped = int.Parse(s_stopped);
                 int prefab_index = int.Parse(s_prefab_index);
 
-                /*citizens[i].gameObject.transform.position = pos;*/
+                positions[i] = pos;
                 citizen_names[i] = citizen_name;
                 destinations[i] = dest;
-
-
-                print($"{citizen_name}, Prefab: {prefab_index} is {stopped} stopped at {pos} heading to {dest} with velocity {velocity}");
             }
 
             spawner.SpawnNPCsFrom(citizen_names, positions, destinations);
         }
 
-        private void LoadSaveData()
+        private void LoadGridData()
         {
             string path = Path.Combine(savePath, GridDataSaveFileName);
             StreamReader reader = new StreamReader(path);
@@ -179,13 +197,13 @@ namespace SavingReloading
             string[] lines = reader.ReadToEnd().Split('\n');
             reader.Dispose();
 
-            var buildings = gridSystem.GetCells();
-            if (buildings is null)
+            var cells = gridSystem.GetCells();
+            if (cells is null)
             {
                 throw new UnityException("Couldn't access Cells from SaveSystem");
             }
 
-            for (int i = 0; i < buildings.Count; i++)
+            for (int i = 0; i < cells.Count; i++)
             {
                 string[] cell_serial = lines[i].Split('=');
                 string[] xz = cell_serial[0].Split(',');
@@ -193,7 +211,7 @@ namespace SavingReloading
                 int x = int.Parse(xz[0]);
                 int z = int.Parse(xz[1]);
 
-                var cell = buildings[i].GetComponent<Cell>();
+                var cell = cells[i].GetComponent<Cell>();
 
                 Assert.AreEqual(cell.location.x, x);
                 Assert.AreEqual(cell.location.y, z);
@@ -204,35 +222,39 @@ namespace SavingReloading
                 CellType ct = (CellType)int.Parse(zt_ct[1]);
 
                 cell.SetZoneTypeAndUpdate(zt);
+                cell.SetCellTypeAndUpdate(ct);
 
-                switch (ct)
-                {
-                    case CellType.Building:
-                        cell.PushBuilding();
-                        break;
-                    case CellType.Road:
-                        cell.PushRoad();
-                        break;
-                    case CellType.None:
-                        break;
-                    default:
-                        throw new UnityException("Default shouldn't ever happen");
-                }
+                /*switch (ct)*/
+                /*{*/
+                /*    case CellType.Building:*/
+                /*        cell.PushBuilding();*/
+                /*        /*cell.SetWalkableAndUpdate(true);*/
+                /*        break;*/
+                /*    case CellType.Road:*/
+                /*        cell.PushRoad();*/
+                /*        /*cell.SetWalkableAndUpdate(true);*/
+                /*        break;*/
+                /*    case CellType.None:*/
+                /*        /*cell.SetWalkableAndUpdate(false);*/
+                /*        break;*/
+                /*    default:*/
+                /*        throw new UnityException("Default shouldn't ever happen");*/
+                /*}*/
             }
         }
 
-        private void SaveCurrent()
+        private void SaveGridData()
         {
             string path = Path.Combine(savePath, GridDataSaveFileName);
             using StreamWriter writer = new StreamWriter(path, false);
             writer.WriteLine($"x,y=zone_type,cell_type");
-            var buildings = gridSystem.GetCells();
-            if (buildings is null)
+            var cells = gridSystem.GetCells();
+            if (cells is null)
             {
                 throw new UnityException("Cells was null");
             }
 
-            foreach (var building in buildings)
+            foreach (var building in cells)
             {
                 var cell = building.GetComponent<Cell>();
                 if (cell is null)

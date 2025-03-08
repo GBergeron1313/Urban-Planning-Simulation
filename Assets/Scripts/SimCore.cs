@@ -1,6 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class SimCore : MonoBehaviour
@@ -59,8 +56,6 @@ public class SimCore : MonoBehaviour
         isSimulationRunning = true;
         Time.timeScale = simulationSpeed;
         Debug.Log("Simulation Started");
-
-        // gridSystem.InvalidateCells();
     }
 
     public void PauseSimulation()
@@ -73,10 +68,7 @@ public class SimCore : MonoBehaviour
     public void SetSimulationSpeed(float speed)
     {
         simulationSpeed = Mathf.Clamp(speed, 0.1f, 3f);
-        if (isSimulationRunning)
-        {
-            Time.timeScale = simulationSpeed;
-        }
+        Time.timeScale = simulationSpeed;
     }
 
     // Core Update Loop

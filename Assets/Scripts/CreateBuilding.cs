@@ -35,11 +35,41 @@ public class CreateBuilding : MonoBehaviour
         nextBuilding.GetComponent<BuildingScript>().mainGrid = MainGrid;
     }
 
-    public void createBuilding(float x, float z, Color color, ZoneType zone_type, CellType cell_type)
+    private GameObject getCellTypeShape(CellType cell_type)
     {
-        print($"CreateBuilding: {x}, {z}, {color}, {zone_type}, {cell_type}");
-        var nextBuilding = Instantiate(buildingPrefab);
-        prefabs.Add(nextBuilding);
+        switch (cell_type)
+        {
+            case CellType.Building:
+                return Instantiate(buildingPrefab);
+            case CellType.Road:
+                return GameObject.CreatePrimitive(PrimitiveType.Cube);
+            default:
+                throw new UnityException($"CellType {cell_type} unexpected");
+        }
+    }
+
+    private void applyRoadShapeTransformations(GameObject road, ZoneType zone_type, int x, int z)
+    {
+        road.transform.position = new Vector3(x - 4.5f, 0f, z - 4.5f);
+        road.transform.Translate(new Vector3(0f, 0.05f, 0f));
+        road.transform.localScale = new Vector3(1.0f, 0.1f, 1.0f);
+
+
+        Cell c;
+        if (!road.TryGetComponent<Cell>(out c))
+        {
+            Debug.Log("Cell wasn't attached. Attaching...");
+
+            c = road.AddComponent<Cell>();
+        }
+        c.location = new Vector2Int((int)x, (int)z);
+        /*Cell.grid = GameObject.Find("Grid").GetComponent<GridSystem>();*/
+        c.cell_type = CellType.Road;
+        c.SetZoneTypeAndUpdate(zone_type);
+    }
+
+    private void applyBuildingShapeTransformations(GameObject nextBuilding, ZoneType zone_type, int x, int z)
+    {
         nextBuilding.transform.position = new Vector3(x - 4.5f, 0.5f, z - 4.5f);
         Cell c;
         if (!nextBuilding.TryGetComponent<Cell>(out c))
@@ -48,13 +78,25 @@ public class CreateBuilding : MonoBehaviour
 
             c = nextBuilding.AddComponent<Cell>();
         }
-        /*c.color = GridSystem.ZoneColor(zone_type);*/
         c.location = new Vector2Int((int)x, (int)z);
-        c.grid = GameObject.Find("Grid").GetComponent<GridSystem>();
-        /*c.zone_type = zone_type;*/
-        c.cell_type = cell_type;
+        /*c.grid = GameObject.Find("Grid").GetComponent<GridSystem>();*/
+        c.cell_type = CellType.Building;
         c.SetZoneTypeAndUpdate(zone_type);
-        /*c.GetComponent<Renderer>().material.color = color;*/
+    }
+
+    public void createBuilding(float x, float z, Color color, ZoneType zone_type, CellType cell_type)
+    {
+        print($"CreateBuilding: {x}, {z}, {color}, {zone_type}, {cell_type}");
+        var next_prefab = getCellTypeShape(cell_type);
+        if (cell_type == CellType.Building)
+        {
+            applyBuildingShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
+        }
+        else if (cell_type == CellType.Road)
+        {
+            applyRoadShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
+        }
+        prefabs.Add(next_prefab);
     }
 
     public void createBuilding(float x, float z, Color color, ZoneType zone_type)
@@ -65,7 +107,6 @@ public class CreateBuilding : MonoBehaviour
         Cell c = nextBuilding.AddComponent<Cell>();
         c.color = color;
         c.location = new Vector2Int((int)x, (int)z);
-        c.grid = MainGrid.GetComponent<GridSystem>();
         c.zone_type = zone_type;
         c.GetComponent<Renderer>().material.color = color;
     }
