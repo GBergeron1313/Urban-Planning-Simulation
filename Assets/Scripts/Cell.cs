@@ -17,13 +17,13 @@ public class Cell : MonoBehaviour
     public static Color default_color;
     public static bool dragging;
     public static CreateBuilding creator;
+    public static GridSystem grid;
 
     private new Renderer renderer;
 
     public Vector2Int location;
     public ZoneType zone_type;
     public Color color;
-    public GridSystem grid;
     public CellType cell_type;
     public bool walkable;
 
@@ -36,7 +36,7 @@ public class Cell : MonoBehaviour
         renderer.material.color = color;
     }
 
-    private void PushBuilding(Color color)
+    public void PushBuilding(Color color)
     {
         if (zone_type == ZoneType.Restricted) return;
         cell_type = CellType.Building;
@@ -108,6 +108,11 @@ public class Cell : MonoBehaviour
         {
             PushRoad();
         }
+    }
+
+    public static Cell AtCoords(int x, int z)
+    {
+        return grid.GetCellAt(x, z).GetComponent<Cell>();
     }
 
     public override string ToString()

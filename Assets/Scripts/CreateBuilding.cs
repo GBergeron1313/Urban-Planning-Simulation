@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-/*using Unity.AI.Navigation;*/
 using UnityEngine;
-using UnityEngine.AI;
 
 public class CreateBuilding : MonoBehaviour
 {
@@ -65,7 +63,7 @@ public class CreateBuilding : MonoBehaviour
             c = road.AddComponent<Cell>();
         }
         c.location = new Vector2Int((int)x, (int)z);
-        c.grid = GameObject.Find("Grid").GetComponent<GridSystem>();
+        /*Cell.grid = GameObject.Find("Grid").GetComponent<GridSystem>();*/
         c.cell_type = CellType.Road;
         c.SetZoneTypeAndUpdate(zone_type);
     }
@@ -81,7 +79,7 @@ public class CreateBuilding : MonoBehaviour
             c = nextBuilding.AddComponent<Cell>();
         }
         c.location = new Vector2Int((int)x, (int)z);
-        c.grid = GameObject.Find("Grid").GetComponent<GridSystem>();
+        /*c.grid = GameObject.Find("Grid").GetComponent<GridSystem>();*/
         c.cell_type = CellType.Building;
         c.SetZoneTypeAndUpdate(zone_type);
     }
@@ -109,7 +107,7 @@ public class CreateBuilding : MonoBehaviour
         Cell c = nextBuilding.AddComponent<Cell>();
         c.color = color;
         c.location = new Vector2Int((int)x, (int)z);
-        c.grid = MainGrid.GetComponent<GridSystem>();
+        /*c.grid = MainGrid.GetComponent<GridSystem>();*/
         c.zone_type = zone_type;
         c.GetComponent<Renderer>().material.color = color;
     }

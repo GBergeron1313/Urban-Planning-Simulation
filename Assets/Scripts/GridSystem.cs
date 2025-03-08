@@ -136,7 +136,6 @@ public class GridSystem : MonoBehaviour
                 Cell c = cell.AddComponent<Cell>();
                 c.location = new Vector2Int(x, z);
                 c.zone_type = ZoneType.None;
-                c.grid = this;
                 if (x < 5)
                 {
                     var nma = cell.AddComponent<NavMeshObstacle>();
@@ -148,6 +147,8 @@ public class GridSystem : MonoBehaviour
                 gridCells[x, z] = cell;
             }
         }
+
+        Cell.grid = this;
 
         // Store reference to default material for color restoration
         if (gridCells[0, 0] != null)
