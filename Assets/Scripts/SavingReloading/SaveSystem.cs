@@ -228,13 +228,13 @@ namespace SavingReloading
             string path = Path.Combine(savePath, GridDataSaveFileName);
             using StreamWriter writer = new StreamWriter(path, false);
             writer.WriteLine($"x,y=zone_type,cell_type");
-            var buildings = gridSystem.GetCells();
-            if (buildings is null)
+            var cells = gridSystem.GetCells();
+            if (cells is null)
             {
                 throw new UnityException("Cells was null");
             }
 
-            foreach (var building in buildings)
+            foreach (var building in cells)
             {
                 var cell = building.GetComponent<Cell>();
                 if (cell is null)

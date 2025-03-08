@@ -157,7 +157,6 @@ public class GridSystem : MonoBehaviour
     /// Updates grid state each frame
     public void Update()
     {
-        UpdateBuildingMode();
         HandleGridInteraction();
     }
 
@@ -166,48 +165,8 @@ public class GridSystem : MonoBehaviour
         return new Vector2Int((int)(vec.x - 4.5f), (int)(vec.z - 4.5f));
     }
 
-    private void UpdateBuildingMode()
-    {
-        // Toggles between PlacingBuilding and MarkingZoneType
-        var e = Input.GetKeyDown(KeyCode.E);
-
-        if (e)
-        {
-            currentMode++;
-            if (currentMode >= BuildingMode.TotalModes)
-            {
-                currentMode = BuildingMode.None;
-            }
-
-            Debug.Log($"Switched to {currentMode}");
-        }
-    }
-
-
     void HandleGridInteraction()
     {
-        if (!Cell.hovering) return;
-
-        /*if (Input.GetMouseButton(0) && Cell.building_mode == BuildingMode.None)*/
-        /*{*/
-        /*    if (Cell.hovering.cell_type == CellType.Building)*/
-        /*    {*/
-        /*        Cell c = GetCellAt(Cell.hovering.location.x, Cell.hovering.location.y).GetComponent<Cell>();*/
-        /*        Destroy(c.gameObject.GetComponent<NavMeshObstacle>());*/
-        /*        Destroy(c.GetComponent<NavMeshObstacle>());*/
-        /*    }*/
-        /*    else*/
-        /*    {*/
-        /*        Destroy(Cell.hovering.GetComponent<NavMeshObstacle>());*/
-        /*        Destroy(Cell.hovering.gameObject.GetComponent<NavMeshObstacle>());*/
-        /*    }*/
-        /*}*/
-
-
-        GameObject hitObject = Cell.hovering.gameObject;
-        int x = Cell.hovering.location.x;
-        int z = Cell.hovering.location.y;
-
         // Toggles between PlacingBuilding and MarkingZoneType
         var e = Input.GetKeyDown(KeyCode.E);
 
@@ -233,193 +192,13 @@ public class GridSystem : MonoBehaviour
             }
         }
 
-        Vector2Int loc;
-
-        if (Cell.hovering is null)
-        {
-            loc = Cell.last_hovered?.location ?? new Vector2Int(-1, -1);
-        }
-        else
-        {
-            loc = Cell.hovering.location;
-        }
-
-        ZoneType zt_displayed = Cell.hovering?.zone_type ?? Cell.last_hovered?.zone_type ?? ZoneType.None;
-
         uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
-            $"Cell ({loc.x},{loc.y})\n" +
-            $"Zone Type: {zt_displayed}\n" +
+            $"Cell: {(Cell.hovering is null ? "No Cell Selected" : Cell.hovering.location)}\n" +
+            $"Zone Type: {(Cell.hovering is null ? "No Cell Selected" : Cell.hovering.zone_type)}\n" +
             $"Paintbrush: {Cell.paintbrush}\n" +
             $"Building Placement Mode: {Cell.building_mode}";
 
-
-        // bool mouseLeftDown = Input.GetMouseButtonDown((int)MouseButton.LeftMouse);
-        // bool mouseLeftDragging = Input.GetMouseButton((int)MouseButton.LeftMouse);
-        // Color nextColor = GetZoneColor(zoneGrid[x, z]);
-
-        // switch (currentMode)
-        // {
-        //     case BuildingMode.MarkingZoneType:
-        //         if (mouseLeftDragging)
-        //         {
-        //             if (selectedCell)
-        //             {
-        //                 UpdateCellColor(selectedCell);
-        //             }
-        //
-        //             selectedCell = hitObject;
-        //
-        //             Color blendedSelectColor = Color.Lerp(nextColor, selectedColor, 0.5f);
-        //             selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
-        //         }
-        //
-        //         break;
-        //
-        //     case BuildingMode.PlacingBuilding:
-        //         if (mouseLeftDown)
-        //         {
-        //             GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>().createBuilding(
-        //                 x,
-        //                 z,
-        //                 nextColor
-        //             );
-        //             fillCell(x, z);
-        //         }
-        //
-        //         break;
-        //
-        //     default:
-        //     case BuildingMode.None:
-        //         break;
-        // }
-
-        // // Handle selection
-        // if (Input.GetMouseButtonDown(0))
-        // {
-        //     if (selectedCell != null)
-        //     {
-        //         UpdateCellColor(selectedCell);
-        //     }
-        //
-        //     selectedCell = hitObject;
-        //     Color baseColor = GetZoneColor(zoneGrid[x, z]);
-        //     Color blendedSelectColor = Color.Lerp(baseColor, selectedColor, 0.5f);
-        //     selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
-        // }
-        // if (lastHovered != null && lastHovered != selectedCell)
-        // {
-        //     UpdateCellColor(lastHovered);
-        //     lastHovered = null;
-        // }
     }
-
-    /// Handles mouse interaction with the grid including hover effects and zone assignment
-    // void HandleGridInteraction()
-    // {
-    //     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //     RaycastHit hit;
-    //
-    //     if (Physics.Raycast(ray, out hit))
-    //     {
-    //         GameObject hitObject = hit.collider.gameObject;
-    //         string[] coordinates = hitObject.name.Split('_');
-    //
-    //         if (coordinates.Length >= 3)
-    //         {
-    //             int x = int.Parse(coordinates[1]);
-    //             int z = int.Parse(coordinates[2]);
-    //
-    //             // Handle hover effect
-    //             if (lastHovered != hitObject)
-    //             {
-    //                 if (lastHovered != null && lastHovered != selectedCell)
-    //                 {
-    //                     UpdateCellColor(lastHovered);
-    //                 }
-    //
-    //                 if (hitObject != selectedCell)
-    //                 {
-    //                     Color baseColor = GetZoneColor(zoneGrid[x, z]);
-    //                     Color blendedHoverColor = Color.Lerp(baseColor, hoverColor, 0.5f);
-    //                     hitObject.GetComponent<Renderer>().material.color = blendedHoverColor;
-    //                     uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
-    //                         "Cell (" + x + "," + z + ")\nZone Type: " + zoneGrid[x, z];
-    //                 }
-    //
-    //                 lastHovered = hitObject;
-    //             }
-    //
-    //             // Zone assignment
-    //             if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-    //             {
-    //                 if (Input.GetKeyDown(KeyCode.Alpha1)) SetZone(x, z, ZoneType.Residential);
-    //                 else if (Input.GetKeyDown(KeyCode.Alpha2)) SetZone(x, z, ZoneType.Commercial);
-    //                 else if (Input.GetKeyDown(KeyCode.Alpha3)) SetZone(x, z, ZoneType.Industrial);
-    //                 else if (Input.GetKeyDown(KeyCode.Alpha4)) SetZone(x, z, ZoneType.Restricted);
-    //                 else if (Input.GetKeyDown(KeyCode.Alpha0)) SetZone(x, z, ZoneType.None);
-    //             }
-    //
-    //             bool mouseLeftDown = Input.GetMouseButtonDown((int)MouseButton.LeftMouse);
-    //             bool mouseLeftDragging = Input.GetMouseButton((int)MouseButton.LeftMouse);
-    //             Color nextColor = GetZoneColor(zoneGrid[x, z]);
-    //
-    //             switch (currentMode)
-    //             {
-    //                 case BuildingMode.MarkingZoneType:
-    //                     if (mouseLeftDragging)
-    //                     {
-    //                         if (selectedCell != null)
-    //                         {
-    //                             UpdateCellColor(selectedCell);
-    //                         }
-    //
-    //                         selectedCell = hitObject;
-    //
-    //                         Color blendedSelectColor = Color.Lerp(nextColor, selectedColor, 0.5f);
-    //                         selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
-    //                     }
-    //
-    //                     break;
-    //
-    //                 case BuildingMode.PlacingBuilding:
-    //                     if (mouseLeftDown)
-    //                     {
-    //                         GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>().createBuilding(
-    //                             x,
-    //                             z,
-    //                             nextColor
-    //                         );
-    //                         fillCell(x, z);
-    //                     }
-    //
-    //                     break;
-    //
-    //                 default:
-    //                 case BuildingMode.None:
-    //                     break;
-    //             }
-    //
-    //             // // Handle selection
-    //             // if (Input.GetMouseButtonDown(0))
-    //             // {
-    //             //     if (selectedCell != null)
-    //             //     {
-    //             //         UpdateCellColor(selectedCell);
-    //             //     }
-    //             //
-    //             //     selectedCell = hitObject;
-    //             //     Color baseColor = GetZoneColor(zoneGrid[x, z]);
-    //             //     Color blendedSelectColor = Color.Lerp(baseColor, selectedColor, 0.5f);
-    //             //     selectedCell.GetComponent<Renderer>().material.color = blendedSelectColor;
-    //             // }
-    //         }
-    //     }
-    //     else if (lastHovered != null && lastHovered != selectedCell)
-    //     {
-    //         UpdateCellColor(lastHovered);
-    //         lastHovered = null;
-    //     }
-    // }
 
     [CanBeNull]
     public List<GameObject> GetBuildings()
@@ -521,7 +300,6 @@ public class GridSystem : MonoBehaviour
         return null;
     }
 
-
     /// Checks if a cell is filled or restricted
     /// Returns true if cell is filled, restricted, or out of bounds
     public bool isCellFilled(int x, int z)
@@ -533,26 +311,6 @@ public class GridSystem : MonoBehaviour
 
         return true; // Return true for out of bounds or restricted zones to prevent building
     }
-
-    // public void InvalidateCells()
-    // {
-    //     for (int i = 0; i < width; i++)
-    //     {
-    //         for (int j = 0; j < height; j++)
-    //         {
-    //             bool result = isCellFilled(i, j);
-    //
-    //             if (result)
-    //             {
-    //                 // if cell is filled, update cell color
-    //                 UpdateCellColor(gridCells[i, j], x, z);
-    //
-    //                 Debug.Log("Grid Updated");
-    //             }
-    //         }
-    //     }
-    // }
-
 
     /// Marks a cell as filled if it's within grid bounds
     public void fillCell(int x, int z)

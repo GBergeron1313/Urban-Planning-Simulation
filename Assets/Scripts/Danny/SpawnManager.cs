@@ -35,7 +35,6 @@ namespace Danny
             {
                 string[] name_id_index = citizen_names[i].Split('_');
                 int prefab_index = int.Parse(name_id_index[2]);
-                Debug.LogWarning($"citizens[{i}] = {citizen_names[i]}");
                 GameObject npc =
                     Instantiate(npcPrefabs[prefab_index],
                             positions[i],

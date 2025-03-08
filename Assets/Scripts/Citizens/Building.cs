@@ -54,7 +54,6 @@ namespace Citizens
 
         public void UpdateCitizens()
         {
-            Debug.LogWarning("Updating Citizens");
             int mod = building_positions.Count;
             foreach (var citizen in go_citizens)
             {

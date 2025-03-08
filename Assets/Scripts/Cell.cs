@@ -43,9 +43,20 @@ public class Cell : MonoBehaviour
         else
         {
             var nmo = gameObject.AddComponent<NavMeshObstacle>();
-            /*Debug.LogError($"Size = {nmo.size}, Shape = {nmo.shape}, center = {nmo.center}");*/
             nmo.carving = true;
-            nmo.size = new Vector3(0.4f, 0.4f, 0.5f);
+            // The "gridCells", in GridSystem, are rotated quads.
+            // This makes the X and Y dimensions responsible for
+            // width and height. Maybe not in that order, but the
+            // important thing to note is that Z, in the local space,
+            // refers to height. 
+            // This is why nmo.size is:
+            // (0.15, 0.15, 0.5) 
+            // instead of:
+            // (0.15, 0.5, 0.15)
+
+            nmo.size = new Vector3(0.15f, 0.15f, 0.5f);
+            // TODO: Change gridCells and the way they work to more 
+            // idiomatically represent themselves.
         }
     }
 
