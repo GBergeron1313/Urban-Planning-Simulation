@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using JetBrains.Annotations;
 using UnityEngine;
-using UnityEngine.AI;
 using UnityEngine.Assertions;
 
 public enum ZoneType
@@ -102,6 +101,8 @@ public class GridSystem : MonoBehaviour
         GameObject gridParent = new GameObject("Grid");
         gridParent.transform.parent = transform;
 
+        Cell.grid = this;
+
         // Calculate starting position to center the grid
         Vector3 startPos = transform.position - new Vector3(width * cellSize / 2f, 0, height * cellSize / 2f);
 
@@ -133,22 +134,14 @@ public class GridSystem : MonoBehaviour
                 // The name "collider" was causing conflicts
                 collide.size = new Vector3(1, 1, 0.1f);
 
+                // Store reference to cell
+                gridCells[x, z] = cell;
+
                 Cell c = cell.AddComponent<Cell>();
                 c.location = new Vector2Int(x, z);
                 c.zone_type = ZoneType.None;
-                if (x < 5)
-                {
-                    var nma = cell.AddComponent<NavMeshObstacle>();
-                    nma.carving = true;
-                    nma.size = new Vector3(0.25f, 1, 0.25f);
-                }
-
-                // Store reference to cell
-                gridCells[x, z] = cell;
             }
         }
-
-        Cell.grid = this;
 
         // Store reference to default material for color restoration
         if (gridCells[0, 0] != null)
