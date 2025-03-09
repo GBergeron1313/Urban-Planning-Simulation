@@ -2,6 +2,7 @@ using UnityEngine;
 using Citizens;
 using UnityEngine.AI;
 using System.Collections.Generic;
+using Unity.AI.Navigation;
 
 public enum CellType
 {
@@ -34,12 +35,16 @@ public class Cell : MonoBehaviour
 
         if (walkable)
         {
+            var nms = gameObject.AddComponent<NavMeshSurface>();
+            nms.useGeometry = NavMeshCollectGeometry.RenderMeshes;
+            nms.BuildNavMesh();
+
             var nmo = GetComponent<NavMeshObstacle>();
             if (nmo)
-                Destroy(nmo);
+                nmo.enabled = false;
             var grid_tile_nmo = AtCoords(location.x, location.y)?.GetComponent<NavMeshObstacle>();
             if (grid_tile_nmo)
-                Destroy(grid_tile_nmo);
+                grid_tile_nmo.enabled = false;
         }
         else
         {
@@ -48,6 +53,7 @@ public class Cell : MonoBehaviour
             {
                 nmo = gameObject.AddComponent<NavMeshObstacle>();
             }
+            nmo.enabled = true;
             nmo.carving = true;
             // The "gridCells", in GridSystem, are rotated quads.
             // This makes the X and Y dimensions responsible for
@@ -145,7 +151,7 @@ public class Cell : MonoBehaviour
 
     private void OnMouseEnter()
     {
-        Debug.Log($"transform.position = {gameObject.transform.position}");
+        Debug.Log($"transform.rotation = {gameObject.transform.rotation}");
         hovering = this;
 
         if (building_mode == BuildingMode.MarkingZoneType)

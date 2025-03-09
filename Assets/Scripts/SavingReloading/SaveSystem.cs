@@ -1,6 +1,7 @@
 using System.IO;
 using Citizens;
 using Danny;
+using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Assertions;
@@ -33,8 +34,6 @@ namespace SavingReloading
             Assert.IsTrue(gridSystem != null);
         }
 
-        bool first_load = true;
-
         private void Update()
         {
             // Most of the time, they just won't be holding control,
@@ -55,24 +54,25 @@ namespace SavingReloading
             else if (l)
             {
                 // Bandaid solution for loading.
-                // Double work but for some reason:
+                // Double the work but for some reason,
                 // NavMeshAgent doesn't want to comply
                 // the first time around. 
                 //
-                // It works just fine the second time...
+                // It works just fine the second time.
                 //
-                // Don't ask me why, because I don't know
-                // why.
+                // I don't know why.
                 //
                 // TODO: Fix this abomination.
-                if (first_load)
-                {
-                    first_load = false;
-                    LoadAllData();
-                } else {
-                    lastLoadTime = Time.time;
-                    LoadAllData();
-                }
+                /*if (first_load)*/
+                /*{*/
+                /*    first_load = false;*/
+                /*    LoadAllData();*/
+                /*}*/
+                /*else*/
+                /*{*/
+                lastLoadTime = Time.time;
+                LoadAllData();
+                /*}*/
             }
         }
 
@@ -132,6 +132,7 @@ namespace SavingReloading
         // But it does work.
         private void LoadCitizenData()
         {
+
             string path = Path.Combine(savePath, CitizenDataSaveFileName);
             using StreamReader reader = new StreamReader(path);
 
@@ -143,6 +144,17 @@ namespace SavingReloading
             if (spawner is null)
             {
                 throw new UnityException("Why was SpawnManager null when trying to load NPCs?");
+            }
+            {
+                NavMeshSurface[] surfaces = GameObject.FindObjectsOfType<NavMeshSurface>();
+                if (surfaces is null)
+                {
+                    throw new UnityException("NavMeshSurface was null");
+                }
+                else
+                {
+                    Debug.Log($"# surfaces = {surfaces.Length}, go = {JsonUtility.ToJson(surfaces)}");
+                }
             }
 
             for (int i = 0; i < SpawnManager.npcCount; i++)

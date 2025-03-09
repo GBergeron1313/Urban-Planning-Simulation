@@ -9,18 +9,18 @@ namespace Citizens
     public class Building : MonoBehaviour
     {
         public static List<Vector3> building_positions = new List<Vector3>();
-        public static List<GameObject> go_citizens;
 
         private float last_citizen_update;
 
         public static void ClearBuildings()
         {
             building_positions.Clear();
+            building_positions = new List<Vector3>();
         }
 
         public void AddCitizen(GameObject go_citizen)
         {
-            go_citizens.Add(go_citizen);
+            Citizen.go_citizens.Add(go_citizen);
         }
 
         public static void TrackPosition(Vector3 tracked)
@@ -46,7 +46,7 @@ namespace Citizens
         public void UpdateCitizens()
         {
             int mod = building_positions.Count;
-            foreach (var citizen in go_citizens)
+            foreach (var citizen in Citizens.Citizen.go_citizens)
             {
                 var nma = citizen.GetComponent<NavMeshAgent>();
                 Assert.IsTrue(nma.isOnNavMesh);
