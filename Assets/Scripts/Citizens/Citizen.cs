@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace Citizens
@@ -21,19 +22,21 @@ namespace Citizens
     public class Citizen : MonoBehaviour
     {
         public static bool citizens_enabled = false;
+        public static List<GameObject> go_citizens = new List<GameObject>();
 
-        public static Cell CitizenCellLocation(Vector3 position) {
+        public static Cell CitizenCellLocation(Vector3 position)
+        {
             return new Cell();
         }
-        
+
         public static void ClearCitizens()
         {
-            var citizens = GameObject.FindGameObjectsWithTag("Citizens");
-            foreach (var citizen in citizens)
+            foreach (var citizen in go_citizens)
             {
                 Destroy(citizen);
             }
-            citizens_enabled = false;
+            go_citizens.Clear();
+            go_citizens = new List<GameObject>();
         }
 
         private void Start()

@@ -32,7 +32,17 @@ namespace Danny
             npcButton.onClick = null;
             npcButton.enabled = false;
 
-            Building.go_citizens = new List<GameObject>(npcCount);
+            if (Citizen.go_citizens is not null
+                &&
+                Citizen.go_citizens.Count > 0)
+            {
+                Citizen.ClearCitizens();
+            }
+            else
+            {
+                Citizen.go_citizens = new List<GameObject>(npcCount);
+            }
+
 
             for (int i = 0; i < npcCount; i++)
             {
@@ -42,11 +52,7 @@ namespace Danny
                     Instantiate(npcPrefabs[prefab_index],
                             positions[i],
                             Quaternion.identity);
-
                 npc.name = citizen_names[i];
-                Debug.LogWarning($"For {npc}: {npc.transform.position}");
-
-
                 npc.tag = "Citizens";
 
                 // Ensure the animator is enabled
@@ -54,11 +60,7 @@ namespace Danny
                 if (npcAnimator is not null)
                 {
                     var nma = npc.GetComponent<NavMeshAgent>();
-                    Debug.LogWarning($"For {nma}: {nma.transform.position}");
-                    Debug.LogWarning($"Bound? {nma.isOnNavMesh}");
-                    nma.autoRepath = true;
 
-                    nma.nextPosition = positions[i];
                     Assert.IsTrue(nma.Warp(positions[i]));
                     Assert.IsTrue(nma.SetDestination(destinations[i]));
                     nma.radius /= 10.0f;
@@ -66,7 +68,8 @@ namespace Danny
                     nma.speed /= 10.0f;
                     nma.updateRotation = true;
                     nma.autoRepath = true;
-                    Building.go_citizens.Add(npc);
+                    Citizen.go_citizens.Add(npc);
+
                 }
                 else
                 {
@@ -88,7 +91,7 @@ namespace Danny
             npcButton.interactable = false;
             npcButton.onClick = null;
             npcButton.enabled = false;
-            Building.go_citizens = new List<GameObject>(npcCount);
+            Citizen.go_citizens = new List<GameObject>(npcCount);
 
             for (int i = 0; i < npcCount; i++)
             {
@@ -111,7 +114,7 @@ namespace Danny
                 if (npcAnimator is not null)
                 {
                     // npcAnimator.SetTrigger("Idle"); // Ensure NPC starts animating
-                    Building.go_citizens.Add(npc);
+                    Citizen.go_citizens.Add(npc);
                 }
                 else
                 {
