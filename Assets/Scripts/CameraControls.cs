@@ -74,11 +74,11 @@ public class CameraControls : MonoBehaviour
         currentVelocity = Vector3.Lerp(
             currentVelocity,
             targetVelocity,
-            input.magnitude > 0 ? acceleration : deceleration * Time.deltaTime
+            input.magnitude > 0 ? acceleration : deceleration * Time.unscaledDeltaTime
         );
 
         // Update target position
-        targetPosition += transform.TransformDirection(currentVelocity) * Time.deltaTime;
+        targetPosition += transform.TransformDirection(currentVelocity) * Time.unscaledDeltaTime;
 
         // Handle rotation toggle
         if (Input.GetKeyDown(KeyCode.Space))

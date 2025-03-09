@@ -1,3 +1,4 @@
+using Citizens;
 using UnityEngine;
 
 public class SimCore : MonoBehaviour
@@ -9,10 +10,12 @@ public class SimCore : MonoBehaviour
     [SerializeField] private GridSystem gridSystem;
 
     // Simulation state
-    private bool isSimulationRunning = false;
+    public bool isSimulationRunning = false;
     private float simulationSpeed = 1f;
     private float simulationTimer = 0f;
     private float updateInterval = 1f; // One second intervals
+
+    public float simulationClock = 0f;
 
     private enum SimState
     {
@@ -27,7 +30,6 @@ public class SimCore : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -40,28 +42,27 @@ public class SimCore : MonoBehaviour
     {
         // Initialize systems
         InitializeSystems();
+        PauseSimulation();
     }
 
     void Update()
     {
         if (isSimulationRunning)
-        {
-            UpdateSimulation();
-        }
+            simulationClock += Time.unscaledDeltaTime * simulationSpeed;
     }
 
     // Time Control Methods
     public void PlaySimulation()
     {
         isSimulationRunning = true;
-        Time.timeScale = simulationSpeed;
+        Citizen.EnableMovement(true);
         Debug.Log("Simulation Started");
     }
 
     public void PauseSimulation()
     {
         isSimulationRunning = false;
-        Time.timeScale = 0;
+        Citizen.EnableMovement(false);
         Debug.Log("Simulation Paused");
     }
 
@@ -74,13 +75,7 @@ public class SimCore : MonoBehaviour
     // Core Update Loop
     private void UpdateSimulation()
     {
-        simulationTimer += Time.deltaTime * simulationSpeed;
-
-        if (simulationTimer >= updateInterval)
-        {
-            gridSystem.Update();
-            simulationTimer = 0f;
-        }
+        simulationClock += Time.unscaledDeltaTime * simulationSpeed;
     }
 
     private void InitializeSystems()

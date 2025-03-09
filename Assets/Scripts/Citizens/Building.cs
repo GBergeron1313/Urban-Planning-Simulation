@@ -72,12 +72,15 @@ namespace Citizens
             {
                 RequestUpdate();
             }
+        }
 
-            if (Citizen.citizens_enabled)
+        void FixedUpdate()
+        {
+            if (SimCore.Instance.isSimulationRunning && Citizen.citizens_enabled)
             {
-                if (Time.time - last_citizen_update > 5.0f)
+                if (Time.unscaledTime - last_citizen_update > 5.0f)
                 {
-                    last_citizen_update = Time.time;
+                    last_citizen_update = Time.unscaledTime;
                     UpdateCitizens();
                 }
             }
