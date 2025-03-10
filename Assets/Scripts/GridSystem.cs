@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Citizens;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -195,7 +194,6 @@ public class GridSystem : MonoBehaviour
 
     }
 
-    [CanBeNull]
     public List<GameObject> GetBuildings()
     {
         if (filledCells is null || gridCells is null) return null;
@@ -217,7 +215,6 @@ public class GridSystem : MonoBehaviour
         return buildings;
     }
 
-    [CanBeNull]
     public List<GameObject> GetCells()
     {
         if (filledCells is null || gridCells is null) return null;
