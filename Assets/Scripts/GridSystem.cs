@@ -62,8 +62,8 @@ public class GridSystem : MonoBehaviour
 
     void Awake()
     {
-        BTN_change_building_mode = GameObject.Find("BuildingButton").GetComponent<Button>();
-        BTN_change_building_mode.onClick.AddListener(Cell.BTN_ToBuildingMode);
+        BTN_change_building_mode = GameObject.Find("ModeButton").GetComponent<Button>();
+        BTN_change_building_mode.onClick.AddListener(Cell.CycleBuildingMode);
     }
 
     /// Initializes the grid arrays and generates the grid structure
@@ -177,23 +177,13 @@ public class GridSystem : MonoBehaviour
 
         if (e)
         {
-            Cell.building_mode++;
-            if (Cell.building_mode >= BuildingMode.TotalModes)
-            {
-                Cell.building_mode = BuildingMode.None;
-            }
+            Cell.CycleBuildingMode();
         }
 
         if (r)
         {
-            print($"Paintbrush = {Cell.paintbrush}");
-            Cell.paintbrush++;
-            if (Cell.paintbrush > ZoneType.Restricted)
-            {
-                Cell.paintbrush = ZoneType.Residential;
-            }
+            Cell.CycleZoneType();
         }
-
 
         uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
             $"Simulation Time: {SimCore.Instance.simulationClock}\n" +

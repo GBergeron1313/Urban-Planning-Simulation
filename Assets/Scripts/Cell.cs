@@ -72,7 +72,15 @@ public class Cell : MonoBehaviour
         }
     }
 
-    public static void BTN_ToBuildingMode()
+    public static void CycleZoneType()
+    {
+        Cell.paintbrush++;
+        if (Cell.paintbrush > ZoneType.Restricted)
+        {
+            Cell.paintbrush = ZoneType.Residential;
+        }
+    }
+    public static void CycleBuildingMode()
     {
         Cell.building_mode++;
         if (Cell.building_mode >= BuildingMode.TotalModes)
@@ -85,7 +93,6 @@ public class Cell : MonoBehaviour
     {
         zone_type = zt;
         color = GridSystem.ZoneColor(zone_type);
-        /*renderer ??= gameObject.GetComponent<Renderer>();*/
         renderer.material.color = color;
     }
 
@@ -110,9 +117,15 @@ public class Cell : MonoBehaviour
         Building.building_positions.Add(this.transform.position);
     }
 
+    public bool Removable()
+    {
+        return cell_type != CellType.None;
+    }
+
     public bool Buildable()
     {
-        return zone_type != ZoneType.Restricted;
+        return zone_type != ZoneType.Restricted
+            && cell_type == CellType.None;
     }
 
     public void PushRoad(Color color)

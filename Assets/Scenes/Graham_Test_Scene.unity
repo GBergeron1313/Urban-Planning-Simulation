@@ -661,7 +661,7 @@ GameObject:
   - component: {fileID: 645938367}
   - component: {fileID: 645938366}
   m_Layer: 5
-  m_Name: BuildingButton
+  m_Name: ModeButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

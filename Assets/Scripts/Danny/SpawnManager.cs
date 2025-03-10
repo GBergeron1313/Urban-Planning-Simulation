@@ -66,7 +66,6 @@ namespace Danny
                     nma.radius = 0.025f;
                     nma.acceleration /= 10.0f;
                     nma.speed /= 10.0f;
-
                     nma.updateRotation = true;
                     nma.autoRepath = true;
                     Citizen.go_citizens.Add(npc);
