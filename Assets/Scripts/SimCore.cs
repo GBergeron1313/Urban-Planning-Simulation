@@ -2,6 +2,24 @@ using Citizens;
 using UnityEngine;
 using UnityEngine.UI;
 
+
+public enum SimState
+{
+    Default,
+    Running = Default,
+    Paused,
+
+    TotalSimStates,
+}
+
+public enum ViewMode
+{
+    Default,
+    Clear,
+
+    TotalViewModes,
+}
+
 public class SimCore : MonoBehaviour
 {
     // Singleton pattern for easy access
@@ -14,28 +32,28 @@ public class SimCore : MonoBehaviour
     public bool isSimulationRunning = false;
     private float simulationSpeed = 1f;
     private float simulationTimer = 0f;
-    private float updateInterval = 1f; // One second intervals
 
     private Button pauseSimulationButton;
     private Button playSimulationButton;
 
     public float simulationClock = 0f;
 
-    public enum ViewMode
-    {
-        Default,
-        Clear,
 
-        TotalViewModes,
+    public float SimSpeed
+    {
+        get { return simulationSpeed; }
     }
 
-    public ViewMode view_mode;
-
-    private enum SimState
+    public ViewMode view_mode
     {
-        Initializing,
-        Running,
-        Paused
+        get;
+        private set;
+    }
+
+    public SimState sim_state
+    {
+        get;
+        private set;
     }
 
     void Awake()
@@ -63,10 +81,36 @@ public class SimCore : MonoBehaviour
 
     void Update()
     {
-        if (isSimulationRunning)
+        if (sim_state == SimState.Running)
             simulationClock += Time.unscaledDeltaTime * simulationSpeed;
         if (Input.GetKeyDown(KeyCode.V))
             CycleViewModes();
+
+        if (Input.GetKeyDown(KeyCode.F))
+            IncreaseSimulationSpeed();
+
+        if (Input.GetKeyDown(KeyCode.G))
+            DecreaseSimulationSpeed();
+    }
+
+    private void DecreaseSimulationSpeed()
+    {
+        simulationSpeed *= 0.5f;
+        simulationSpeed = Mathf.Clamp(simulationSpeed, 0.03125f, 32.0f);
+        Citizen.SetSpeedCitizens(simulationSpeed);
+    }
+    private void IncreaseSimulationSpeed()
+    {
+        simulationSpeed *= 2.0f;
+        simulationSpeed = Mathf.Clamp(simulationSpeed, 0.03125f, 32.0f);
+        Citizen.SetSpeedCitizens(simulationSpeed);
+    }
+
+    private void CycleSimulationStates()
+    {
+        sim_state++;
+        if (sim_state >= SimState.TotalSimStates)
+            sim_state = SimState.Default;
     }
 
     private void CycleViewModes()
@@ -79,6 +123,7 @@ public class SimCore : MonoBehaviour
     // Time Control Methods
     public void PlaySimulation()
     {
+        sim_state = SimState.Running;
         isSimulationRunning = true;
         Citizen.EnableMovement(true);
         Debug.Log("Simulation Started");
@@ -90,6 +135,7 @@ public class SimCore : MonoBehaviour
 
     public void PauseSimulation()
     {
+        sim_state = SimState.Paused;
         isSimulationRunning = false;
         Citizen.EnableMovement(false);
         Debug.Log("Simulation Paused");

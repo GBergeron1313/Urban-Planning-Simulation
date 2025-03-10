@@ -77,7 +77,7 @@ namespace Danny
                 }
             }
 
-            if (SimCore.Instance.isSimulationRunning)
+            if (SimCore.Instance.sim_state == SimState.Running)
             {
                 Citizen.EnableMovement(true);
             }

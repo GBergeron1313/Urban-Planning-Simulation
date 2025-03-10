@@ -185,7 +185,7 @@ public class GridSystem : MonoBehaviour
             Cell.CycleZoneType();
         }
 
-        if (SimCore.Instance.view_mode == SimCore.ViewMode.Default)
+        if (SimCore.Instance.view_mode == ViewMode.Default)
         {
             if (Cell.hovering is not null)
                 uiText.GetComponent<TMPro.TextMeshProUGUI>().text =

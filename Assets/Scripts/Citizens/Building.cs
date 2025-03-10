@@ -76,7 +76,7 @@ namespace Citizens
 
         void FixedUpdate()
         {
-            if (SimCore.Instance.isSimulationRunning && Citizen.citizens_enabled)
+            if (SimCore.Instance.sim_state == SimState.Running && Citizen.citizens_enabled)
             {
                 if (Time.unscaledTime - last_citizen_update > 5.0f)
                 {
