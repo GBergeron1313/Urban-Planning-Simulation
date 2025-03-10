@@ -26,6 +26,9 @@
 # JetBrains Editor Configuration
 .idea
 
+# Default FPS Settings
+ProjectSettings/TimelineSettings.asset
+
 # Visual Studio cache directory
 .vs/
 

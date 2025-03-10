@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Citizens;
-using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -20,6 +19,7 @@ public enum BuildingMode
     PlacingBuilding,
     PlacingRoad,
     MarkingZoneType,
+    Removal,
 
     // Always keep TotalModes at the end
     TotalModes
@@ -62,8 +62,8 @@ public class GridSystem : MonoBehaviour
 
     void Awake()
     {
-        BTN_change_building_mode = GameObject.Find("BuildingButton").GetComponent<Button>();
-        BTN_change_building_mode.onClick.AddListener(Cell.BTN_ToBuildingMode);
+        BTN_change_building_mode = GameObject.Find("ModeButton").GetComponent<Button>();
+        BTN_change_building_mode.onClick.AddListener(Cell.CycleBuildingMode);
     }
 
     /// Initializes the grid arrays and generates the grid structure
@@ -138,9 +138,9 @@ public class GridSystem : MonoBehaviour
                 }
 
                 // Add thin collider for mouse interaction
-                BoxCollider collide = cell.AddComponent<BoxCollider>();
-                // The name "collider" was causing conflicts
-                collide.size = new Vector3(1, 1, 0.1f);
+                /*BoxCollider collide = cell.AddComponent<BoxCollider>();*/
+                /*// The name "collider" was causing conflicts*/
+                /*collide.size = new Vector3(1, 1, 0.1f);*/
 
                 // Store reference to cell
                 gridCells[x, z] = cell;
@@ -177,35 +177,42 @@ public class GridSystem : MonoBehaviour
 
         if (e)
         {
-            Cell.building_mode++;
-            if (Cell.building_mode >= BuildingMode.TotalModes)
-            {
-                Cell.building_mode = BuildingMode.None;
-            }
+            Cell.CycleBuildingMode();
         }
 
         if (r)
         {
-            print($"Paintbrush = {Cell.paintbrush}");
-            Cell.paintbrush++;
-            if (Cell.paintbrush > ZoneType.Restricted)
-            {
-                Cell.paintbrush = ZoneType.Residential;
-            }
+            Cell.CycleZoneType();
         }
 
-
-        uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
-            $"Simulation Time: {SimCore.Instance.simulationClock}\n" +
-            $"Cell: {(Cell.hovering is null ? "N/A" : Cell.hovering.location)}\n" +
-            $"Zone Type: {(Cell.hovering is null ? "N/A" : Cell.hovering.zone_type)}\n" +
-            $"Paintbrush: {Cell.paintbrush}\n" +
-            $"Building Placement Mode: {Cell.building_mode}\n" +
-            $"Number of Buildings: {Building.building_positions.Count}";
+        if (SimCore.Instance.view_mode == SimCore.ViewMode.Default)
+        {
+            if (Cell.hovering is not null)
+                uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
+                    $"Simulation Time: {SimCore.Instance.simulationClock}\n" +
+                    $"Cell: {(Cell.hovering.location)}\n" +
+                    $"Occupied: {(Cell.AtCoords(Cell.hovering.location).contents)}\n" +
+                    $"Zone Type: {(Cell.hovering.zone_type)}\n" +
+                    $"Paintbrush: {Cell.paintbrush}\n" +
+                    $"Building Placement Mode: {Cell.building_mode}\n" +
+                    $"Number of Buildings: {Building.building_positions.Count}";
+            else
+                uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
+                    $"Simulation Time: {SimCore.Instance.simulationClock}\n" +
+                    $"Cell: N/A\n" +
+                    $"Occupied: N/A\n" +
+                    $"Zone Type: N/A\n" +
+                    $"Paintbrush: {Cell.paintbrush}\n" +
+                    $"Building Placement Mode: {Cell.building_mode}\n" +
+                    $"Number of Buildings: {Building.building_positions.Count}";
+        }
+        else
+        {
+            uiText.GetComponent<TMPro.TextMeshProUGUI>().text = "";
+        }
 
     }
 
-    [CanBeNull]
     public List<GameObject> GetBuildings()
     {
         if (filledCells is null || gridCells is null) return null;
@@ -227,7 +234,6 @@ public class GridSystem : MonoBehaviour
         return buildings;
     }
 
-    [CanBeNull]
     public List<GameObject> GetCells()
     {
         if (filledCells is null || gridCells is null) return null;

@@ -1,5 +1,6 @@
 using Citizens;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SimCore : MonoBehaviour
 {
@@ -15,7 +16,20 @@ public class SimCore : MonoBehaviour
     private float simulationTimer = 0f;
     private float updateInterval = 1f; // One second intervals
 
+    private Button pauseSimulationButton;
+    private Button playSimulationButton;
+
     public float simulationClock = 0f;
+
+    public enum ViewMode
+    {
+        Default,
+        Clear,
+
+        TotalViewModes,
+    }
+
+    public ViewMode view_mode;
 
     private enum SimState
     {
@@ -36,6 +50,8 @@ public class SimCore : MonoBehaviour
             Destroy(gameObject);
         }
 
+        playSimulationButton = GameObject.Find("PLAY").GetComponent<Button>();
+        pauseSimulationButton = GameObject.Find("Pause").GetComponent<Button>();
     }
 
     void Start()
@@ -49,6 +65,15 @@ public class SimCore : MonoBehaviour
     {
         if (isSimulationRunning)
             simulationClock += Time.unscaledDeltaTime * simulationSpeed;
+        if (Input.GetKeyDown(KeyCode.V))
+            CycleViewModes();
+    }
+
+    private void CycleViewModes()
+    {
+        view_mode++;
+        if (view_mode >= ViewMode.TotalViewModes)
+            view_mode = ViewMode.Default;
     }
 
     // Time Control Methods
@@ -57,6 +82,10 @@ public class SimCore : MonoBehaviour
         isSimulationRunning = true;
         Citizen.EnableMovement(true);
         Debug.Log("Simulation Started");
+        playSimulationButton.targetGraphic.color = Color.green;
+        pauseSimulationButton.targetGraphic.color = Color.red;
+        pauseSimulationButton.enabled = true;
+        playSimulationButton.enabled = false;
     }
 
     public void PauseSimulation()
@@ -64,6 +93,10 @@ public class SimCore : MonoBehaviour
         isSimulationRunning = false;
         Citizen.EnableMovement(false);
         Debug.Log("Simulation Paused");
+        pauseSimulationButton.targetGraphic.color = Color.green;
+        playSimulationButton.targetGraphic.color = Color.red;
+        pauseSimulationButton.enabled = false;
+        playSimulationButton.enabled = true;
     }
 
     public void SetSimulationSpeed(float speed)

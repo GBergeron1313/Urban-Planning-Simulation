@@ -84,7 +84,15 @@ public class CreateBuilding : MonoBehaviour
         c.SetZoneTypeAndUpdate(zone_type);
     }
 
-    public void createBuilding(float x, float z, Color color, ZoneType zone_type, CellType cell_type)
+    public void destroyBuilding(GameObject go)
+    {
+        var g = prefabs.Find((GameObject g) => { return Object.ReferenceEquals(g, go); });
+        if (g is null) return;
+        prefabs.Remove(g);
+        Destroy(g);
+    }
+
+    public GameObject createBuilding(float x, float z, Color color, ZoneType zone_type, CellType cell_type)
     {
         print($"CreateBuilding: {x}, {z}, {color}, {zone_type}, {cell_type}");
         var next_prefab = getCellTypeShape(cell_type);
@@ -97,6 +105,7 @@ public class CreateBuilding : MonoBehaviour
             applyRoadShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
         }
         prefabs.Add(next_prefab);
+        return next_prefab;
     }
 
     public void createBuilding(float x, float z, Color color, ZoneType zone_type)

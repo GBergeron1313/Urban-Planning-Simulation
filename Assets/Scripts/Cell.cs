@@ -30,6 +30,8 @@ public class Cell : MonoBehaviour
     public CellType cell_type;
     public bool walkable;
 
+    public GameObject contents;
+
     public void SetWalkableAndUpdate(bool is_walkable)
     {
         walkable = is_walkable;
@@ -72,7 +74,15 @@ public class Cell : MonoBehaviour
         }
     }
 
-    public static void BTN_ToBuildingMode()
+    public static void CycleZoneType()
+    {
+        Cell.paintbrush++;
+        if (Cell.paintbrush > ZoneType.Restricted)
+        {
+            Cell.paintbrush = ZoneType.Residential;
+        }
+    }
+    public static void CycleBuildingMode()
     {
         Cell.building_mode++;
         if (Cell.building_mode >= BuildingMode.TotalModes)
@@ -85,68 +95,128 @@ public class Cell : MonoBehaviour
     {
         zone_type = zt;
         color = GridSystem.ZoneColor(zone_type);
-        /*renderer ??= gameObject.GetComponent<Renderer>();*/
         renderer.material.color = color;
     }
 
-    public void PushBuilding(Color color)
+    private bool _TryPushBuilding()
     {
-        if (zone_type == ZoneType.Restricted) return;
+        if (contents != null) return false;
+
         cell_type = CellType.Building;
-        this.color = color;
-        creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        contents = creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
         SetWalkableAndUpdate(true);
 
         Building.building_positions.Add(this.transform.position);
+
+        return contents != null;
     }
 
-    public void PushBuilding()
+    public bool TryPushBuilding(Color color)
     {
-        if (zone_type == ZoneType.Restricted) return;
-        cell_type = CellType.Building;
-        creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
-        SetWalkableAndUpdate(true);
+        if (!Buildable()) return false;
+        this.color = color;
+        return _TryPushBuilding();
+    }
 
-        Building.building_positions.Add(this.transform.position);
+    public bool TryPushBuilding()
+    {
+        return Buildable() && _TryPushBuilding();
+    }
+
+    public bool Removable()
+    {
+        return cell_type != CellType.None
+            && contents != null;
     }
 
     public bool Buildable()
     {
-        return zone_type != ZoneType.Restricted;
+        return zone_type != ZoneType.Restricted
+            && cell_type == CellType.None
+            && contents == null;
     }
 
-    public void PushRoad(Color color)
+    private bool _TryPushRoad()
     {
-        if (zone_type == ZoneType.Restricted) return;
+        cell_type = CellType.Road;
+        contents = creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        SetWalkableAndUpdate(true);
+
+        return contents != null;
+    }
+
+    public bool TryPushRoad(Color color)
+    {
+        if (!Buildable()) return false;
         this.color = color;
-        cell_type = CellType.Road;
-        creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
-        SetWalkableAndUpdate(true);
+        return _TryPushRoad();
     }
 
-    public void PushRoad()
+    public bool TryPushRoad()
     {
-        if (zone_type == ZoneType.Restricted) return;
-        cell_type = CellType.Road;
-        creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
-        SetWalkableAndUpdate(true);
+        return Buildable() && _TryPushRoad();
+    }
+
+    public static void RemoveContents(Cell c)
+    {
+        if (!c.Removable())
+        {
+            print($"Can't remove at: {c.location}");
+            return;
+        }
+        print($"Removing {c.contents}...");
+
+        c.SetCellTypeAndUpdate(CellType.None);
+        bool r = Building.building_positions.Remove(c.gameObject.transform.position)
+            || Building.building_positions.Remove(c.transform.position);
+        print($"{(r ? "Removed" : "Couldn't Remove")}");
+        Destroy(c.contents);
+        c.contents = null;
+    }
+
+    public void RemoveContents()
+    {
+        if (!Removable())
+        {
+            print($"Can't remove at: {location}");
+            return;
+        }
+        print($"Removing {hovering.contents}...");
+
+        creator.destroyBuilding(hovering.contents);
+        hovering.contents = null;
     }
 
     public void SetCellTypeAndUpdate(CellType ct)
     {
         if (ct == CellType.Building)
         {
-            PushBuilding();
+            TryPushBuilding();
         }
         else if (ct == CellType.Road)
         {
-            PushRoad();
+            TryPushRoad();
         }
         else
         {
             cell_type = ct;
             SetWalkableAndUpdate(false);
         }
+    }
+
+    public static Cell AtCoords(Vector2Int loc)
+    {
+        return all_cells[loc.y + (loc.x * grid.width)];
+    }
+
+    public static GameObject ContentsAtCoords(Vector2Int loc)
+    {
+        return grid.GetCellAt(loc.x, loc.y);
+    }
+
+    public static GameObject ContentsAtCoords(int x, int z)
+    {
+        return grid.GetCellAt(x, z);
     }
 
     public static Cell AtCoords(int x, int z)
@@ -156,7 +226,11 @@ public class Cell : MonoBehaviour
 
     public override string ToString()
     {
-        return JsonUtility.ToJson(this, true);
+        int zt = (int)zone_type;
+        int ct = (int)cell_type;
+        int x = location.x;
+        int z = location.y;
+        return $"{x},{z}={zt},{ct}";
     }
 
     private void OnMouseEnter()
@@ -168,7 +242,6 @@ public class Cell : MonoBehaviour
             last_hovered.SetZoneTypeAndUpdate(last_hovered.zone_type);
             return;
         }
-        Debug.Log($"transform.rotation = {gameObject.transform.rotation}");
         hovering = this;
 
         if (building_mode == BuildingMode.MarkingZoneType)
@@ -271,27 +344,28 @@ public class Cell : MonoBehaviour
             grid_tile.GetComponent<Cell>().SetZoneTypeAndUpdate(paintbrush);
             SetZoneTypeAndUpdate(paintbrush);
         }
-        else if (building_mode == BuildingMode.None)
-        {
-            SetWalkableAndUpdate(false);
-        }
+        /*else if (building_mode == BuildingMode.None)*/
+        /*{*/
+        /*    SetWalkableAndUpdate(false);*/
+        /*}*/
         else
         {
-            if (Buildable())
+            switch (building_mode)
             {
-                switch (building_mode)
-                {
-                    case BuildingMode.PlacingBuilding:
-                        grid.fillCell(hovering.location.x, hovering.location.y);
-                        PushBuilding(GridSystem.ZoneColor(zone_type));
-                        break;
-                    case BuildingMode.PlacingRoad:
-                        grid.fillCell(hovering.location.x, hovering.location.y);
-                        PushRoad(GridSystem.ZoneColor(zone_type));
-                        break;
-                    default:
-                        break;
-                }
+                case BuildingMode.PlacingBuilding:
+                    TryPushBuilding(GridSystem.ZoneColor(zone_type));
+                    break;
+
+                case BuildingMode.PlacingRoad:
+                    TryPushRoad(GridSystem.ZoneColor(zone_type));
+                    break;
+
+                case BuildingMode.Removal:
+                    RemoveContents(AtCoords(hovering.location));
+                    break;
+
+                default:
+                    break;
             }
         }
     }

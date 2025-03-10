@@ -28,20 +28,20 @@ namespace Citizens
             building_positions.Add(tracked);
         }
 
-        public void RequestUpdate()
-        {
-            GridSystem grid = GameObject.Find("Grid").GetComponent<GridSystem>();
-            List<GameObject> cells = grid.GetCells();
-            building_positions.Clear();
-            foreach (var cell in cells)
-            {
-                Cell c = cell.GetComponent<Cell>();
-                if (c.cell_type == CellType.Building)
-                {
-                    building_positions.Add(c.gameObject.transform.position);
-                }
-            }
-        }
+        /*public void RequestUpdate()*/
+        /*{*/
+        /*    GridSystem grid = GameObject.Find("Grid").GetComponent<GridSystem>();*/
+        /*    List<GameObject> cells = grid.GetCells();*/
+        /*    building_positions.Clear();*/
+        /*    foreach (var cell in cells)*/
+        /*    {*/
+        /*        Cell c = cell.GetComponent<Cell>();*/
+        /*        if (c.cell_type == CellType.Building)*/
+        /*        {*/
+        /*            building_positions.Add(c.gameObject.transform.position);*/
+        /*        }*/
+        /*    }*/
+        /*}*/
 
         public void UpdateCitizens()
         {
@@ -68,10 +68,10 @@ namespace Citizens
         // Update is called once per frame
         void Update()
         {
-            if (Input.GetKeyDown(KeyCode.B))
-            {
-                RequestUpdate();
-            }
+            /*if (Input.GetKeyDown(KeyCode.B))*/
+            /*{*/
+            /*    RequestUpdate();*/
+            /*}*/
         }
 
         void FixedUpdate()
