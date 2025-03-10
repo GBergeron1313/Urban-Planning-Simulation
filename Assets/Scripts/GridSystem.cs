@@ -19,6 +19,7 @@ public enum BuildingMode
     PlacingBuilding,
     PlacingRoad,
     MarkingZoneType,
+    Removal,
 
     // Always keep TotalModes at the end
     TotalModes
@@ -137,9 +138,9 @@ public class GridSystem : MonoBehaviour
                 }
 
                 // Add thin collider for mouse interaction
-                BoxCollider collide = cell.AddComponent<BoxCollider>();
-                // The name "collider" was causing conflicts
-                collide.size = new Vector3(1, 1, 0.1f);
+                /*BoxCollider collide = cell.AddComponent<BoxCollider>();*/
+                /*// The name "collider" was causing conflicts*/
+                /*collide.size = new Vector3(1, 1, 0.1f);*/
 
                 // Store reference to cell
                 gridCells[x, z] = cell;
@@ -184,13 +185,31 @@ public class GridSystem : MonoBehaviour
             Cell.CycleZoneType();
         }
 
-        uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
-            $"Simulation Time: {SimCore.Instance.simulationClock}\n" +
-            $"Cell: {(Cell.hovering is null ? "N/A" : Cell.hovering.location)}\n" +
-            $"Zone Type: {(Cell.hovering is null ? "N/A" : Cell.hovering.zone_type)}\n" +
-            $"Paintbrush: {Cell.paintbrush}\n" +
-            $"Building Placement Mode: {Cell.building_mode}\n" +
-            $"Number of Buildings: {Building.building_positions.Count}";
+        if (SimCore.Instance.view_mode == SimCore.ViewMode.Default)
+        {
+            if (Cell.hovering is not null)
+                uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
+                    $"Simulation Time: {SimCore.Instance.simulationClock}\n" +
+                    $"Cell: {(Cell.hovering.location)}\n" +
+                    $"Occupied: {(Cell.AtCoords(Cell.hovering.location).contents)}\n" +
+                    $"Zone Type: {(Cell.hovering.zone_type)}\n" +
+                    $"Paintbrush: {Cell.paintbrush}\n" +
+                    $"Building Placement Mode: {Cell.building_mode}\n" +
+                    $"Number of Buildings: {Building.building_positions.Count}";
+            else
+                uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
+                    $"Simulation Time: {SimCore.Instance.simulationClock}\n" +
+                    $"Cell: N/A\n" +
+                    $"Occupied: N/A\n" +
+                    $"Zone Type: N/A\n" +
+                    $"Paintbrush: {Cell.paintbrush}\n" +
+                    $"Building Placement Mode: {Cell.building_mode}\n" +
+                    $"Number of Buildings: {Building.building_positions.Count}";
+        }
+        else
+        {
+            uiText.GetComponent<TMPro.TextMeshProUGUI>().text = "";
+        }
 
     }
 

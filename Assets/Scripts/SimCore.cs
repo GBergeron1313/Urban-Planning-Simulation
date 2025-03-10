@@ -21,6 +21,16 @@ public class SimCore : MonoBehaviour
 
     public float simulationClock = 0f;
 
+    public enum ViewMode
+    {
+        Default,
+        Clear,
+
+        TotalViewModes,
+    }
+
+    public ViewMode view_mode;
+
     private enum SimState
     {
         Initializing,
@@ -55,6 +65,15 @@ public class SimCore : MonoBehaviour
     {
         if (isSimulationRunning)
             simulationClock += Time.unscaledDeltaTime * simulationSpeed;
+        if (Input.GetKeyDown(KeyCode.V))
+            CycleViewModes();
+    }
+
+    private void CycleViewModes()
+    {
+        view_mode++;
+        if (view_mode >= ViewMode.TotalViewModes)
+            view_mode = ViewMode.Default;
     }
 
     // Time Control Methods
