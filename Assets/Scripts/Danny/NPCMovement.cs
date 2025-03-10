@@ -16,7 +16,10 @@ namespace Danny
             if (!SpawnManager.spawned_and_moving)
             {
                 agent = GetComponent<NavMeshAgent>();
-                agent.radius /= 10.0f;
+                // I don't know why, but 0.25f doesn't work here
+                // the same way it does in SpawnManager.
+                // 0.025f works, though.
+                agent.radius = 0.025f;
                 agent.acceleration /= 10.0f;
                 agent.speed /= 10.0f;
                 agent.updateRotation = true;

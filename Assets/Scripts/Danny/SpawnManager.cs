@@ -63,9 +63,10 @@ namespace Danny
 
                     Assert.IsTrue(nma.Warp(positions[i]));
                     Assert.IsTrue(nma.SetDestination(destinations[i]));
-                    nma.radius = 0.25f;
+                    nma.radius = 0.025f;
                     nma.acceleration /= 10.0f;
                     nma.speed /= 10.0f;
+
                     nma.updateRotation = true;
                     nma.autoRepath = true;
                     Citizen.go_citizens.Add(npc);
