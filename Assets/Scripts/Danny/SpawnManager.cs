@@ -77,9 +77,14 @@ namespace Danny
                 }
             }
 
-            spawned_and_moving = true;
-
-            Citizen.citizens_enabled = true;
+            if (SimCore.Instance.isSimulationRunning)
+            {
+                Citizen.EnableMovement(true);
+            }
+            else
+            {
+                Citizen.EnableMovement(false);
+            }
         }
 
         public void SpawnNPCs()

@@ -3,6 +3,7 @@ using Citizens;
 using UnityEngine.AI;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
+using UnityEngine.EventSystems;
 
 public enum CellType
 {
@@ -68,6 +69,15 @@ public class Cell : MonoBehaviour
             nmo.size = new Vector3(0.15f, 0.15f, 0.5f);
             // TODO: Change gridCells and the way they work to more 
             // idiomatically represent themselves.
+        }
+    }
+
+    public static void BTN_ToBuildingMode()
+    {
+        Cell.building_mode++;
+        if (Cell.building_mode >= BuildingMode.TotalModes)
+        {
+            Cell.building_mode = BuildingMode.PlacingBuilding;
         }
     }
 
@@ -151,6 +161,13 @@ public class Cell : MonoBehaviour
 
     private void OnMouseEnter()
     {
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            hovering = null;
+            last_hovered = this;
+            last_hovered.SetZoneTypeAndUpdate(last_hovered.zone_type);
+            return;
+        }
         Debug.Log($"transform.rotation = {gameObject.transform.rotation}");
         hovering = this;
 
@@ -201,6 +218,13 @@ public class Cell : MonoBehaviour
 
     private void OnMouseExit()
     {
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            last_hovered = this;
+            last_hovered.SetZoneTypeAndUpdate(last_hovered.zone_type);
+            hovering = null;
+            return;
+        }
         if (dragging && building_mode == BuildingMode.MarkingZoneType)
         {
             last_hovered.SetZoneTypeAndUpdate(paintbrush);
@@ -210,8 +234,26 @@ public class Cell : MonoBehaviour
         renderer.material.color = GridSystem.ZoneColor(zone_type);
     }
 
+    private void OnMouseOver()
+    {
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            last_hovered = this;
+            last_hovered.SetZoneTypeAndUpdate(last_hovered.zone_type);
+            hovering = null;
+        }
+        else
+        {
+            hovering = this;
+            Color baseColor = GridSystem.ZoneColor(hovering.zone_type);
+            Color blendedHoverColor = Color.Lerp(baseColor, GridSystem.g_hoverColor, 0.3f);
+            hovering.renderer.material.color = blendedHoverColor;
+        }
+    }
+
     private void OnMouseDrag()
     {
+        if (EventSystem.current.IsPointerOverGameObject()) return;
         if (building_mode != BuildingMode.MarkingZoneType) return;
         renderer.material.color = GridSystem.ZoneColor(paintbrush);
         zone_type = paintbrush;
@@ -220,6 +262,7 @@ public class Cell : MonoBehaviour
 
     private void OnMouseDown()
     {
+        if (EventSystem.current.IsPointerOverGameObject()) return;
         dragging = true;
         if (building_mode == BuildingMode.MarkingZoneType)
         {

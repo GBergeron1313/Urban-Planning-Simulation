@@ -3,6 +3,7 @@ using Citizens;
 using JetBrains.Annotations;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UI;
 
 public enum ZoneType
 {
@@ -50,14 +51,20 @@ public class GridSystem : MonoBehaviour
 
     public GameObject uiText;
 
-    private BuildingMode currentMode;
-
     public static readonly Color g_residentialZoneColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
     public static readonly Color g_commercialZoneColor = new Color(0.2f, 0.2f, 0.8f, 0.5f);
     public static readonly Color g_industrialZoneColor = new Color(0.8f, 0.2f, 0.2f, 0.5f);
     public static readonly Color g_restrictedZoneColor = new Color(0.7f, 0.7f, 0.7f, 0.5f);
     public static Color g_defaultColor = Color.green;
     public static readonly Color g_hoverColor = Color.yellow;
+
+    private Button BTN_change_building_mode;
+
+    void Awake()
+    {
+        BTN_change_building_mode = GameObject.Find("BuildingButton").GetComponent<Button>();
+        BTN_change_building_mode.onClick.AddListener(Cell.BTN_ToBuildingMode);
+    }
 
     /// Initializes the grid arrays and generates the grid structure
     void Start()
@@ -189,6 +196,7 @@ public class GridSystem : MonoBehaviour
 
 
         uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
+            $"Simulation Time: {SimCore.Instance.simulationClock}\n" +
             $"Cell: {(Cell.hovering is null ? "N/A" : Cell.hovering.location)}\n" +
             $"Zone Type: {(Cell.hovering is null ? "N/A" : Cell.hovering.zone_type)}\n" +
             $"Paintbrush: {Cell.paintbrush}\n" +
