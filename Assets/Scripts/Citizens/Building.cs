@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
-using UnityEngine.AI;
-using UnityEngine.Assertions;
+/*using UnityEngine.AI;*/
+/*using UnityEngine.Assertions;*/
 
 namespace Citizens
 {
@@ -18,10 +18,10 @@ namespace Citizens
             building_positions = new List<Vector3>();
         }
 
-        public void AddCitizen(GameObject go_citizen)
-        {
-            Citizen.go_citizens.Add(go_citizen);
-        }
+        /*public void AddCitizen(GameObject go_citizen)*/
+        /*{*/
+        /*    Citizen.go_citizens.Add(go_citizen);*/
+        /*}*/
 
         public static void TrackPosition(Vector3 tracked)
         {
@@ -43,20 +43,20 @@ namespace Citizens
         /*    }*/
         /*}*/
 
-        public void UpdateCitizens()
-        {
-            int mod = building_positions.Count;
-            foreach (var citizen in Citizens.Citizen.go_citizens)
-            {
-                var nma = citizen.GetComponent<NavMeshAgent>();
-                Assert.IsTrue(nma.isOnNavMesh);
-                if (nma.remainingDistance < 0.25f)
-                {
-                    int rand = Random.Range(0, mod);
-                    nma.SetDestination(building_positions[rand]);
-                }
-            }
-        }
+        /*public void UpdateCitizens()*/
+        /*{*/
+        /*    int mod = building_positions.Count;*/
+        /*    foreach (var citizen in Citizens.Citizen.go_citizens)*/
+        /*    {*/
+        /*        var nma = citizen.GetComponent<NavMeshAgent>();*/
+        /*        Assert.IsTrue(nma.isOnNavMesh);*/
+        /*        if (nma.remainingDistance < 0.25f)*/
+        /*        {*/
+        /*            int rand = Random.Range(0, mod);*/
+        /*            nma.SetDestination(building_positions[rand]);*/
+        /*        }*/
+        /*    }*/
+        /*}*/
 
         // Start is called before the first frame update
         void Start()
@@ -76,14 +76,14 @@ namespace Citizens
 
         void FixedUpdate()
         {
-            if (SimCore.Instance.sim_state == SimState.Running && Citizen.citizens_enabled)
-            {
-                if (Time.unscaledTime - last_citizen_update > 5.0f)
-                {
-                    last_citizen_update = Time.unscaledTime;
-                    UpdateCitizens();
-                }
-            }
+            /*if (SimCore.Instance.sim_state == SimState.Running && Citizen.citizens_enabled)*/
+            /*{*/
+            /*    if (Time.unscaledTime - last_citizen_update > 5.0f)*/
+            /*    {*/
+            /*        last_citizen_update = Time.unscaledTime;*/
+            /*        UpdateCitizens();*/
+            /*    }*/
+            /*}*/
         }
     }
 }

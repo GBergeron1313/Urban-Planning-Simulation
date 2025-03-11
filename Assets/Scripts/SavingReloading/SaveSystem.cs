@@ -1,7 +1,6 @@
 using System.IO;
 using Citizens;
 using Danny;
-using Unity.AI.Navigation;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Assertions;
@@ -15,12 +14,9 @@ namespace SavingReloading
         private string savePath;
 
         const string GridDataSaveFileName = "grid_data_save.data";
-
-        // const string RoadDataSaveFileName = "road_data_save.data";
         const string CitizenDataSaveFileName = "citizen_data_save.data";
         GridSystem gridSystem;
         private CreateBuilding creator;
-
 
         private void Start()
         {
@@ -144,17 +140,6 @@ namespace SavingReloading
             if (spawner is null)
             {
                 throw new UnityException("Why was SpawnManager null when trying to load NPCs?");
-            }
-            {
-                NavMeshSurface[] surfaces = GameObject.FindObjectsOfType<NavMeshSurface>();
-                if (surfaces is null)
-                {
-                    throw new UnityException("NavMeshSurface was null");
-                }
-                else
-                {
-                    Debug.Log($"# surfaces = {surfaces.Length}, go = {JsonUtility.ToJson(surfaces)}");
-                }
             }
 
             for (int i = 0; i < SpawnManager.npcCount; i++)

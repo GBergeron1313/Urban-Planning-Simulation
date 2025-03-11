@@ -1,7 +1,8 @@
 using System.Collections.Generic;
-using Danny;
+/*using Danny;*/
 using UnityEngine;
 using UnityEngine.AI;
+/*using UnityEngine.Assertions;*/
 
 namespace Citizens
 {
@@ -21,78 +22,81 @@ namespace Citizens
         public const float acceleration = 0.8f;
         public const float angular_speed = 120f;
         public const float area_cost = 1f;
+        public const float set_speed = 0.1f;
     }
 
 
     public class Citizen : MonoBehaviour
     {
         public static bool citizens_enabled = false;
-        public static List<GameObject> go_citizens = new List<GameObject>();
+        /*public static List<GameObject> go_citizens = new List<GameObject>();*/
 
         private static List<NavMeshAgent> nma_citizens = new List<NavMeshAgent>();
 
-        // The concern right now is getting things to work.
-        // Performance comes later.
-        private static Vector3[] velocities = new Vector3[100];
-
+        private float last_clock_update;
+        private static float dest_update_interval = 1.0f;
 
         NavMeshAgent agent;
 
         public CitizenModel prefab_idx;
 
+        public Citizen with_destination(Vector3 destination)
+        {
+            agent.SetDestination(destination);
+            return this;
+        }
+
+        public Citizen with_enabled_movement(bool enabled)
+        {
+            agent.isStopped = !enabled;
+            return this;
+        }
+
+        public Citizen with_position(Vector3 position)
+        {
+            agent.Warp(position);
+            return this;
+        }
+
+        public Citizen with_model(CitizenModel model)
+        {
+            prefab_idx = model;
+            return this;
+        }
 
         public static void ClearCitizens()
         {
-            foreach (var citizen in go_citizens)
+            foreach (var citizen in nma_citizens)
             {
-                Destroy(citizen);
+                Destroy(citizen.gameObject);
             }
-            go_citizens.Clear();
-            go_citizens = new List<GameObject>();
+            nma_citizens.Clear();
+            nma_citizens = null;
         }
-
 
         public static void EnableMovement(bool is_enabled)
         {
-            var idx = 0;
-            foreach (var citizen in go_citizens)
+            foreach (var citizen in nma_citizens)
             {
-
-                var nma = citizen.GetComponent<NavMeshAgent>();
-                nma_citizens.Add(nma);
-
-                nma.isStopped = !is_enabled;
-                if (nma.isStopped)
-                {
-                    velocities[idx++] = nma.velocity;
-                    nma.velocity = Vector3.zero;
-                    nma.speed = 0f;
-                    nma.acceleration = 0f;
-                    nma.updateRotation = false;
-
-                    SpawnManager.spawned_and_moving = false;
-                    Citizen.citizens_enabled = false;
-                }
-                else
-                {
-                    nma.velocity = velocities[idx++];
-                    nma.speed = DefaultCitizenInfo.speed;
-                    nma.acceleration = DefaultCitizenInfo.acceleration;
-                    nma.angularSpeed = DefaultCitizenInfo.angular_speed;
-                    nma.updateRotation = false;
-
-                    SpawnManager.spawned_and_moving = true;
-                    Citizen.citizens_enabled = true;
-                }
+                citizen.isStopped = !is_enabled;
             }
         }
 
 
         private void Awake()
         {
+            nma_citizens ??= new List<NavMeshAgent>();
+
             agent = GetComponent<NavMeshAgent>();
             agent.updateUpAxis = true;
             agent.updatePosition = true;
+            agent.updateRotation = false;
+
+            agent.speed = DefaultCitizenInfo.speed;
+            agent.acceleration = DefaultCitizenInfo.acceleration;
+            agent.angularSpeed = DefaultCitizenInfo.angular_speed;
+            nma_citizens.Add(agent);
+            last_clock_update = SimCore.Instance.simulationClock;
         }
 
 
@@ -100,16 +104,50 @@ namespace Citizens
         {
         }
 
-        private void Update()
+        private void UpdateRotation()
+        {
+            curr_dest = agent.steeringTarget;
+            agent.transform.LookAt(agent.steeringTarget);
+        }
+
+        private void UpdateDestinationAndClock()
+        {
+            last_clock_update = SimCore.Instance.simulationClock;
+
+            if (agent.remainingDistance < 0.25f)
+            {
+                int rand = Random.Range(0, Building.building_positions.Count);
+                agent.SetDestination(Building.building_positions[rand]);
+            }
+        }
+
+        Vector3 curr_dest;
+        private void FixedUpdate()
         {
             if (SimCore.Instance.sim_state == SimState.Running)
             {
+                if (SimCore.Instance.simulationClock
+                    - last_clock_update
+                    > dest_update_interval)
+                {
+                    UpdateDestinationAndClock();
+                }
+
+
                 agent.transform.position =
                     Vector3.MoveTowards(
-                        agent.transform.position,
-                        agent.steeringTarget,
-                        0.01f * SimCore.Instance.SimSpeed);
+                    agent.transform.position,
+                    agent.steeringTarget,
+                    DefaultCitizenInfo.set_speed * SimCore.Instance.SimSpeed
+                    );
+
+                if (curr_dest != agent.steeringTarget)
+                    UpdateRotation();
             }
+        }
+
+        private void Update()
+        {
         }
     }
 }
