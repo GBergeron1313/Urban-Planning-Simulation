@@ -82,7 +82,10 @@ public class SimCore : MonoBehaviour
     void Update()
     {
         if (sim_state == SimState.Running)
+        {
             simulationClock += Time.unscaledDeltaTime * simulationSpeed;
+        }
+
         if (Input.GetKeyDown(KeyCode.V))
             CycleViewModes();
 
@@ -97,13 +100,11 @@ public class SimCore : MonoBehaviour
     {
         simulationSpeed *= 0.5f;
         simulationSpeed = Mathf.Clamp(simulationSpeed, 0.03125f, 32.0f);
-        Citizen.SetSpeedCitizens(simulationSpeed);
     }
     private void IncreaseSimulationSpeed()
     {
         simulationSpeed *= 2.0f;
         simulationSpeed = Mathf.Clamp(simulationSpeed, 0.03125f, 32.0f);
-        Citizen.SetSpeedCitizens(simulationSpeed);
     }
 
     private void CycleSimulationStates()

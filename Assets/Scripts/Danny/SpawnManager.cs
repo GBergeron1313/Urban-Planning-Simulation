@@ -55,11 +55,14 @@ namespace Danny
                 npc.name = citizen_names[i];
                 npc.tag = "Citizens";
 
+
                 // Ensure the animator is enabled
                 Animator npcAnimator = npc.GetComponent<Animator>();
                 if (npcAnimator is not null)
                 {
                     var nma = npc.GetComponent<NavMeshAgent>();
+                    Citizen citizen = npc.AddComponent<Citizen>();
+                    citizen.prefab_idx = (CitizenModel)prefab_index;
 
                     Assert.IsTrue(nma.Warp(positions[i]));
                     Assert.IsTrue(nma.SetDestination(destinations[i]));

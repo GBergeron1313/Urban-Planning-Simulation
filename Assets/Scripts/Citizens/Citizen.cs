@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Danny;
 using UnityEngine;
@@ -16,11 +15,6 @@ namespace Citizens
         CITIZEN_MODELS_MAX
     }
 
-    public struct CitizenInfo
-    {
-        public CitizenModel model_type;
-    }
-
     public class DefaultCitizenInfo
     {
         public const float speed = 0.35f;
@@ -35,6 +29,18 @@ namespace Citizens
         public static bool citizens_enabled = false;
         public static List<GameObject> go_citizens = new List<GameObject>();
 
+        private static List<NavMeshAgent> nma_citizens = new List<NavMeshAgent>();
+
+        // The concern right now is getting things to work.
+        // Performance comes later.
+        private static Vector3[] velocities = new Vector3[100];
+
+
+        NavMeshAgent agent;
+
+        public CitizenModel prefab_idx;
+
+
         public static void ClearCitizens()
         {
             foreach (var citizen in go_citizens)
@@ -45,31 +51,6 @@ namespace Citizens
             go_citizens = new List<GameObject>();
         }
 
-        public static void SetSpeedCitizens(float adjust)
-        {
-            if (adjust <= 0f)
-            {
-                throw new UnityException($"Can't call SetSpeedCitizens with {adjust}!");
-            }
-            foreach (var citizen in go_citizens)
-            {
-                /*var nma = citizen.GetComponent<NavMeshAgent>();*/
-                /*nma.speed = DefaultCitizenInfo.speed * adjust;*/
-                /*nma.acceleration = DefaultCitizenInfo.acceleration * adjust;*/
-                /*nma.angularSpeed = DefaultCitizenInfo.angular_speed;*/
-                /*nma.stoppingDistance = 0f;*/
-                /*nma.autoBraking = true;*/
-                var anim = citizen.GetComponent<Animator>();
-                anim.logWarnings = true;
-                anim.SetLookAtPosition(Vector3.up * 100f);
-                print(anim.isMatchingTarget);
-                print(anim.isInitialized);
-            }
-        }
-
-        // The concern right now is getting things to work.
-        // Performance comes later.
-        private static Vector3[] velocities = new Vector3[100];
 
         public static void EnableMovement(bool is_enabled)
         {
@@ -78,6 +59,8 @@ namespace Citizens
             {
 
                 var nma = citizen.GetComponent<NavMeshAgent>();
+                nma_citizens.Add(nma);
+
                 nma.isStopped = !is_enabled;
                 if (nma.isStopped)
                 {
@@ -104,14 +87,29 @@ namespace Citizens
             }
         }
 
+
+        private void Awake()
+        {
+            agent = GetComponent<NavMeshAgent>();
+            agent.updateUpAxis = true;
+            agent.updatePosition = true;
+        }
+
+
         private void Start()
         {
-            throw new NotImplementedException();
         }
 
         private void Update()
         {
-            throw new NotImplementedException();
+            if (SimCore.Instance.sim_state == SimState.Running)
+            {
+                agent.transform.position =
+                    Vector3.MoveTowards(
+                        agent.transform.position,
+                        agent.steeringTarget,
+                        0.01f * SimCore.Instance.SimSpeed);
+            }
         }
     }
 }
