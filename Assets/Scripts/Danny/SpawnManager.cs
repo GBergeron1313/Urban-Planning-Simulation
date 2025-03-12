@@ -1,9 +1,7 @@
-using System.Collections.Generic;
 using Citizens;
-/*using Unity.AI.Navigation;*/
 using UnityEngine;
-using UnityEngine.AI;
-using UnityEngine.Assertions;
+/*using UnityEngine.AI;*/
+/*using UnityEngine.Assertions;*/
 using UnityEngine.UI;
 
 namespace Danny
@@ -32,59 +30,32 @@ namespace Danny
             npcButton.onClick = null;
             npcButton.enabled = false;
 
-            if (Citizen.go_citizens is not null
-                &&
-                Citizen.go_citizens.Count > 0)
-            {
-                Citizen.ClearCitizens();
-            }
-            else
-            {
-                Citizen.go_citizens = new List<GameObject>(npcCount);
-            }
-
-
             for (int i = 0; i < npcCount; i++)
             {
                 string[] name_id_index = citizen_names[i].Split('_');
-                int prefab_index = int.Parse(name_id_index[2]);
+                CitizenModel prefab_index = CitizenModel.Parse<CitizenModel>(name_id_index[2]);
                 GameObject npc =
-                    Instantiate(npcPrefabs[prefab_index],
+                    Instantiate(npcPrefabs[((int)prefab_index)],
                             positions[i],
                             Quaternion.identity);
                 npc.name = citizen_names[i];
                 npc.tag = "Citizens";
 
-                // Ensure the animator is enabled
-                Animator npcAnimator = npc.GetComponent<Animator>();
-                if (npcAnimator is not null)
-                {
-                    var nma = npc.GetComponent<NavMeshAgent>();
-
-                    Assert.IsTrue(nma.Warp(positions[i]));
-                    Assert.IsTrue(nma.SetDestination(destinations[i]));
-                    nma.radius = 0.025f;
-                    nma.acceleration /= 10.0f;
-                    nma.speed /= 10.0f;
-                    nma.updateRotation = true;
-                    nma.autoRepath = true;
-                    Citizen.go_citizens.Add(npc);
-
-                }
-                else
+                if (npc is null)
                 {
                     throw new UnityException("NPCAnimator was null");
                 }
+
+                Citizen citizen = npc.AddComponent<Citizen>()
+                    .with_model(prefab_index)
+                    .with_position(positions[i])
+                    .with_destination(destinations[i])
+                    .with_enabled_movement(
+                            SimCore.Instance.sim_state
+                            == SimState.Running);
             }
 
-            if (SimCore.Instance.isSimulationRunning)
-            {
-                Citizen.EnableMovement(true);
-            }
-            else
-            {
-                Citizen.EnableMovement(false);
-            }
+            Citizen.citizens_enabled = true;
         }
 
         public void SpawnNPCs()
@@ -96,7 +67,6 @@ namespace Danny
             npcButton.interactable = false;
             npcButton.onClick = null;
             npcButton.enabled = false;
-            Citizen.go_citizens = new List<GameObject>(npcCount);
 
             for (int i = 0; i < npcCount; i++)
             {
@@ -114,17 +84,12 @@ namespace Danny
 
                 npc.tag = "Citizens";
 
-                // Ensure the animator is enabled
-                Animator npcAnimator = npc.GetComponent<Animator>();
-                if (npcAnimator is not null)
-                {
-                    // npcAnimator.SetTrigger("Idle"); // Ensure NPC starts animating
-                    Citizen.go_citizens.Add(npc);
-                }
-                else
-                {
-                    throw new UnityException("NPCAnimator was null");
-                }
+                Citizen citizen = npc.AddComponent<Citizen>()
+                    .with_model((CitizenModel)rand_prefab_idx)
+                    .with_position(Building.building_positions[rand_position_idx])
+                    .with_enabled_movement(
+                            SimCore.Instance.sim_state
+                            == SimState.Running);
             }
 
             Citizen.citizens_enabled = true;

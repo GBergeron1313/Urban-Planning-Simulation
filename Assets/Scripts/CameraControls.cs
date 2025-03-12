@@ -129,8 +129,10 @@ public class CameraControls : MonoBehaviour
 
     private void UpdateRotation()
     {
-        currentYaw = Mathf.LerpAngle(currentYaw, targetYaw, rotationSmoothness);
-        currentPitch = Mathf.LerpAngle(currentPitch, targetPitch, rotationSmoothness);
+        float dt_rotationSmoothness = (rotationSmoothness * Time.unscaledDeltaTime) * 100f;
+
+        currentYaw = Mathf.LerpAngle(currentYaw, targetYaw, dt_rotationSmoothness);
+        currentPitch = Mathf.LerpAngle(currentPitch, targetPitch, dt_rotationSmoothness);
         transform.rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
     }
 

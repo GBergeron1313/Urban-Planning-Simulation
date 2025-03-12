@@ -174,19 +174,6 @@ public class Cell : MonoBehaviour
         c.contents = null;
     }
 
-    public void RemoveContents()
-    {
-        if (!Removable())
-        {
-            print($"Can't remove at: {location}");
-            return;
-        }
-        print($"Removing {hovering.contents}...");
-
-        creator.destroyBuilding(hovering.contents);
-        hovering.contents = null;
-    }
-
     public void SetCellTypeAndUpdate(CellType ct)
     {
         if (ct == CellType.Building)
