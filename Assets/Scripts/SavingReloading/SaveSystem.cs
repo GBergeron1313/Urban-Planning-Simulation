@@ -49,26 +49,8 @@ namespace SavingReloading
             }
             else if (l)
             {
-                // Bandaid solution for loading.
-                // Double the work but for some reason,
-                // NavMeshAgent doesn't want to comply
-                // the first time around. 
-                //
-                // It works just fine the second time.
-                //
-                // I don't know why.
-                //
-                // TODO: Fix this abomination.
-                /*if (first_load)*/
-                /*{*/
-                /*    first_load = false;*/
-                /*    LoadAllData();*/
-                /*}*/
-                /*else*/
-                /*{*/
                 lastLoadTime = Time.time;
                 LoadAllData();
-                /*}*/
             }
         }
 

@@ -29,14 +29,12 @@ namespace Citizens
     public class Citizen : MonoBehaviour
     {
         public static bool citizens_enabled = false;
-        /*public static List<GameObject> go_citizens = new List<GameObject>();*/
 
         private static List<NavMeshAgent> nma_citizens = new List<NavMeshAgent>();
-
         private float last_clock_update;
         private static float dest_update_interval = 1.0f;
 
-        NavMeshAgent agent;
+        private NavMeshAgent agent;
 
         public CitizenModel prefab_idx;
 
