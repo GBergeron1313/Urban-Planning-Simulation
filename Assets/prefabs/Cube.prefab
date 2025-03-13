@@ -120,3 +120,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainCam: {fileID: 0}
   mainGrid: {fileID: 0}
+  bType: 0
+  Pollution: 0
+  NoisePollution: 0
+  PowerUsage: 0
+  MaxCapacity: 0

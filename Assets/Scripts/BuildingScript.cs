@@ -1,5 +1,13 @@
 using UnityEngine;
 
+public enum BuildingType
+{
+    None,
+    Residential,
+    Commercial,
+    Industrial,
+}
+
 public class BuildingScript : MonoBehaviour
 {
     Ray ray;
@@ -11,6 +19,14 @@ public class BuildingScript : MonoBehaviour
     private bool locked;
     private Material buildingMaterial;
     private Vector3 lastValidPosition;
+    public BuildingType bType;
+
+    public string Name;
+    public int Pollution;
+    public int NoisePollution;
+    public int PowerUsage;
+    public int MaxCapacity;
+    
 
     void Start()
     {
@@ -22,6 +38,8 @@ public class BuildingScript : MonoBehaviour
         grid = GameObject.Find("Grid").GetComponent<GridSystem>();
         mainCam = Camera.main;
         lastValidPosition = transform.position;
+
+        bType = BuildingType.None;
     }
 
     void Update()
@@ -130,6 +148,55 @@ public class BuildingScript : MonoBehaviour
         );
     }
 
+    public void SetBuildingType(BuildingType buildingType)
+    {
+        bType = buildingType;
+    }
+
+    public BuildingType GetBuildingType() { 
+        return bType; 
+    }
+
+    public void setName(string newName)
+    {
+        Name = newName;
+    }
+
+    public string getName()
+    {
+        return Name;
+    }
+
+    public void setPollutionLevel(int pollutionLevel)
+    {
+        Pollution = pollutionLevel;
+    }
+
+    public int getPollutionLevel()
+    {
+        return Pollution;
+    }
+
+    public void setNoisePollutionLevel(int pollutionLevel)
+    {
+        NoisePollution = pollutionLevel;
+    }
+
+    public int getNoisePollutionLevel()
+    {
+        return NoisePollution;
+    }
+
+    public void setMaxCapacity(int capacityLevel)
+    {
+        MaxCapacity = capacityLevel;
+    }
+
+    public int getMaxCapacity()
+    {
+        return MaxCapacity;
+    }
+
 
     public void checkBuildingColor(int x, int z)
     {
@@ -145,15 +212,19 @@ public class BuildingScript : MonoBehaviour
         {
             case ZoneType.Residential:
                 buildingMaterial.color = new Color(0.2f, 0.8f, 0.2f, 1f);
+                SetBuildingType(BuildingType.Residential);
                 break;
             case ZoneType.Commercial:
                 buildingMaterial.color = new Color(0.2f, 0.2f, 0.8f, 1f);
+                SetBuildingType(BuildingType.Commercial);
                 break;
             case ZoneType.Industrial:
                 buildingMaterial.color = new Color(0.8f, 0.2f, 0.2f, 1f);
+                SetBuildingType(BuildingType.Industrial);
                 break;
             default:
                 buildingMaterial.color = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+                SetBuildingType(BuildingType.None);
                 break;
         }
     }
