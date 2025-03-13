@@ -1,41 +1,116 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 namespace Danny
 {
     public class NPCMovement : MonoBehaviour
     {
-        private NavMeshAgent agent;
-        public float wanderRadius = 2f;
-        public float wanderTimer = 15f;
+        public event Action OnDeath;
 
-        private float timer;
+        Animator animator;
+        public float speed = 0.2f;
+        public float rotationSpeed = 10f;
 
-        void Start()
+        List<Vector3> pathToGo = new List<Vector3>();
+        bool moveFlag = false;
+        int index = 0;
+        Vector3 endPosition;
+
+        public Color pathColor;
+        PathVisualizer pathVisualizer;
+
+        Rigidbody rb;
+
+        private bool stop;
+
+        public bool Stop
         {
-            if (!SpawnManager.spawned_and_moving)
+            get { return stop; }
+            set
             {
-                agent = GetComponent<NavMeshAgent>();
-                // I don't know why, but 0.25f doesn't work here
-                // the same way it does in SpawnManager.
-                // 0.025f works, though.
-                agent.radius = 0.025f;
-                agent.acceleration /= 10.0f;
-                agent.speed /= 10.0f;
-                agent.updateRotation = true;
-                agent.autoRepath = true;
-                timer = wanderTimer;
+                stop = value;
+                if (stop)
+                {
+                    rb.velocity = Vector3.zero;
+                    animator.SetBool("Walk", false);
+                }
+                else
+                {
+                    animator.SetBool("Walk", true);
+                }
             }
         }
 
-        Vector3 GetRandomPoint(Vector3 origin, float dist)
+        private void Awake()
         {
-            Vector3 randomDirection = new Vector3(Random.insideUnitCircle.x, 0, Random.insideUnitCircle.y);
-            randomDirection *= dist;
-            randomDirection += origin;
-            NavMeshHit hit;
-            NavMesh.SamplePosition(randomDirection, out hit, dist, 1);
-            return hit.position;
+            rb = GetComponent<Rigidbody>();
+        }
+
+        private void Start()
+        {
+            pathVisualizer = FindObjectOfType<PathVisualizer>();
+            pathColor = UnityEngine.Random.ColorHSV(0f, 1f, 0f, 1f, 0f, 1f);
+        }
+
+        public void ShowPath()
+        {
+            pathVisualizer.ShowPath(pathToGo, this, pathColor);
+        }
+
+        public void Initialize(List<Vector3> path)
+        {
+            pathToGo = path;
+            index = 1;
+            moveFlag = true;
+            endPosition = pathToGo[index];
+            animator = GetComponent<Animator>();
+            Stop = false;
+        }
+
+        private void Update()
+        {
+            if (moveFlag && Stop == false)
+            {
+                PerformMovement();
+            }
+        }
+
+        private void PerformMovement()
+        {
+            if (pathToGo.Count > index)
+            {
+                float distanceToGo = MoveTheAgent();
+                if (distanceToGo < 0.05f)
+                {
+                    index++;
+                    if (index >= pathToGo.Count)
+                    {
+                        moveFlag = false;
+                        Destroy(gameObject);
+                        return;
+                    }
+                    endPosition = pathToGo[index];
+                }
+            }
+        }
+
+        private float MoveTheAgent()
+        {
+            float step = speed * Time.deltaTime;
+            Vector3 endPositionCorrect = new Vector3(endPosition.x, transform.position.y, endPosition.z);
+            //transform.position = Vector3.MoveTowards(transform.position, endPositionCorrect, step);
+            rb.velocity = transform.forward * speed;
+
+            var lookDirection = endPositionCorrect - transform.position;
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(lookDirection), Time.deltaTime * rotationSpeed);
+            return Vector3.Distance(transform.position, endPositionCorrect);
+        }
+
+        private void OnDestroy()
+        {
+            OnDeath?.Invoke();
         }
     }
 }

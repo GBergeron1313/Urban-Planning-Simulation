@@ -18,11 +18,11 @@ namespace Citizens
 
     public class DefaultCitizenInfo
     {
-        public const float speed = 0.35f;
-        public const float acceleration = 0.8f;
+        public const float speed = 0.1f;
+        public const float acceleration = 0.5f;
         public const float angular_speed = 120f;
         public const float area_cost = 1f;
-        public const float set_speed = 0.1f;
+        public const float set_speed = 0.1f;   
     }
 
 

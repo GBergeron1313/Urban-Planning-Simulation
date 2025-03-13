@@ -233,7 +233,7 @@ GameObject:
   - component: {fileID: 4287458478014017753}
   - component: {fileID: 8467672600997115561}
   - component: {fileID: 9165615190975493206}
-  - component: {fileID: -2735857697683519482}
+  - component: {fileID: -4706839485463121795}
   m_Layer: 0
   m_Name: Female_Casual
   m_TagString: Untagged
@@ -291,8 +291,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ec4a6df89aab848a8c6295be24c174, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wanderRadius: 10
-  wanderTimer: 5
+  speed: 0.2
+  rotationSpeed: 10
+  pathColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!65 &8467672600997115561
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -341,7 +342,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!195 &-2735857697683519482
+--- !u!195 &-4706839485463121795
 NavMeshAgent:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -351,7 +352,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.5
-  m_Speed: 0
+  m_Speed: 3.5
   m_Acceleration: 8
   avoidancePriority: 50
   m_AngularSpeed: 120
@@ -362,7 +363,7 @@ NavMeshAgent:
   m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 1
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &1579172822639618269
 GameObject:
   m_ObjectHideFlags: 0

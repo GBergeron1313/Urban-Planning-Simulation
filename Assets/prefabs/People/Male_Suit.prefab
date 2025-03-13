@@ -1479,7 +1479,7 @@ GameObject:
   - component: {fileID: 6009368767165044062}
   - component: {fileID: 6120594417781355303}
   - component: {fileID: 2096765826710698872}
-  - component: {fileID: -7274309992684608952}
+  - component: {fileID: -4206160441976798773}
   m_Layer: 0
   m_Name: Male_Suit
   m_TagString: Untagged
@@ -1537,8 +1537,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ec4a6df89aab848a8c6295be24c174, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wanderRadius: 10
-  wanderTimer: 5
+  speed: 0.2
+  rotationSpeed: 10
+  pathColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!65 &6120594417781355303
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1587,7 +1588,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!195 &-7274309992684608952
+--- !u!195 &-4206160441976798773
 NavMeshAgent:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1608,7 +1609,7 @@ NavMeshAgent:
   m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 1
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &8987942369903925705
 GameObject:
   m_ObjectHideFlags: 0
