@@ -458,7 +458,7 @@ GameObject:
   - component: {fileID: 4265572602319032884}
   - component: {fileID: 1580319076575847937}
   - component: {fileID: 6023387724682465906}
-  - component: {fileID: 8713073286214148838}
+  - component: {fileID: 3102675438498844905}
   m_Layer: 0
   m_Name: Male_Casual
   m_TagString: Untagged
@@ -516,8 +516,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 49ec4a6df89aab848a8c6295be24c174, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  wanderRadius: 10
-  wanderTimer: 5
+  speed: 0.2
+  rotationSpeed: 10
+  pathColor: {r: 0, g: 0, b: 0, a: 0}
 --- !u!65 &1580319076575847937
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -566,7 +567,7 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
---- !u!195 &8713073286214148838
+--- !u!195 &3102675438498844905
 NavMeshAgent:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -587,7 +588,7 @@ NavMeshAgent:
   m_Height: 2
   m_BaseOffset: 0
   m_WalkableMask: 4294967295
-  m_ObstacleAvoidanceType: 1
+  m_ObstacleAvoidanceType: 4
 --- !u!1 &2706860788363568042
 GameObject:
   m_ObjectHideFlags: 0
