@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Danny
+namespace UrbanPlanning
 {
     public class NPCMovement : MonoBehaviour
     {

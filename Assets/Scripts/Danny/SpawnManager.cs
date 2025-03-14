@@ -4,7 +4,7 @@ using UnityEngine;
 /*using UnityEngine.Assertions;*/
 using UnityEngine.UI;
 
-namespace Danny
+namespace UrbanPlanning
 {
     public class SpawnManager : MonoBehaviour
     {

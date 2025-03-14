@@ -1,9 +1,9 @@
-using static Danny.NPCMovement;
+using static UrbanPlanning.NPCMovement;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Danny;
+using UrbanPlanning;
 
 public class PathVisualizer : MonoBehaviour
 {
