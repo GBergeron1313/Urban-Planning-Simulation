@@ -41,7 +41,6 @@ namespace Citizens
 
         void Awake()
         {
-            building_positions.Add(gameObject.transform.position);
         }
 
         // Start is called before the first frame update
