@@ -11,6 +11,7 @@ public enum CellType
     Building,
     Road,
 }
+
 public class Cell : MonoBehaviour
 {
     public static Cell hovering;
@@ -30,7 +31,7 @@ public class Cell : MonoBehaviour
     public CellType cell_type;
     public bool walkable;
 
-    public GameObject contents;
+    public Building contents;
 
     public void SetWalkableAndUpdate(bool is_walkable)
     {
@@ -39,7 +40,7 @@ public class Cell : MonoBehaviour
         if (walkable)
         {
             var nms = gameObject.AddComponent<NavMeshSurface>();
-            nms.useGeometry = NavMeshCollectGeometry.RenderMeshes;
+            nms.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
             nms.BuildNavMesh();
 
             var nmo = GetComponent<NavMeshObstacle>();
@@ -103,19 +104,10 @@ public class Cell : MonoBehaviour
         if (contents != null) return false;
 
         cell_type = CellType.Building;
-        contents = creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        creator.attach_building(this);
         SetWalkableAndUpdate(true);
 
-        Building.building_positions.Add(this.transform.position);
-
         return contents != null;
-    }
-
-    public bool TryPushBuilding(Color color)
-    {
-        if (!Buildable()) return false;
-        this.color = color;
-        return _TryPushBuilding();
     }
 
     public bool TryPushBuilding()
@@ -139,39 +131,15 @@ public class Cell : MonoBehaviour
     private bool _TryPushRoad()
     {
         cell_type = CellType.Road;
-        contents = creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        creator.attach_building(this);
         SetWalkableAndUpdate(true);
 
         return contents != null;
     }
 
-    public bool TryPushRoad(Color color)
-    {
-        if (!Buildable()) return false;
-        this.color = color;
-        return _TryPushRoad();
-    }
-
     public bool TryPushRoad()
     {
         return Buildable() && _TryPushRoad();
-    }
-
-    public static void RemoveContents(Cell c)
-    {
-        if (!c.Removable())
-        {
-            print($"Can't remove at: {c.location}");
-            return;
-        }
-        print($"Removing {c.contents}...");
-
-        c.SetCellTypeAndUpdate(CellType.None);
-        bool r = Building.building_positions.Remove(c.gameObject.transform.position)
-            || Building.building_positions.Remove(c.transform.position);
-        print($"{(r ? "Removed" : "Couldn't Remove")}");
-        Destroy(c.contents);
-        c.contents = null;
     }
 
     public void SetCellTypeAndUpdate(CellType ct)
@@ -331,24 +299,16 @@ public class Cell : MonoBehaviour
             grid_tile.GetComponent<Cell>().SetZoneTypeAndUpdate(paintbrush);
             SetZoneTypeAndUpdate(paintbrush);
         }
-        /*else if (building_mode == BuildingMode.None)*/
-        /*{*/
-        /*    SetWalkableAndUpdate(false);*/
-        /*}*/
         else
         {
             switch (building_mode)
             {
                 case BuildingMode.PlacingBuilding:
-                    TryPushBuilding(GridSystem.ZoneColor(zone_type));
+                    TryPushBuilding();
                     break;
 
                 case BuildingMode.PlacingRoad:
-                    TryPushRoad(GridSystem.ZoneColor(zone_type));
-                    break;
-
-                case BuildingMode.Removal:
-                    RemoveContents(AtCoords(hovering.location));
+                    TryPushRoad();
                     break;
 
                 default:
