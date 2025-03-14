@@ -50,7 +50,9 @@ public class CreateBuilding : MonoBehaviour
             case CellType.Building:
                 return Instantiate(buildingPrefab);
             case CellType.Road:
-                return GameObject.CreatePrimitive(PrimitiveType.Cube);
+                GameObject ret = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                ret.gameObject.transform.localScale = new Vector3(1, 0.1f, 1);
+                return ret;
             default:
                 throw new UnityException($"CellType {cell_type} unexpected");
         }
@@ -58,20 +60,19 @@ public class CreateBuilding : MonoBehaviour
 
     private void applyRoadShapeTransformations(GameObject road, ZoneType zone_type, int x, int z)
     {
-        road.transform.position = new Vector3(x - 4.5f, 0f, z - 4.5f);
-        road.transform.Translate(new Vector3(0f, 0.05f, 0f));
-        road.transform.localScale = new Vector3(1.0f, 0.1f, 1.0f);
+        road.transform.Translate(Vector3.down * 2);
+        road.transform.localScale.Set(1.0f, 0.1f, 1.0f);
 
-        Cell c;
-        if (!road.TryGetComponent<Cell>(out c))
-        {
-            Debug.Log("Cell wasn't attached. Attaching...");
-
-            c = road.AddComponent<Cell>();
-        }
-        c.location = new Vector2Int((int)x, (int)z);
-        c.cell_type = CellType.Road;
-        c.SetZoneTypeAndUpdate(zone_type);
+        /*Cell c;*/
+        /*if (!road.TryGetComponent<Cell>(out c))*/
+        /*{*/
+        /*    Debug.Log("Cell wasn't attached. Attaching...");*/
+        /**/
+        /*    c = road.AddComponent<Cell>();*/
+        /*}*/
+        /*c.location = new Vector2Int((int)x, (int)z);*/
+        /*c.cell_type = CellType.Road;*/
+        /*c.SetZoneTypeAndUpdate(zone_type);*/
     }
 
     private void applyBuildingShapeTransformations(GameObject nextBuilding, ZoneType zone_type, int x, int z)
@@ -100,7 +101,7 @@ public class CreateBuilding : MonoBehaviour
     public void attach_building(Cell cell)
     {
 
-        print($"attach_building: {cell.location}");
+        print($"attach_building: {cell.location}, {cell.cell_type}");
         var next_prefab = getCellTypeShape(cell.cell_type);
         next_prefab.transform.position = cell.gameObject.transform.position;
 

@@ -219,11 +219,11 @@ public class GridSystem : MonoBehaviour
             text_display.text =
                 $"Time: {time}\n" +
                 $"Focus: {focus}\n" +
-                $"# Cells: {num_cells}\n" +
                 $"Zone Type: {zone_type}\n" +
                 $"Paintbrush: {Cell.paintbrush}\n" +
                 $"Building Placement Mode: {Cell.building_mode}\n" +
-                $"Number of Buildings: {Building.building_positions.Count}";
+                $"# Cells: {num_cells}\n" +
+                $"# Buildings: {Building.building_positions.Count}";
         }
         else
         {

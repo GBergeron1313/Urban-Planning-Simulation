@@ -137,33 +137,9 @@ public class Cell : MonoBehaviour
         return contents != null;
     }
 
-    public bool TryPushRoad(Color color)
-    {
-        if (!Buildable()) return false;
-        this.color = color;
-        return _TryPushRoad();
-    }
-
     public bool TryPushRoad()
     {
         return Buildable() && _TryPushRoad();
-    }
-
-    public static void RemoveContents(Building building)
-    {
-        if (!building.attached_to.Removable())
-        {
-            print($"Can't remove at: {building}");
-            return;
-        }
-        print($"Removing {building}...");
-
-        building.attached_to.SetCellTypeAndUpdate(CellType.None);
-        bool r = Building.building_positions.Remove(building.gameObject.transform.position)
-            || Building.building_positions.Remove(building.transform.position);
-        print($"{(r ? "Removed" : "Couldn't Remove")}");
-        Destroy(building);
-        building = null;
     }
 
     public void SetCellTypeAndUpdate(CellType ct)
@@ -323,10 +299,6 @@ public class Cell : MonoBehaviour
             grid_tile.GetComponent<Cell>().SetZoneTypeAndUpdate(paintbrush);
             SetZoneTypeAndUpdate(paintbrush);
         }
-        /*else if (building_mode == BuildingMode.None)*/
-        /*{*/
-        /*    SetWalkableAndUpdate(false);*/
-        /*}*/
         else
         {
             switch (building_mode)
@@ -338,10 +310,6 @@ public class Cell : MonoBehaviour
                 case BuildingMode.PlacingRoad:
                     TryPushRoad();
                     break;
-
-                /*case BuildingMode.Removal:*/
-                /*    RemoveContents(hovering.contents);*/
-                /*    break;*/
 
                 default:
                     break;

@@ -41,6 +41,7 @@ namespace Citizens
 
         void Awake()
         {
+            building_positions.Add(gameObject.transform.position);
         }
 
         // Start is called before the first frame update
@@ -49,7 +50,6 @@ namespace Citizens
             uuid = Random.Range(int.MinValue, int.MaxValue).ToString();
             Assert.IsNotNull(attached_to);
             resolve_name();
-            building_positions.Add(gameObject.transform.position);
             print("Placed " + uuid);
         }
 
@@ -102,7 +102,6 @@ namespace Citizens
                 {
                     DestroyBuilding(hovering);
                     hovering = null;
-                    last_hovered = null;
                 }
             }
         }
