@@ -50,6 +50,7 @@ public class GridSystem : MonoBehaviour
     private bool[,] filledCells;
 
     public GameObject uiText;
+    private TMPro.TextMeshProUGUI text_display;
 
     public static readonly Color g_residentialZoneColor = new Color(0.2f, 0.8f, 0.2f, 0.5f);
     public static readonly Color g_commercialZoneColor = new Color(0.2f, 0.2f, 0.8f, 0.5f);
@@ -64,6 +65,7 @@ public class GridSystem : MonoBehaviour
     {
         BTN_change_building_mode = GameObject.Find("ModeButton").GetComponent<Button>();
         BTN_change_building_mode.onClick.AddListener(Cell.CycleBuildingMode);
+        text_display = uiText.GetComponent<TMPro.TextMeshProUGUI>();
     }
 
     /// Initializes the grid arrays and generates the grid structure
@@ -185,30 +187,47 @@ public class GridSystem : MonoBehaviour
             Cell.CycleZoneType();
         }
 
+        show_text();
+    }
+
+    private void show_text()
+    {
         if (SimCore.Instance.view_mode == ViewMode.Default)
         {
-            if (Cell.hovering is not null)
-                uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
-                    $"Simulation Time: {SimCore.Instance.simulationClock}\n" +
-                    $"Cell: {(Cell.hovering.location)}\n" +
-                    $"Occupied: {(Cell.AtCoords(Cell.hovering.location).contents)}\n" +
-                    $"Zone Type: {(Cell.hovering.zone_type)}\n" +
-                    $"Paintbrush: {Cell.paintbrush}\n" +
-                    $"Building Placement Mode: {Cell.building_mode}\n" +
-                    $"Number of Buildings: {Building.building_positions.Count}";
+            string focus;
+            int num_cells = Cell.all_cells.Count;
+            var time = SimCore.Instance.simulationClock;
+            var building = Building.hovering?.legible;
+            var cell = Cell.hovering?.location.ToString();
+            ZoneType zone_type;
+            if (cell is not null)
+            {
+                focus = cell;
+                zone_type = Cell.hovering.zone_type;
+            }
+            else if (building is not null)
+            {
+                focus = building;
+                zone_type = Building.hovering.building_type;
+            }
             else
-                uiText.GetComponent<TMPro.TextMeshProUGUI>().text =
-                    $"Simulation Time: {SimCore.Instance.simulationClock}\n" +
-                    $"Cell: N/A\n" +
-                    $"Occupied: N/A\n" +
-                    $"Zone Type: N/A\n" +
-                    $"Paintbrush: {Cell.paintbrush}\n" +
-                    $"Building Placement Mode: {Cell.building_mode}\n" +
-                    $"Number of Buildings: {Building.building_positions.Count}";
+            {
+                focus = "N/A";
+                zone_type = ZoneType.None;
+            }
+
+            text_display.text =
+                $"Time: {time}\n" +
+                $"Focus: {focus}\n" +
+                $"# Cells: {num_cells}\n" +
+                $"Zone Type: {zone_type}\n" +
+                $"Paintbrush: {Cell.paintbrush}\n" +
+                $"Building Placement Mode: {Cell.building_mode}\n" +
+                $"Number of Buildings: {Building.building_positions.Count}";
         }
         else
         {
-            uiText.GetComponent<TMPro.TextMeshProUGUI>().text = "";
+            text_display.text = "";
         }
 
     }

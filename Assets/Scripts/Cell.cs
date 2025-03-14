@@ -11,6 +11,7 @@ public enum CellType
     Building,
     Road,
 }
+
 public class Cell : MonoBehaviour
 {
     public static Cell hovering;
@@ -148,21 +149,21 @@ public class Cell : MonoBehaviour
         return Buildable() && _TryPushRoad();
     }
 
-    public static void RemoveContents(Cell c)
+    public static void RemoveContents(Building building)
     {
-        if (!c.Removable())
+        if (!building.attached_to.Removable())
         {
-            print($"Can't remove at: {c.location}");
+            print($"Can't remove at: {building}");
             return;
         }
-        print($"Removing {c.contents}...");
+        print($"Removing {building}...");
 
-        c.SetCellTypeAndUpdate(CellType.None);
-        bool r = Building.building_positions.Remove(c.gameObject.transform.position)
-            || Building.building_positions.Remove(c.transform.position);
+        building.attached_to.SetCellTypeAndUpdate(CellType.None);
+        bool r = Building.building_positions.Remove(building.gameObject.transform.position)
+            || Building.building_positions.Remove(building.transform.position);
         print($"{(r ? "Removed" : "Couldn't Remove")}");
-        Destroy(c.contents);
-        c.contents = null;
+        Destroy(building);
+        building = null;
     }
 
     public void SetCellTypeAndUpdate(CellType ct)
@@ -338,9 +339,9 @@ public class Cell : MonoBehaviour
                     TryPushRoad();
                     break;
 
-                case BuildingMode.Removal:
-                    RemoveContents(AtCoords(hovering.location));
-                    break;
+                /*case BuildingMode.Removal:*/
+                /*    RemoveContents(hovering.contents);*/
+                /*    break;*/
 
                 default:
                     break;
