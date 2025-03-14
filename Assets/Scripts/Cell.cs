@@ -106,6 +106,7 @@ public class Cell : MonoBehaviour
         cell_type = CellType.Building;
         creator.attach_building(this);
         SetWalkableAndUpdate(true);
+        Building.building_positions.Add(gameObject.transform.position);
 
         return contents != null;
     }

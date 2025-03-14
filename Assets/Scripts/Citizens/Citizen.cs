@@ -1,8 +1,6 @@
 using System.Collections.Generic;
-/*using UrbanPlanning;*/
 using UnityEngine;
 using UnityEngine.AI;
-/*using UnityEngine.Assertions;*/
 
 namespace Citizens
 {
@@ -89,6 +87,7 @@ namespace Citizens
             agent.updateUpAxis = true;
             agent.updatePosition = true;
             agent.updateRotation = false;
+            agent.radius = 0.025f;
 
             agent.speed = DefaultCitizenInfo.speed;
             agent.acceleration = DefaultCitizenInfo.acceleration;
