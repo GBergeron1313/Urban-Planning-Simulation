@@ -30,7 +30,7 @@ public class Cell : MonoBehaviour
     public CellType cell_type;
     public bool walkable;
 
-    public GameObject contents;
+    public Building contents;
 
     public void SetWalkableAndUpdate(bool is_walkable)
     {
@@ -39,7 +39,7 @@ public class Cell : MonoBehaviour
         if (walkable)
         {
             var nms = gameObject.AddComponent<NavMeshSurface>();
-            nms.useGeometry = NavMeshCollectGeometry.RenderMeshes;
+            nms.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
             nms.BuildNavMesh();
 
             var nmo = GetComponent<NavMeshObstacle>();
@@ -103,19 +103,10 @@ public class Cell : MonoBehaviour
         if (contents != null) return false;
 
         cell_type = CellType.Building;
-        contents = creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        creator.attach_building(this);
         SetWalkableAndUpdate(true);
 
-        Building.building_positions.Add(this.transform.position);
-
         return contents != null;
-    }
-
-    public bool TryPushBuilding(Color color)
-    {
-        if (!Buildable()) return false;
-        this.color = color;
-        return _TryPushBuilding();
     }
 
     public bool TryPushBuilding()
@@ -139,7 +130,7 @@ public class Cell : MonoBehaviour
     private bool _TryPushRoad()
     {
         cell_type = CellType.Road;
-        contents = creator.createBuilding(location.x, location.y, color, zone_type, cell_type);
+        creator.attach_building(this);
         SetWalkableAndUpdate(true);
 
         return contents != null;
@@ -340,11 +331,11 @@ public class Cell : MonoBehaviour
             switch (building_mode)
             {
                 case BuildingMode.PlacingBuilding:
-                    TryPushBuilding(GridSystem.ZoneColor(zone_type));
+                    TryPushBuilding();
                     break;
 
                 case BuildingMode.PlacingRoad:
-                    TryPushRoad(GridSystem.ZoneColor(zone_type));
+                    TryPushRoad();
                     break;
 
                 case BuildingMode.Removal:

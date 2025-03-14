@@ -1,7 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
-/*using UnityEngine.AI;*/
-/*using UnityEngine.Assertions;*/
+using UnityEngine.Assertions;
 
 namespace Citizens
 {
@@ -10,7 +9,14 @@ namespace Citizens
     {
         public static List<Vector3> building_positions = new List<Vector3>();
 
-        private float last_citizen_update;
+        public string uuid;
+        public float air_pollution;
+        public float noise_pollution;
+        public float power_usage;
+        public float max_capacity;
+        public ZoneType building_type;
+
+        public Cell attached_to;
 
         public static void ClearBuildings()
         {
@@ -18,24 +24,21 @@ namespace Citizens
             building_positions = new List<Vector3>();
         }
 
-        public static void TrackPosition(Vector3 tracked)
+        void Awake()
         {
-            building_positions.Add(tracked);
         }
 
         // Start is called before the first frame update
         void Start()
         {
-            name = "Building";
-            last_citizen_update = Time.time;
+            uuid = Random.Range(int.MinValue, int.MaxValue).ToString();
+            Assert.IsNotNull(attached_to);
+            building_positions.Add(gameObject.transform.position);
+            print("Placed " + uuid);
         }
 
         // Update is called once per frame
         void Update()
-        {
-        }
-
-        void FixedUpdate()
         {
         }
     }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Citizens;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,14 +35,13 @@ public class CreateBuilding : MonoBehaviour
         Start();
     }
 
-    public void createBuilding()
-    {
-        print("Building Created");
-        var nextBuilding = Instantiate(buildingPrefab);
-        prefabs.Add(nextBuilding);
-        nextBuilding.transform.position = new Vector3(6.0f, 0.5f, 0.0f);
-        nextBuilding.GetComponent<BuildingScript>().mainGrid = MainGrid;
-    }
+    /*public void createBuilding()*/
+    /*{*/
+    /*    print("Building Created");*/
+    /*    var nextBuilding = Instantiate(buildingPrefab);*/
+    /*    prefabs.Add(nextBuilding);*/
+    /*    nextBuilding.transform.position = new Vector3(6.0f, 0.5f, 0.0f);*/
+    /*}*/
 
     private GameObject getCellTypeShape(CellType cell_type)
     {
@@ -62,7 +62,6 @@ public class CreateBuilding : MonoBehaviour
         road.transform.Translate(new Vector3(0f, 0.05f, 0f));
         road.transform.localScale = new Vector3(1.0f, 0.1f, 1.0f);
 
-
         Cell c;
         if (!road.TryGetComponent<Cell>(out c))
         {
@@ -71,7 +70,6 @@ public class CreateBuilding : MonoBehaviour
             c = road.AddComponent<Cell>();
         }
         c.location = new Vector2Int((int)x, (int)z);
-        /*Cell.grid = GameObject.Find("Grid").GetComponent<GridSystem>();*/
         c.cell_type = CellType.Road;
         c.SetZoneTypeAndUpdate(zone_type);
     }
@@ -87,7 +85,6 @@ public class CreateBuilding : MonoBehaviour
             c = nextBuilding.AddComponent<Cell>();
         }
         c.location = new Vector2Int((int)x, (int)z);
-        /*c.grid = GameObject.Find("Grid").GetComponent<GridSystem>();*/
         c.cell_type = CellType.Building;
         c.SetZoneTypeAndUpdate(zone_type);
     }
@@ -98,6 +95,26 @@ public class CreateBuilding : MonoBehaviour
         if (g is null) return;
         prefabs.Remove(g);
         Destroy(g);
+    }
+
+    public void attach_building(Cell cell)
+    {
+
+        print($"attach_building: {cell.location}");
+        var next_prefab = getCellTypeShape(cell.cell_type);
+        next_prefab.transform.position = cell.gameObject.transform.position;
+
+        Building bs = next_prefab.AddComponent<Building>();
+
+        bs.air_pollution = pollutionSlider.value;
+        bs.noise_pollution = noiseSlider.value;
+        bs.max_capacity = capacitySlider.value;
+        bs.building_type = cell.zone_type;
+        bs.attached_to = cell;
+
+        cell.contents = bs;
+
+        prefabs.Add(next_prefab);
     }
 
     public GameObject createBuilding(float x, float z, Color color, ZoneType zone_type, CellType cell_type)
@@ -112,25 +129,20 @@ public class CreateBuilding : MonoBehaviour
         {
             applyRoadShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
         }
+
+        Building bs;
+        if (!next_prefab.TryGetComponent<Building>(out bs))
+        {
+            bs = next_prefab.AddComponent<Building>();
+        }
+
+        bs.air_pollution = pollutionSlider.value;
+        bs.noise_pollution = noiseSlider.value;
+        bs.max_capacity = capacitySlider.value;
+        bs.building_type = zone_type;
+
         prefabs.Add(next_prefab);
-        next_prefab.GetComponent<BuildingScript>().Pollution = pollutionSlider.value;
-        next_prefab.GetComponent<BuildingScript>().NoisePollution = noiseSlider.value;
-        next_prefab.GetComponent<BuildingScript>().MaxCapacity = capacitySlider.value;
-        if(zone_type == ZoneType.Commercial)
-        {
-            print("Commercial Building Placed");
-            next_prefab.GetComponent<BuildingScript>().bType = BuildingType.Commercial;
-        }
-        else if (zone_type == ZoneType.Residential)
-        {
-            print("Residential Building Placed");
-            next_prefab.GetComponent<BuildingScript>().bType = BuildingType.Residential;
-        }
-        else if (zone_type == ZoneType.Industrial)
-        {
-            print("Industrial Building Placed");
-            next_prefab.GetComponent<BuildingScript>().bType = BuildingType.Industrial;
-        }
+
         return next_prefab;
     }
 
