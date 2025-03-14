@@ -1,11 +1,19 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CreateBuilding : MonoBehaviour
 {
     public GameObject MainGrid;
 
     public GameObject buildingPrefab;
+    public GameObject commercialPrefab;
+    public GameObject residentialPrefab;
+    public GameObject industrialPrefab;
+
+    public Slider pollutionSlider;
+    public Slider noiseSlider;
+    public Slider capacitySlider;
 
     // Keeping references to prefabs for later removal.
     private List<GameObject> prefabs;
@@ -105,6 +113,24 @@ public class CreateBuilding : MonoBehaviour
             applyRoadShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
         }
         prefabs.Add(next_prefab);
+        next_prefab.GetComponent<BuildingScript>().Pollution = pollutionSlider.value;
+        next_prefab.GetComponent<BuildingScript>().NoisePollution = noiseSlider.value;
+        next_prefab.GetComponent<BuildingScript>().MaxCapacity = capacitySlider.value;
+        if(zone_type == ZoneType.Commercial)
+        {
+            print("Commercial Building Placed");
+            next_prefab.GetComponent<BuildingScript>().bType = BuildingType.Commercial;
+        }
+        else if (zone_type == ZoneType.Residential)
+        {
+            print("Residential Building Placed");
+            next_prefab.GetComponent<BuildingScript>().bType = BuildingType.Residential;
+        }
+        else if (zone_type == ZoneType.Industrial)
+        {
+            print("Industrial Building Placed");
+            next_prefab.GetComponent<BuildingScript>().bType = BuildingType.Industrial;
+        }
         return next_prefab;
     }
 

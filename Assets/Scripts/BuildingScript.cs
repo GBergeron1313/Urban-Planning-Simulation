@@ -1,4 +1,6 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UI;
 
 public enum BuildingType
 {
@@ -15,17 +17,16 @@ public class BuildingScript : MonoBehaviour
     public Camera mainCam;
     public GameObject mainGrid;
     private GridSystem grid;
-    private bool move;
-    private bool locked;
+    private bool selected;
     private Material buildingMaterial;
     private Vector3 lastValidPosition;
     public BuildingType bType;
 
     public string Name;
-    public int Pollution;
-    public int NoisePollution;
-    public int PowerUsage;
-    public int MaxCapacity;
+    public float Pollution;
+    public float NoisePollution;
+    public float PowerUsage;
+    public float MaxCapacity;
     
 
     void Start()
@@ -38,8 +39,6 @@ public class BuildingScript : MonoBehaviour
         grid = GameObject.Find("Grid").GetComponent<GridSystem>();
         mainCam = Camera.main;
         lastValidPosition = transform.position;
-
-        bType = BuildingType.None;
     }
 
     void Update()
@@ -53,38 +52,25 @@ public class BuildingScript : MonoBehaviour
         // The internals of Input.Get... is not actually polling for input from the hardware.
         // Input is polled and stored somewhere. We're just accessing that stored data.
         // Point Being: We're not hardware polling by accident, so this should be better, perf-wise.
-        // bool mouseLeftPressed = Input.GetMouseButtonDown((int)MouseButton.Left);
-        // bool mouseRightPressed = Input.GetMouseButtonDown((int)MouseButton.Right);
-        // bool mouseLeftReleased = Input.GetMouseButtonUp((int)MouseButton.Left);
+         //bool mouseLeftPressed = Input.GetMouseButtonDown((int)MouseButton.Left);
+         //bool mouseRightPressed = Input.GetMouseButtonDown((int)MouseButton.Right);
 
-        // if (mouseLeftPressed || mouseRightPressed)
-        // {
-        //     ray = mainCam.ScreenPointToRay(Input.mousePosition);
-        //
-        //     if (Physics.Raycast(ray, out hit))
-        //     {
+         //if (mouseLeftPressed)
+         //{
+         //    ray = mainCam.ScreenPointToRay(Input.mousePosition);
+        
+        //    if (Physics.Raycast(ray, out hit))
+        //    {
         //         if (mouseLeftPressed)
-        //         {
-        //             if (hit.transform == transform && !locked)
-        //             {
-        //                 int gridX = Mathf.RoundToInt(transform.position.x) + 5;
-        //                 int gridZ = Mathf.RoundToInt(transform.position.z) + 5;
-        //
-        //                 SetRoundedToGridCell(transform.position);
-        //
-        //                 grid.emptyCell(gridX, gridZ);
-        //                 move = true;
-        //                 lastValidPosition = transform.position;
-        //             }
-        //         }
-        //
-        //         if (mouseRightPressed)
         //         {
         //             if (hit.transform == transform)
         //             {
-        //                 locked = !locked;
+        //                 if (!selected)
+        //                {
+        //                    selected = true;
+        //                }
         //             }
-        //         }
+        //        }
         //     }
         // }
 
@@ -172,7 +158,7 @@ public class BuildingScript : MonoBehaviour
         Pollution = pollutionLevel;
     }
 
-    public int getPollutionLevel()
+    public float getPollutionLevel()
     {
         return Pollution;
     }
@@ -182,7 +168,7 @@ public class BuildingScript : MonoBehaviour
         NoisePollution = pollutionLevel;
     }
 
-    public int getNoisePollutionLevel()
+    public float getNoisePollutionLevel()
     {
         return NoisePollution;
     }
@@ -192,7 +178,7 @@ public class BuildingScript : MonoBehaviour
         MaxCapacity = capacityLevel;
     }
 
-    public int getMaxCapacity()
+    public float getMaxCapacity()
     {
         return MaxCapacity;
     }
