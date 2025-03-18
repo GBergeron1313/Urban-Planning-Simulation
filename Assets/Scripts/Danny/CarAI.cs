@@ -14,9 +14,6 @@ public class CarAI : MonoBehaviour
     private float turningAngleOffset = 5;
     [SerializeField]
     private Vector3 currentTargetPosition;
-
-    [SerializeField]
-    private GameObject raycastStartingPoint = null;
     [SerializeField]
     private float collisionRaycastLength = 0.1f;
 
@@ -41,7 +38,7 @@ public class CarAI : MonoBehaviour
 
     private void Start()
     {
-        if(path == null || path.Count == 0)
+        if (path == null || path.Count == 0)
         {
             Stop = true;
         }
@@ -50,6 +47,7 @@ public class CarAI : MonoBehaviour
             currentTargetPosition = path[index];
         }
     }
+
 
     public void SetPath(List<Vector3> path)
     {
@@ -79,7 +77,7 @@ public class CarAI : MonoBehaviour
 
     private void CheckForCollisions()
     {
-        if(Physics.Raycast(raycastStartingPoint.transform.position, transform.forward,collisionRaycastLength, 1 << gameObject.layer))
+        if(Physics.Raycast(transform.position, transform.forward,collisionRaycastLength, 1 << gameObject.layer))
         {
             collisionStop = true;
         }
@@ -130,14 +128,15 @@ public class CarAI : MonoBehaviour
     private void SetNextTargetIndex()
     {
         index++;
-        if(index >= path.Count)
+        if (index >= path.Count)
         {
             Stop = true;
-            Destroy(gameObject);
+            Destroy(gameObject, 1f); // Destroy the car after 1 second of stopping
         }
         else
         {
             currentTargetPosition = path[index];
         }
     }
+
 }

@@ -29,7 +29,7 @@ public class CarController : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(rb.velocity.magnitude < maxSpeed)
+        if (rb.velocity.magnitude < maxSpeed)
         {
             rb.AddForce(movementVector.y * transform.forward * power);
         }
