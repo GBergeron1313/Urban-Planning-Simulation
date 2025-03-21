@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Citizens;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +17,8 @@ public class CreateBuilding : MonoBehaviour
     public Slider noiseSlider;
     public Slider capacitySlider;
 
+    public int buildingType;
+
     // Keeping references to prefabs for later removal.
     private List<GameObject> prefabs;
 
@@ -24,6 +27,35 @@ public class CreateBuilding : MonoBehaviour
     {
         name = "CreateBuilding";
         prefabs = new List<GameObject>();
+        buildingType = 1;
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            buildingType++;
+
+            if(buildingType == 4)
+            {
+                buildingType = 1;
+            }
+
+            if (buildingType == 1)
+            {
+                buildingPrefab = commercialPrefab;
+            }
+            if (buildingType == 2)
+            {
+                buildingPrefab = residentialPrefab;
+            }
+            if (buildingType == 3)
+            {
+                buildingPrefab = industrialPrefab;
+            }
+        } 
+
+
     }
 
     public void clearBuildings()
