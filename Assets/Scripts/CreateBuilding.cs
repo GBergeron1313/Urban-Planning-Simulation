@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Citizens;
+using TMPro;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -8,15 +10,13 @@ public class CreateBuilding : MonoBehaviour
     public GameObject MainGrid;
 
     public GameObject buildingPrefab;
-    public GameObject commercialPrefab;
-    public GameObject residentialPrefab;
-    public GameObject industrialPrefab;
+    public GameObject[] prefabList;
 
     public Slider pollutionSlider;
     public Slider noiseSlider;
     public Slider capacitySlider;
 
-    public int buildingType;
+    public TMP_Dropdown buildingDropdown;
 
     // Keeping references to prefabs for later removal.
     private List<GameObject> prefabs;
@@ -26,31 +26,6 @@ public class CreateBuilding : MonoBehaviour
     {
         name = "CreateBuilding";
         prefabs = new List<GameObject>();
-        buildingType = 1;
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Q))
-        {
-            buildingType++;
-            if (buildingType == 4)
-            {
-                buildingType = 1;
-            }
-            if (buildingType == 1)
-            {
-                buildingPrefab = commercialPrefab;
-            }
-            if (buildingType == 2)
-            {
-                buildingPrefab = residentialPrefab;
-            }
-            if (buildingType == 3)
-            {
-                buildingPrefab = industrialPrefab;
-            }
-        }
     }
 
     public void clearBuildings()
@@ -72,6 +47,8 @@ public class CreateBuilding : MonoBehaviour
 
     private GameObject getCellTypeShape(CellType cell_type)
     {
+        buildingPrefab = prefabList[buildingDropdown.value];
+
         switch (cell_type)
         {
             case CellType.Building:
@@ -183,5 +160,10 @@ public class CreateBuilding : MonoBehaviour
         c.location = new Vector2Int((int)x, (int)z);
         c.zone_type = zone_type;
         c.GetComponent<Renderer>().material.color = color;
+    }
+
+    public void checkBuildingType(GameObject buildingPrefab)
+    {
+        buildingPrefab = prefabList[buildingDropdown.value];
     }
 }
