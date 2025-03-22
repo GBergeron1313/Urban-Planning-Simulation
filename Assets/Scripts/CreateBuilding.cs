@@ -16,6 +16,8 @@ public class CreateBuilding : MonoBehaviour
     public Slider noiseSlider;
     public Slider capacitySlider;
 
+    public int buildingType;
+
     // Keeping references to prefabs for later removal.
     private List<GameObject> prefabs;
 
@@ -24,6 +26,31 @@ public class CreateBuilding : MonoBehaviour
     {
         name = "CreateBuilding";
         prefabs = new List<GameObject>();
+        buildingType = 1;
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            buildingType++;
+            if (buildingType == 4)
+            {
+                buildingType = 1;
+            }
+            if (buildingType == 1)
+            {
+                buildingPrefab = commercialPrefab;
+            }
+            if (buildingType == 2)
+            {
+                buildingPrefab = residentialPrefab;
+            }
+            if (buildingType == 3)
+            {
+                buildingPrefab = industrialPrefab;
+            }
+        }
     }
 
     public void clearBuildings()
@@ -104,7 +131,6 @@ public class CreateBuilding : MonoBehaviour
         print($"attach_building: {cell.location}, {cell.cell_type}");
         var next_prefab = getCellTypeShape(cell.cell_type);
         next_prefab.transform.position = cell.gameObject.transform.position;
-
         Building bs = next_prefab.AddComponent<Building>();
 
         bs.air_pollution = pollutionSlider.value;
@@ -123,7 +149,7 @@ public class CreateBuilding : MonoBehaviour
         print($"CreateBuilding: {x}, {z}, {color}, {zone_type}, {cell_type}");
         var next_prefab = getCellTypeShape(cell_type);
         if (cell_type == CellType.Building)
-        {
+        {          
             applyBuildingShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
         }
         else if (cell_type == CellType.Road)

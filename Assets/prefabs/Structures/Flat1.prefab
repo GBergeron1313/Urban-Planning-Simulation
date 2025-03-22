@@ -173,14 +173,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40f5adb56b6d5b14b8b8e8053e8f702a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mainCam: {fileID: 0}
-  mainGrid: {fileID: 0}
-  bType: 0
-  Name: 
-  Pollution: 0
-  NoisePollution: 0
-  PowerUsage: 0
-  MaxCapacity: 0
+  prefabs: []
+  prefab_Number: 0
 --- !u!1001 &8850370260213597147
 PrefabInstance:
   m_ObjectHideFlags: 0
