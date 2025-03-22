@@ -1,0 +1,16 @@
+ Cells: 100
+ Residential: 0
+ Commercial: 0
+ Industrial: 0
+------------------------------------------------------- Buildings: 0
+ Residential: 0
+ Commercial: 0
+ Industrial: 0
+------------------------------------------------------- Citizens: 0
+ Citizens Highest Travel Time: 0
+ Citizens Lowest Travel Time: 0
+ Citizens Avergae Travel Time: 0
+ Citizens Total Travel Time: 0
+ Citizen Highest Density Cell: (0, 0)
+------------------------------------------------------- Average Pollution: 0
+ Max Pollution: 0
