@@ -1,0 +1,21 @@
+ Cells: 100
+ Residential: 8
+ Commercial: 24
+ Industrial: 16
+ Restricted: 16
+-------------------------------------------------------
+ Buildings: 52
+ Residential: 4
+ Commercial: 8
+ Industrial: 4
+ Restricted: 36
+-------------------------------------------------------
+ Citizens: 100
+ Citizens Highest Travel Time: 9.194388
+ Citizens Lowest Travel Time: 0
+ Citizens Avergae Travel Time: 1.368513
+ Citizens Total Travel Time: 136.8513
+ Citizen Highest Density Cell: (-4, 0)
+-------------------------------------------------------
+ Average Pollution: 4.678503
+ Max Pollution: 8.118891

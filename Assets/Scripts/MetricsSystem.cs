@@ -1,6 +1,7 @@
 using Citizens;
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -13,30 +14,33 @@ public class MetricsSystem : MonoBehaviour
     private PollutionSystem pollutionSystem;
 
     // cell script
-    private int totalCells = 0;
-    private int residentialCells = 0;
-    private int commericalCells = 0;
-    private int industrialCells = 0;
+    private float totalCells = 0;
+    private float residentialCells = 0;
+    private float commericalCells = 0;
+    private float industrialCells = 0;
+    private float restrictedCells = 0;  // restricted zones SHOULD NOT to be able to have assigned buildings
 
     // building script
-    private int totalBuildings = 0;
-    private int residentialBuildings = 0;
-    private int commericalBuildings = 0;
-    private int industrialBuildings = 0;
+    private float totalBuildings = 0;
+    private float residentialBuildings = 0;
+    private float commericalBuildings = 0;
+    private float industrialBuildings = 0;
+    private float restrictedBuildings = 0;  // restricted zones SHOULD NOT to be able to have assigned buildings
 
     // citizen script
-    private int totalCitizens = 0;
-    private int avgTravelTime = 0;
-    private int maxTravelTime = 0;
-    private int minTravelTime = 0;
-    private int totalTravelTime = 0;
+    private float totalCitizens = 0;
+    private float avgTravelTime = 0;
+    private float maxTravelTime = 0;
+    private float minTravelTime = 0;
+    private float totalTravelTime = 0;
 
 
     // pollution script
     private float avgPollution = 0;
     private float maxGridPollution = 0;
 
-    Dictionary<int, Vector2Int> citizenPositions = new Dictionary<int, Vector2Int>();
+    private int frameCount = 0;
+
     Dictionary<Citizen, float> pathLengths = new Dictionary<Citizen, float>();
 
     // Start is called before the first frame update
@@ -50,13 +54,23 @@ public class MetricsSystem : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        frameCount++;
+
         CellCount();
         BuildingCount();
         CitizenCount();
         PollutionCount();
-        SaveMetricsData();
         CitizenDensityMax();
         CitizenTravelLength();
+        TravelEfficency();
+
+        if (frameCount == 500)
+        {
+            SaveMetricsData();
+            frameCount = 0;
+        }
+
     }
 
     public void CellCount()
@@ -65,6 +79,7 @@ public class MetricsSystem : MonoBehaviour
         residentialCells = 0;
         commericalCells = 0;
         industrialCells = 0;
+        restrictedCells = 0;
 
         for (int x = 0; x < gridSystem.width; x++)
         {
@@ -80,6 +95,7 @@ public class MetricsSystem : MonoBehaviour
                         case ZoneType.Residential: residentialCells++; break;
                         case ZoneType.Commercial: commericalCells++; break;
                         case ZoneType.Industrial: industrialCells++; break;
+                        case ZoneType.Restricted: restrictedCells++; break;
                     }
                 }
 
@@ -89,110 +105,92 @@ public class MetricsSystem : MonoBehaviour
 
     public void BuildingCount()
     {
+        Debug.Log("Starting building count...");
         residentialBuildings = 0;
         commericalBuildings = 0;
         industrialBuildings = 0;
+        restrictedBuildings = 0;
 
-        for (int x = 0; x < gridSystem.width; x++)
+        Building[] buildings = FindObjectsOfType<Building>();
+        if (buildings == null || buildings.Length == 0) return;
+
+        foreach (Building building in buildings)
         {
-            for (int y = 0; y < gridSystem.height; y++)
+            if (building.building_type == ZoneType.Residential)
             {
-                GameObject cellObject = gridSystem.GetCellAt(x, y);
-                Cell cell = cellObject.GetComponent<Cell>();
-
-                if (cell.contents != null)
-                {
-                    totalBuildings++;
-
-                    switch (cell.zone_type)
-                    {
-                        case ZoneType.Residential: residentialBuildings++;break;
-                        case ZoneType.Commercial: commericalBuildings++; break;
-                        case ZoneType.Industrial: industrialBuildings++; break;
-                    }
-                }
-
+                residentialBuildings++;
+            }
+            else if (building.building_type == ZoneType.Commercial)
+            {
+                commericalBuildings++;
+            }
+            else if (building.building_type == ZoneType.Industrial)
+            {
+                industrialBuildings++;
+            }
+            else if (building.building_type != ZoneType.Restricted)  // should be removed later
+            {
+                restrictedBuildings++;
             }
         }
 
-        totalBuildings = residentialBuildings + commericalBuildings + industrialBuildings;
+        totalBuildings = residentialBuildings + commericalBuildings + industrialBuildings + restrictedBuildings;
+        Debug.Log($"Building count complete - Residential: {residentialBuildings}, Commercial: {commericalBuildings}, Industrial: {industrialBuildings}, Total: {totalBuildings}");
     }
 
     public void CitizenCount()
     {
+        Debug.Log("Starting citizen count...");
+
         totalCitizens = 0;
 
         Citizen[] citizens = FindObjectsOfType<Citizen>();
 
         totalCitizens = citizens.Length;
+
+        Debug.Log($"Found {totalCitizens} citizens");
     }
 
-    public (int x, int y) CitizenDensityMax()
+    public Vector2Int CitizenDensityMax()
     {
-        citizenPositions.Clear();
-
         Citizen[] citizens = FindObjectsOfType<Citizen>();
+        Dictionary<Vector2Int, int> posCount = new Dictionary<Vector2Int, int>();
+
+        Vector2Int maxPos = new Vector2Int();
+        int count = 0;
 
         for (int i = 0; i < citizens.Length; i++)
         {
-            Vector3 position = citizens[i].transform.position;
+            int posX = Mathf.FloorToInt(citizens[i].transform.position.x);
+            int posY = Mathf.FloorToInt(citizens[i].transform.position.y);
 
-            int x = Convert.ToInt32(position.x);
-            int y = Convert.ToInt32(position.y);
+            Vector2Int position = new Vector2Int(posX, posY);
 
-            Vector2Int citizenPos = new Vector2Int(x, y);
-
-            citizenPositions.Add(i, citizenPos);
-        }
-
-        Dictionary<int, int> xPos = new Dictionary<int, int>();
-        Dictionary<int, int> yPos = new Dictionary<int, int>();
-
-        foreach (Vector2Int pos in citizenPositions.Values)
-        {
-            if (!xPos.ContainsKey(pos.x))
+            if (posCount.ContainsKey(position))
             {
-                xPos.Add(pos.x, 1);
+                posCount[position]++;
             }
             else
             {
-                xPos[pos.x]++;
-            }
-
-            if (!yPos.ContainsKey(pos.y))
-            {
-                yPos.Add(pos.y, 1);
-            }
-            else
-            {
-                yPos[pos.y]++;
+                posCount[position] = 1;
             }
 
         }
 
-        int maxX = 0;
-        int maxY = 0;
-
-        foreach (KeyValuePair<int, int> pair in xPos)
+        foreach (var person in posCount)
         {
-            if (pair.Value > maxX)
+            if (person.Value > count)
             {
-                maxX = pair.Value;
-            }
-        }
-        foreach (KeyValuePair<int, int> pair in yPos)
-        {
-            if (pair.Value > maxY)
-            {
-                maxY = pair.Value;
+                count = person.Value;
+                maxPos = person.Key;
             }
         }
 
-        return (maxX, maxY);
+        return maxPos;
 
     }
 
-public void PollutionCount()
+    public void PollutionCount()
     {
         avgPollution = 0;
         maxGridPollution = 0;
@@ -223,9 +221,9 @@ public void PollutionCount()
 
     public List<Vector2Int> RoadCells()
     {
-        List<Vector2Int > roadTracker = new List<Vector2Int>();
+        List<Vector2Int> roadTracker = new List<Vector2Int>();
 
-        for(int x = 0; x < gridSystem.width; x++)
+        for (int x = 0; x < gridSystem.width; x++)
         {
             for (int y = 0; y < gridSystem.height; y++)
             {
@@ -284,15 +282,16 @@ public void PollutionCount()
 
     public void CitizenTravelLength()
     {
+        Debug.Log("Starting citizen travel length calculation...");
         pathLengths.Clear();
-        
+
         Citizen[] citizens = FindObjectsOfType<Citizen>();
         List<Vector2Int> roadCells = RoadCells();
 
         foreach (Citizen c in citizens)
         {
             NavMeshAgent navMeshAgent = c.GetComponent<NavMeshAgent>();
-            if (navMeshAgent == null) continue;
+            if (navMeshAgent == null || !navMeshAgent.isOnNavMesh) continue;
 
             Vector3 startingPoint = c.transform.position;
             Vector3 endPoint = navMeshAgent.destination;
@@ -303,7 +302,7 @@ public void PollutionCount()
             float pathLength = 0f;
             if (path.status == NavMeshPathStatus.PathComplete)
             {
-                for (int i = 0; i < path.corners.Length; i++)
+                for (int i = 0; i < path.corners.Length - 1; i++)
                 {
                     pathLength += Vector3.Distance(path.corners[i], path.corners[i + 1]);
                 }
@@ -313,20 +312,44 @@ public void PollutionCount()
             }
         }
 
+        Debug.Log("Starting citizen travel length completed");
+
     }
 
     public void TravelEfficency()
     {
-        maxTravelTime = (int)pathLengths.Values.Max();
-        minTravelTime = (int)pathLengths.Values.Min();
-        avgTravelTime = (int)pathLengths.Values.Average();
-        totalTravelTime = (int)pathLengths.Values.Sum();
+        float[] values = pathLengths.Values.ToArray();
+        if (values.Length == 0)
+        {
+            maxTravelTime = 0;
+            minTravelTime = 0;
+            avgTravelTime = 0;
+            totalTravelTime = 0;
+            return;
+        }
+
+        maxTravelTime = values.Max();
+        minTravelTime = values.Min();
+        avgTravelTime = values.Average();
+        totalTravelTime = values.Sum();
+    }
+
+    public void MetricReload()
+    {
+        CellCount();
+        BuildingCount();
+        CitizenCount();
+        PollutionCount();
+        CitizenDensityMax();
+        CitizenTravelLength();
+        TravelEfficency();
+        SaveMetricsData();
     }
 
     public void SaveMetricsData()
     {
 
-        string saveFolder = "MetricsData";
+        string saveFolder = Path.Combine(Application.dataPath, "MetricsData");
         if (!Directory.Exists(saveFolder))
         {
             Directory.CreateDirectory(saveFolder);
@@ -337,30 +360,32 @@ public void PollutionCount()
 
         string dataToSave =
 
-               " Cells: " + totalCells + Environment.NewLine + 
+               " Cells: " + totalCells + Environment.NewLine +
                " Residential: " + residentialCells + Environment.NewLine +
                " Commercial: " + commericalCells + Environment.NewLine +
                " Industrial: " + industrialCells + Environment.NewLine +
-               "-------------------------------------------------------" +
+               " Restricted: " + restrictedCells + Environment.NewLine +
+               "-------------------------------------------------------" + Environment.NewLine +
                " Buildings: " + totalBuildings + Environment.NewLine +
                " Residential: " + residentialBuildings + Environment.NewLine +
                " Commercial: " + commericalBuildings + Environment.NewLine +
                " Industrial: " + industrialBuildings + Environment.NewLine +
-               "-------------------------------------------------------" +
+               " Restricted: " + restrictedBuildings + Environment.NewLine +
+               "-------------------------------------------------------" + Environment.NewLine +
                " Citizens: " + totalCitizens + Environment.NewLine +
                " Citizens Highest Travel Time: " + maxTravelTime + Environment.NewLine +
                " Citizens Lowest Travel Time: " + minTravelTime + Environment.NewLine +
                " Citizens Avergae Travel Time: " + avgTravelTime + Environment.NewLine +
                " Citizens Total Travel Time: " + totalTravelTime + Environment.NewLine +
                " Citizen Highest Density Cell: " + CitizenDensityMax() + Environment.NewLine +
-               "-------------------------------------------------------" +
+               "-------------------------------------------------------" + Environment.NewLine +
                " Average Pollution: " + avgPollution + Environment.NewLine +
                " Max Pollution: " + maxGridPollution + Environment.NewLine;
 
         try
         {
             File.WriteAllText(filePath, dataToSave);
-            Debug.Log("Metrics Saved");
+            Debug.Log("Metrics Saved to: " + filePath);
         }
         catch (Exception ex)
         {
@@ -368,23 +393,4 @@ public void PollutionCount()
         }
 
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
