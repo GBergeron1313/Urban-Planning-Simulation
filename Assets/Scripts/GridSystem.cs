@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Citizens;
+using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
@@ -61,6 +62,9 @@ public class GridSystem : MonoBehaviour
 
     private Button BTN_change_building_mode;
 
+    public GameObject buildingUI;
+    public Button zoneButton;
+
     void Awake()
     {
         BTN_change_building_mode = GameObject.Find("ModeButton").GetComponent<Button>();
@@ -85,6 +89,9 @@ public class GridSystem : MonoBehaviour
                 zoneGrid[x, z] = ZoneType.None;
             }
         }
+
+
+        zoneButton.onClick.AddListener(Cell.CycleZoneType);
 
         GenerateGrid();
     }
@@ -167,6 +174,7 @@ public class GridSystem : MonoBehaviour
     public void Update()
     {
         HandleGridInteraction();
+
     }
 
     void HandleGridInteraction()
@@ -188,6 +196,17 @@ public class GridSystem : MonoBehaviour
         }
 
         show_text();
+
+
+        if (Cell.building_mode == BuildingMode.PlacingBuilding)
+        {
+            buildingUI.SetActive(true);
+        }
+        else
+        {
+            buildingUI.SetActive(false);
+        }
+        zoneButton.GetComponentInChildren<TextMeshProUGUI>().text = $"{Cell.paintbrush}";
     }
 
     private void show_text()
