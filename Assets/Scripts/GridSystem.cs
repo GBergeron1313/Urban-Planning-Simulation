@@ -61,6 +61,8 @@ public class GridSystem : MonoBehaviour
 
     private Button BTN_change_building_mode;
 
+    public GameObject buildingUI;
+
     void Awake()
     {
         BTN_change_building_mode = GameObject.Find("ModeButton").GetComponent<Button>();
@@ -224,6 +226,15 @@ public class GridSystem : MonoBehaviour
                 $"Building Placement Mode: {Cell.building_mode}\n" +
                 $"# Cells: {num_cells}\n" +
                 $"# Buildings: {Building.building_positions.Count}";
+
+            if(Cell.building_mode == BuildingMode.PlacingBuilding)
+            {
+                buildingUI.SetActive(true);
+            }
+            else
+            {
+                buildingUI.SetActive(false);
+            }
         }
         else
         {
