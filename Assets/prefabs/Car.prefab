@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 5288401989019888607}
   - component: {fileID: 9129931513075086721}
   m_Layer: 10
-  m_Name: CarSpawner
+  m_Name: Car
   m_TagString: Car
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 569683081087099838}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.5, z: 0}
+  m_LocalPosition: {x: 0, y: 0.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -57,11 +57,11 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 80
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!135 &569683081087099779
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -124,5 +124,4 @@ MonoBehaviour:
   - {fileID: 7954715419065063505, guid: 10f4671cf44100d409a99458809783f8, type: 3}
   - {fileID: 771982215564958993, guid: 855cd82b21977fe458e741a8f5352a56, type: 3}
   - {fileID: 899243954413507757, guid: f939653fea539134c908bf914ff23571, type: 3}
-  spawnPoints:
-  - {fileID: 0}
+  spawnHeightOffset: 0.05
