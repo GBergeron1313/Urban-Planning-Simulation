@@ -18,10 +18,13 @@ namespace SavingReloading
         GridSystem gridSystem;
         private CreateBuilding creator;
 
+        private MetricsSystem metricsSystem;
+
         private void Start()
         {
             savePath = Application.persistentDataPath;
             gridSystem = FindObjectOfType<GridSystem>();
+            metricsSystem = FindObjectOfType<MetricsSystem>();
             lastSaveTime = Time.time;
             creator = FindObjectOfType<CreateBuilding>();
             // Let them load their data right on startup.
@@ -59,6 +62,8 @@ namespace SavingReloading
             ClearCurrentData();
             LoadGridData();
             LoadCitizenData();
+
+            metricsSystem.MetricReload();
         }
 
         private void ClearCurrentData()
