@@ -233,4 +233,19 @@ public class PollutionSystem : MonoBehaviour
             Debug.Log("Pollution off");
         }
     }
+
+    public float[,] AccessPollutionData()
+    {
+        float[,] copyPollutionLevels = new float[gridSystem.width, gridSystem.height];
+
+        for (int x = 0; x < gridSystem.width; x++)
+        {
+            for (int y = 0; y < gridSystem.height; y++)
+            {
+                copyPollutionLevels[x,y] = pollutionLevels[x,y];
+            }
+        }
+
+        return copyPollutionLevels;
+    }
 }

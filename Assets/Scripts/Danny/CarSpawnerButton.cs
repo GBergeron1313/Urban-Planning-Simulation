@@ -1,41 +1,53 @@
+using Citizens;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class CarSpawnerButton : MonoBehaviour
 {
     public GameObject carSpawnerPrefab; // Reference to the CarSpawner prefab
-    public Transform spawnPoint; // Assign this in the Inspector
+    public Button carButton; // Assign your button in Inspector
+
+    private CarSpawner carSpawnerInstance; // Store spawned CarSpawner
 
     private void Start()
     {
-        // Get the Button component and add a listener to the onClick event
-        Button button = GetComponent<Button>();
-        button.onClick.AddListener(SpawnCarSpawner);
+        carButton.onClick.AddListener(SpawnCars);
     }
 
-    public void SpawnCarSpawner()
+    public void SpawnCars()
     {
-        if (carSpawnerPrefab != null)
+        // Ensure there are buildings before spawning cars
+        if (Building.building_positions.Count == 0)
         {
-            Vector3 spawnPosition = spawnPoint != null ? spawnPoint.position : Vector3.zero;
+            Debug.LogError("Can't spawn cars when there are no buildings!");
+            return;
+        }
 
-            // Instantiate the CarSpawner at the specified position
-            GameObject carSpawnerInstance = Instantiate(carSpawnerPrefab, spawnPosition, Quaternion.identity);
+        carButton.interactable = true;
 
-            // Call the SpawnCar method on the instantiated CarSpawner
-            CarSpawner carSpawnerScript = carSpawnerInstance.GetComponent<CarSpawner>();
-            if (carSpawnerScript != null)
+        // Restore original functionality
+        carButton.onClick.AddListener(SpawnCars);
+
+        // Make sure the component is enabled
+        carButton.enabled = true;
+
+        // Check if CarSpawner exists; if not, spawn it
+        if (carSpawnerInstance == null)
+        {
+            GameObject carSpawnerObj = Instantiate(carSpawnerPrefab, Vector3.zero, Quaternion.identity);
+            carSpawnerInstance = carSpawnerObj.GetComponent<CarSpawner>();
+        }
+
+        if (carSpawnerInstance != null)
+        {
+            for (int i = 0; i < 1; i++) // Adjust number of cars as needed
             {
-                carSpawnerScript.SpawnCar(); // Spawn a car immediately
-            }
-            else
-            {
-                Debug.LogError("CarSpawner script not found on the instantiated prefab!");
+                carSpawnerInstance.SpawnCar();
             }
         }
         else
         {
-            Debug.LogError("CarSpawner prefab is not assigned!");
+            Debug.LogError("CarSpawner script not found on the instantiated prefab!");
         }
     }
 }
