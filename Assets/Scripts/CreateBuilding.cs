@@ -17,6 +17,11 @@ public class CreateBuilding : MonoBehaviour
     public Slider capacitySlider;
 
     public TMP_Dropdown buildingDropdown;
+    
+
+    public int totalPopulation;
+    public TextMeshProUGUI popTot;
+
 
     // Keeping references to prefabs for later removal.
     private List<GameObject> prefabs;
@@ -117,6 +122,9 @@ public class CreateBuilding : MonoBehaviour
         bs.attached_to = cell;
 
         cell.contents = bs;
+
+        totalPopulation += (int)bs.max_capacity;
+        popTot.text = "Population Total: " + totalPopulation;
 
         prefabs.Add(next_prefab);
     }

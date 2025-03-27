@@ -11,8 +11,10 @@ namespace UrbanPlanning
         public GameObject[] npcPrefabs; // Assign 4 prefabs in Inspector
         public Button npcButton; // Assign your button in Inspector
         public Transform spawnArea; // Assign an area where NPCs will spawn
-        public static readonly int npcCount = 100; // Number of NPCs to spawn
+        public static int npcCount = 100; // Number of NPCs to spawn
         public static bool spawned_and_moving = false;
+
+        public GameObject buildings;
 
         void Start()
         {
@@ -22,6 +24,10 @@ namespace UrbanPlanning
 
         public void SpawnNPCsFrom(string[] citizen_names, Vector3[] positions, Vector3[] destinations)
         {
+            buildings = GameObject.Find("CreateBuilding");
+
+            //npcCount = buildings.GetComponent<CreateBuilding>().totalPopulation;
+
             if (Building.building_positions.Count == 0)
                 throw new UnityException("Can't spawn npcs when there are no buildings");
 
@@ -30,7 +36,7 @@ namespace UrbanPlanning
             npcButton.onClick = null;
             npcButton.enabled = false;
 
-            for (int i = 0; i < npcCount; i++)
+            for (int i = 0; i < buildings.GetComponent<CreateBuilding>().totalPopulation; i++)
             {
                 string[] name_id_index = citizen_names[i].Split('_');
                 CitizenModel prefab_index = CitizenModel.Parse<CitizenModel>(name_id_index[2]);
@@ -60,6 +66,8 @@ namespace UrbanPlanning
 
         public void SpawnNPCs()
         {
+
+            buildings = GameObject.Find("CreateBuilding");
             if (Building.building_positions.Count == 0)
                 throw new UnityException("Can't spawn npcs when there are no buildings");
 
@@ -68,7 +76,7 @@ namespace UrbanPlanning
             npcButton.onClick = null;
             npcButton.enabled = false;
 
-            for (int i = 0; i < npcCount; i++)
+            for (int i = 0; i < buildings.GetComponent<CreateBuilding>().totalPopulation; i++)
             {
                 int rand_prefab_idx = Random.Range(0, npcPrefabs.Length);
                 int rand_position_idx = Random.Range(0, Building.building_positions.Count);
