@@ -18,7 +18,7 @@ public class CreateBuilding : MonoBehaviour
 
     public TMP_Dropdown buildingDropdown;
 
-    public int totalPop;
+    public int totalPop, totalPol, totalNoise, polPerCit, noisePerCit;
 
     public TextMeshProUGUI popCount;
 
@@ -123,8 +123,15 @@ public class CreateBuilding : MonoBehaviour
         cell.contents = bs;
 
         if(cell.cell_type == CellType.Building)
-        totalPop += (int)bs.max_capacity;
-        popCount.text = "Total Population: " + totalPop;
+        {
+            totalPol += (int)bs.air_pollution;
+            totalNoise += (int)bs.noise_pollution;
+            totalPop += (int)bs.max_capacity;
+            polPerCit = totalPol / totalPop;
+            noisePerCit = totalNoise / totalPop;
+        }
+        
+        popCount.text = "Pollution Level: " + totalPol + "\nNoise Level: " + totalNoise + "\nTotal Population: " + totalPop;
 
         prefabs.Add(next_prefab);
     }

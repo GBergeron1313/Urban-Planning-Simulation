@@ -62,7 +62,7 @@ public class PollutionSystem : MonoBehaviour
         // Toggle visuals
         if (Input.GetKeyDown(KeyCode.P))
         {
-            showPollution = !showPollution;
+            //showPollution = !showPollution;
             ToggleVisuals();
         }
     }
@@ -214,8 +214,10 @@ public class PollutionSystem : MonoBehaviour
         }
     }
 
-    private void ToggleVisuals()
+    public void ToggleVisuals()
     {
+        showPollution = !showPollution;
+
         if (showPollution)
         {
             UpdateVisuals();

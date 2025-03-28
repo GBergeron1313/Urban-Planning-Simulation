@@ -43,6 +43,8 @@ public class MetricsSystem : MonoBehaviour
 
     Dictionary<Citizen, float> pathLengths = new Dictionary<Citizen, float>();
 
+    public GameObject stats;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -348,6 +350,7 @@ public class MetricsSystem : MonoBehaviour
 
     public void SaveMetricsData()
     {
+        stats = GameObject.Find("CreateBuilding");
 
         string saveFolder = Path.Combine(Application.dataPath, "MetricsData");
         if (!Directory.Exists(saveFolder))
@@ -380,7 +383,27 @@ public class MetricsSystem : MonoBehaviour
                " Citizen Highest Density Cell: " + CitizenDensityMax() + Environment.NewLine +
                "-------------------------------------------------------" + Environment.NewLine +
                " Average Pollution: " + avgPollution + Environment.NewLine +
-               " Max Pollution: " + maxGridPollution + Environment.NewLine;
+               " Max Pollution: " + maxGridPollution + Environment.NewLine +
+               "-------------------------------------------------------" + Environment.NewLine +
+               "Pollution Per Citzen: " + stats.GetComponent<CreateBuilding>().polPerCit + "%" + Environment.NewLine +
+               "Noise Per Citzen: " + stats.GetComponent<CreateBuilding>().noisePerCit + "%" + Environment.NewLine;
+
+        if(stats.GetComponent<CreateBuilding>().polPerCit >= 30)
+        {
+            dataToSave += "Pollution Levels Too High!!!" + Environment.NewLine;
+        }
+        else
+        {
+            dataToSave += "Pollution at Acceptable Levels" + Environment.NewLine;
+        }
+        if (stats.GetComponent<CreateBuilding>().polPerCit >= 30)
+        {
+            dataToSave += "Noise Levels Too High!!!!";
+        }
+        else
+        {
+            dataToSave += "Noise at Acceptable Levels";
+        }
 
         GameObject analyticMenu = GameObject.Find("Analytics Menu");
         analyticMenu.GetComponent<AnalyticsMenu>().text.text = dataToSave;
