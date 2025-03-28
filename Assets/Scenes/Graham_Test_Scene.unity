@@ -442,7 +442,7 @@ GameObject:
   - component: {fileID: 22242667}
   - component: {fileID: 22242666}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Analytic Text
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -464,7 +464,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -17, y: 118}
+  m_AnchoredPosition: {x: -17, y: 113}
   m_SizeDelta: {x: 200, y: 50}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &22242666
@@ -514,8 +514,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 12
+  m_fontSizeBase: 12
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -550,7 +550,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -34.90454, w: -228.19913}
+  m_margin: {x: 0, y: 0, z: -34.90454, w: -377.7579}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -915,6 +915,7 @@ MonoBehaviour:
   - {fileID: 8964402343246118786, guid: 6415100e42056474fb95481c5c3046f3, type: 3}
   npcButton: {fileID: 1995594105}
   spawnArea: {fileID: 411880940}
+  buildingSpawner: {fileID: 0}
 --- !u!4 &346534670
 Transform:
   m_ObjectHideFlags: 0
@@ -1464,16 +1465,9 @@ MonoBehaviour:
   pollutionSlider: {fileID: 11950816}
   noiseSlider: {fileID: 1683732536}
   capacitySlider: {fileID: 87155522}
-
-  buildingType: 0
-
   buildingDropdown: {fileID: 1264961169}
-
   totalPop: 0
   popCount: {fileID: 1590776450}
-
-
-
 --- !u!4 &418860677
 Transform:
   m_ObjectHideFlags: 0
@@ -1979,14 +1973,14 @@ RectTransform:
   m_GameObject: {fileID: 652473116}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 2.5, y: 3, z: 1}
+  m_LocalScale: {x: 2.5, y: 4.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1695063272}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -74}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &652473118
@@ -4776,7 +4770,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1559505588}
   m_CullTransparentMesh: 1
-
 --- !u!1001 &1561574209
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5000,7 +4993,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1590776448}
   m_CullTransparentMesh: 1
-
 --- !u!1 &1611840888
 GameObject:
   m_ObjectHideFlags: 0
@@ -5532,7 +5524,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 64}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1695063273
@@ -5551,6 +5543,7 @@ MonoBehaviour:
   text: {fileID: 22242666}
   panel: {fileID: 652473116}
   on: 0
+  analytics: {fileID: 4900000, guid: 113dd451d2653314b9a8e7555b103baa, type: 3}
 --- !u!1 &1721046097
 GameObject:
   m_ObjectHideFlags: 0
@@ -6600,3 +6593,4 @@ SceneRoots:
   - {fileID: 1131985586}
   - {fileID: 1632606765}
   - {fileID: 514288495}
+  - {fileID: 1561574209}

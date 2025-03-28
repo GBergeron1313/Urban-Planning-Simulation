@@ -122,6 +122,7 @@ public class CreateBuilding : MonoBehaviour
 
         cell.contents = bs;
 
+        if(cell.cell_type == CellType.Building)
         totalPop += (int)bs.max_capacity;
         popCount.text = "Total Population: " + totalPop;
 

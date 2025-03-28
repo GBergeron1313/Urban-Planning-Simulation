@@ -382,6 +382,9 @@ public class MetricsSystem : MonoBehaviour
                " Average Pollution: " + avgPollution + Environment.NewLine +
                " Max Pollution: " + maxGridPollution + Environment.NewLine;
 
+        GameObject analyticMenu = GameObject.Find("Analytics Menu");
+        analyticMenu.GetComponent<AnalyticsMenu>().text.text = dataToSave;
+
         try
         {
             File.WriteAllText(filePath, dataToSave);

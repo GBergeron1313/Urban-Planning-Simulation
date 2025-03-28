@@ -12,6 +12,7 @@ public class AnalyticsMenu : MonoBehaviour
     public TextMeshProUGUI text;
     public GameObject panel;
     public bool on;
+    public TextAsset analytics;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,7 +25,7 @@ public class AnalyticsMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     void ToggleWindow()
