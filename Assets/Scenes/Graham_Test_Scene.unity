@@ -836,7 +836,7 @@ MonoBehaviour:
   musicSource: {fileID: 695034669}
   SFXSource: {fileID: 1547555802}
   background: {fileID: 8300000, guid: bb76d6cbed945374d930aa31a17e33e4, type: 3}
-  placedown: {fileID: 0}
+  placedown: {fileID: 8300000, guid: b99da9a57308d4ba1bee1cf1d9038376, type: 3}
 --- !u!4 &185762398
 Transform:
   m_ObjectHideFlags: 0
