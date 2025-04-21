@@ -21,7 +21,7 @@ namespace Citizens
         public const float acceleration = 0.5f;
         public const float angular_speed = 120f;
         public const float area_cost = 1f;
-        public const float set_speed = 0.1f;   
+        public const float set_speed = 0.1f;
     }
 
 
@@ -94,7 +94,7 @@ namespace Citizens
             agent.acceleration = DefaultCitizenInfo.acceleration;
             agent.angularSpeed = DefaultCitizenInfo.angular_speed;
             nma_citizens.Add(agent);
-            last_clock_update = SimCore.Instance.simulationClock;
+            last_clock_update = SimCore.Time.now;
         }
 
 
@@ -110,7 +110,7 @@ namespace Citizens
 
         private void UpdateDestinationAndClock()
         {
-            last_clock_update = SimCore.Instance.simulationClock;
+            last_clock_update = SimCore.Time.now;
 
             if (agent.remainingDistance < 0.25f)
             {
@@ -122,9 +122,9 @@ namespace Citizens
         Vector3 curr_dest;
         private void FixedUpdate()
         {
-            if (SimCore.Instance.sim_state == SimState.Running)
+            if (SimCore.Instance.state == SimState.Running)
             {
-                if (SimCore.Instance.simulationClock
+                if (SimCore.Time.now
                     - last_clock_update
                     > dest_update_interval)
                 {
@@ -148,7 +148,8 @@ namespace Citizens
         {
         }
 
-        public static int citizen_count() {
+        public static int citizen_count()
+        {
             return nma_citizens.Count;
         }
     }

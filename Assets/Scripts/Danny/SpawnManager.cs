@@ -57,7 +57,7 @@ namespace UrbanPlanning
                     .with_position(positions[i])
                     .with_destination(destinations[i])
                     .with_enabled_movement(
-                            SimCore.Instance.sim_state
+                            SimCore.Instance.state
                             == SimState.Running);
             }
 
@@ -96,7 +96,7 @@ namespace UrbanPlanning
                     .with_model((CitizenModel)rand_prefab_idx)
                     .with_position(Building.building_positions[rand_position_idx])
                     .with_enabled_movement(
-                            SimCore.Instance.sim_state
+                            SimCore.Instance.state
                             == SimState.Running);
             }
 

@@ -215,7 +215,7 @@ public class GridSystem : MonoBehaviour
         {
             string focus;
             int num_cells = Cell.all_cells.Count;
-            var time = SimCore.Instance.simulationClock;
+            var time = SimCore.Time.now;
             var building = Building.hovering?.legible;
             var cell = Cell.hovering?.location.ToString();
             ZoneType zone_type;

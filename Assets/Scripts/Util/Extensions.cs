@@ -1,5 +1,4 @@
 using BuildingUtils;
-/*using Citizens;*/
 using UnityEngine;
 
 static class Extensions
@@ -103,18 +102,18 @@ static class Extensions
         return info;
     }
 
-    public static string into_serial(this Cell cell)
-    {
-        CellSerial cs = new CellSerial();
-        cs.location = cell.location;
-        cs.zone_type = cell.zone_type;
-        cs.color = cell.color;
-        cs.cell_type = cell.cell_type;
-        cs.building_model = cell.contents?.model ?? BuildingModel.NONE;
-        cs.rotation = cell.contents?.get_rotation() ?? Quaternion.identity;
-        return JsonUtility.ToJson(cs);
-    }
-
+    /*public static string into_serial(this Cell cell)*/
+    /*{*/
+    /*    CellSerial cs = new CellSerial();*/
+    /*    cs.location = cell.location;*/
+    /*    cs.zone_type = cell.zone_type;*/
+    /*    cs.color = cell.color;*/
+    /*    cs.cell_type = cell.cell_type;*/
+    /*    cs.building_model = cell.contents?.model ?? BuildingModel.NONE;*/
+    /*    cs.rotation = cell.contents?.get_rotation() ?? Quaternion.identity;*/
+    /*    return JsonUtility.ToJson(cs);*/
+    /*}*/
+    /**/
     /*public static string into_serial(this Citizen citizen)*/
     /*{*/
     /*    CitizenSerial citizen_ser = new CitizenSerial();*/
@@ -127,26 +126,24 @@ static class Extensions
     /*{*/
     /*}*/
 
-    public static void from_serial(this Cell c, string cell_serial)
-    {
-        CellSerial cs = JsonUtility.FromJson<CellSerial>(cell_serial);
-
-        c.location = cs.location;
-        c.cell_type = cs.cell_type;
-        c.SetZoneTypeAndUpdate(cs.zone_type);
-
-        if (cs.building_model is BuildingModel model && model != BuildingModel.NONE)
-        {
-            c.FromModelAndUpdate(model);
-            Debug.Log($"from_serial({c}, {cell_serial})");
-            Debug.Log($"Rotation being applied: {cs.rotation}");
-            Debug.Log($"Applied to: {c.contents}");
-            c.contents.apply_rotation(cs.rotation);
-        }
-        else
-        {
-            c.SetWalkableAndUpdate(false);
-        }
-    }
-
+    /*public static void from_serial(this Cell c, string cell_serial)*/
+    /*{*/
+    /*    CellSerial cs = JsonUtility.FromJson<CellSerial>(cell_serial);*/
+    /*    c.location = cs.location;*/
+    /*    c.cell_type = cs.cell_type;*/
+    /*    c.SetZoneTypeAndUpdate(cs.zone_type);*/
+    /*    if (cs.building_model is BuildingModel model && model != BuildingModel.NONE)*/
+    /*    {*/
+    /*        c.FromModelAndUpdate(model);*/
+    /*        Debug.Log($"from_serial({c}, {cell_serial})");*/
+    /*        Debug.Log($"Rotation being applied: {cs.rotation}");*/
+    /*        Debug.Log($"Applied to: {c.contents}");*/
+    /*        c.contents.apply_rotation(cs.rotation);*/
+    /*    }*/
+    /*    else*/
+    /*    {*/
+    /*        c.SetWalkableAndUpdate(false);*/
+    /*    }*/
+    /*}*/
+    /**/
 }
