@@ -1,4 +1,4 @@
- Cells: 100
+ Cells: 1200
  Residential: 0
  Commercial: 0
  Industrial: 0
