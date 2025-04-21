@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Citizens
+  - Car
+  - Audio
   layers:
   - Default
   - TransparentFX

@@ -30,7 +30,7 @@ public class Cell : MonoBehaviour
     public Color color;
     public CellType cell_type;
     public bool walkable;
-
+    public AudioManager AudioManager;
     public Building contents;
 
     public void SetWalkableAndUpdate(bool is_walkable)
@@ -108,6 +108,9 @@ public class Cell : MonoBehaviour
         SetWalkableAndUpdate(true);
         Building.building_positions.Add(gameObject.transform.position);
 
+        // Play placement sound
+        creator.AudioManager.PlaySFX(creator.AudioManager.placedown);
+
         return contents != null;
     }
 
@@ -134,6 +137,9 @@ public class Cell : MonoBehaviour
         cell_type = CellType.Road;
         creator.attach_building(this);
         SetWalkableAndUpdate(true);
+
+        // Play placement sound
+        creator.AudioManager.PlaySFX(creator.AudioManager.placedown);
 
         return contents != null;
     }
@@ -326,6 +332,7 @@ public class Cell : MonoBehaviour
     void Awake()
     {
         renderer ??= gameObject.GetComponent<Renderer>();
+        AudioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
     }
 
     // Start is called before the first frame update

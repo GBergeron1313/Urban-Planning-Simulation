@@ -25,6 +25,12 @@ public class CreateBuilding : MonoBehaviour
     // Keeping references to prefabs for later removal.
     private List<GameObject> prefabs;
 
+    public AudioManager AudioManager;
+    private void Awake()
+    {
+        AudioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -140,6 +146,10 @@ public class CreateBuilding : MonoBehaviour
     {
         print($"CreateBuilding: {x}, {z}, {color}, {zone_type}, {cell_type}");
         var next_prefab = getCellTypeShape(cell_type);
+
+        // Play placement sound
+        AudioManager.PlaySFX(AudioManager.placedown);
+
         if (cell_type == CellType.Building)
         {          
             applyBuildingShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
