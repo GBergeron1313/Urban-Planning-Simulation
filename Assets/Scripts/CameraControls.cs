@@ -9,17 +9,10 @@ public class CameraControls : MonoBehaviour
     public float acceleration = 10f;
     public float deceleration = 15f;
 
-    [Header("Zoom Settings")]
-    public float zoomSpeed = 10f;
-    public float minHeight = 2f;
-    public float maxHeight = 20f;
-    public float zoomSmoothness = 0.2f;
-    public AnimationCurve zoomCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
-
     [Header("Rotation Settings")]
-    public float rotationSpeed = 2f;
-    public float minPitch = -80f;
-    public float maxPitch = 80f;
+    public float sensitivity = 2f;
+    public float minPitch = -90f;
+    public float maxPitch = 90f;
     public bool invertY = false;
     public float rotationSmoothness = 0.1f;
 
@@ -32,8 +25,6 @@ public class CameraControls : MonoBehaviour
     private Vector3 targetPosition;
     private Vector3 currentVelocity;
     private Vector3 smoothVelocity;
-    private float currentZoomVelocity;
-    private float targetZoom;
     private float currentYaw;
     private float currentPitch;
     private float targetYaw;
@@ -46,7 +37,6 @@ public class CameraControls : MonoBehaviour
     {
         cam = GetComponent<Camera>();
         targetPosition = transform.position;
-        targetZoom = transform.position.y;
         currentYaw = transform.eulerAngles.y;
         currentPitch = transform.eulerAngles.x;
         targetYaw = currentYaw;
@@ -59,7 +49,6 @@ public class CameraControls : MonoBehaviour
         HandleInput();
         UpdateMovement();
         UpdateRotation();
-        UpdateZoom();
     }
 
     private void HandleInput()
@@ -68,48 +57,84 @@ public class CameraControls : MonoBehaviour
         Vector3 input = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical"));
 
         // Calculate target velocity based on input
-        Vector3 targetVelocity = input.normalized * moveSpeed;
+        Vector3 targetVelocity = input.normalized;
+
+        // We want to prevent the camera from moving 
+        // diagonally, because:
+        // 1. It conflicts with dedicated vertical 
+        //    movement, through Space and LeftShift,
+        // 
+        // 2. Often, one will want to repeat an action,
+        //    perhaps while placing a line of road tiles,
+        //    and if they don't want to move vertically
+        //    while doing so.
+        //    This is one thing I've found frustrating
+        //    since day 1. -Reid
+        Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+        targetVelocity = (targetVelocity.x * transform.right + targetVelocity.z * forward) * moveSpeed;
 
         // Apply acceleration/deceleration
         currentVelocity = Vector3.Lerp(
             currentVelocity,
             targetVelocity,
-            input.magnitude > 0 ? acceleration : deceleration * Time.unscaledDeltaTime
+            input.magnitude > 0
+            ? (acceleration * Time.unscaledDeltaTime)
+            : (deceleration * Time.unscaledDeltaTime)
         );
 
         // Update target position
-        targetPosition += transform.TransformDirection(currentVelocity) * Time.unscaledDeltaTime;
+        targetPosition += currentVelocity * Time.unscaledDeltaTime;
 
-        // Handle rotation toggle
-        if (Input.GetKeyDown(KeyCode.Space))
+        // Manual adjustment to targetPosition for 
+        // vertical movement.
+        //
+        // FIXME: Add Axes for Vertical movement,
+        //        such that Input.GetAxisRaw(.., VerticalKey, ..)
+        //        let's us do this in a more elegant way.
+        if (Input.GetKey(KeyCode.Space))
         {
-            isRotating = !isRotating;
-            Cursor.visible = !isRotating;
-            Cursor.lockState = isRotating ? CursorLockMode.Locked : CursorLockMode.Confined;
+            targetPosition[1] += moveSpeed * Time.unscaledDeltaTime;
+        }
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            targetPosition[1] -= moveSpeed * Time.unscaledDeltaTime;
         }
 
-        // Handle zoom input
-        float scrollInput = Input.GetAxis("Mouse ScrollWheel");
-        if (Mathf.Abs(scrollInput) > 0)
+        if (Input.GetKeyDown(KeyCode.P))
         {
-            targetZoom = Mathf.Clamp(targetZoom - scrollInput * zoomSpeed, minHeight, maxHeight);
+            Debug.DrawRay(transform.position, transform.forward * 10, Color.black, 10f);
+        }
+
+        // Handle rotation toggle
+        if (Input.GetMouseButtonDown(1))
+        {
+            isRotating = !isRotating;
+            /*Cursor.visible = !isRotating;*/
+            Cursor.lockState = isRotating ? CursorLockMode.Locked : CursorLockMode.Confined;
         }
 
         // Handle rotation input
         if (isRotating)
         {
-            float mouseX = Input.GetAxis("Mouse X") * rotationSpeed;
-            float mouseY = Input.GetAxis("Mouse Y") * rotationSpeed * (invertY ? 1 : -1);
+            float mouseX = Input.GetAxis("Mouse X") * sensitivity;
+            float mouseY = Input.GetAxis("Mouse Y") * sensitivity * (invertY ? 1 : -1);
 
             targetYaw += mouseX;
             targetPitch = Mathf.Clamp(targetPitch + mouseY, minPitch, maxPitch);
         }
-
-        // Reset camera
-        if (Input.GetKeyDown(KeyCode.P))
+        else
         {
-            ResetCamera();
+            Rect res = Screen.safeArea;
+            lastMousePosition.x = res.width / 2;
+            lastMousePosition.y = res.height / 2;
         }
+
+        /*// Reset camera*/
+        /*if (Input.GetKeyDown(KeyCode.P))*/
+        /*{*/
+        /*    ResetCamera();*/
+        /*}*/
+
     }
 
     private void UpdateMovement()
@@ -136,23 +161,6 @@ public class CameraControls : MonoBehaviour
         transform.rotation = Quaternion.Euler(currentPitch, currentYaw, 0);
     }
 
-    private void UpdateZoom()
-    {
-        float currentHeight = transform.position.y;
-        float newHeight = Mathf.SmoothDamp(
-            currentHeight,
-            targetZoom,
-            ref currentZoomVelocity,
-            zoomSmoothness
-        );
-
-        transform.position = new Vector3(
-            transform.position.x,
-            newHeight,
-            transform.position.z
-        );
-    }
-
     private Vector3 ClampPositionToBoundaries(Vector3 position)
     {
         return new Vector3(
@@ -162,19 +170,17 @@ public class CameraControls : MonoBehaviour
         );
     }
 
-    private void ResetCamera()
-    {
-        targetPosition = new Vector3(0, minHeight, -10);
-        targetZoom = minHeight;
-        targetYaw = 0;
-        targetPitch = 0;
-        currentVelocity = Vector3.zero;
-        smoothVelocity = Vector3.zero;
-        currentZoomVelocity = 0;
-        isRotating = false;
-        Cursor.visible = true;
-        Cursor.lockState = CursorLockMode.Confined;
-    }
+    /*private void ResetCamera()*/
+    /*{*/
+    /*    targetPosition = new Vector3(0, minHeight, -10);*/
+    /*    targetYaw = 0;*/
+    /*    targetPitch = 0;*/
+    /*    currentVelocity = Vector3.zero;*/
+    /*    smoothVelocity = Vector3.zero;*/
+    /*    isRotating = false;*/
+    /*    Cursor.visible = true;*/
+    /*    Cursor.lockState = CursorLockMode.Confined;*/
+    /*}*/
 
     private void OnDrawGizmos()
     {
@@ -203,10 +209,5 @@ public class CameraControls : MonoBehaviour
     {
         targetYaw = yaw;
         targetPitch = Mathf.Clamp(pitch, minPitch, maxPitch);
-    }
-
-    public void SetZoom(float height)
-    {
-        targetZoom = Mathf.Clamp(height, minHeight, maxHeight);
     }
 }
