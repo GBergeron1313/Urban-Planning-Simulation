@@ -146,11 +146,6 @@ public class GridSystem : MonoBehaviour
                     cell.GetComponent<Renderer>().material = cellMaterial;
                 }
 
-                // Add thin collider for mouse interaction
-                /*BoxCollider collide = cell.AddComponent<BoxCollider>();*/
-                /*// The name "collider" was causing conflicts*/
-                /*collide.size = new Vector3(1, 1, 0.1f);*/
-
                 // Store reference to cell
                 gridCells[x, z] = cell;
 
@@ -159,6 +154,7 @@ public class GridSystem : MonoBehaviour
                 c.location = new Vector2Int(x, z);
                 c.SetZoneTypeAndUpdate(ZoneType.None);
                 c.SetWalkableAndUpdate(false);
+                c.register();
             }
         }
 

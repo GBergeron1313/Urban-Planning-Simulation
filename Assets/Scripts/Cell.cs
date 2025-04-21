@@ -3,6 +3,8 @@ using UnityEngine.AI;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine.EventSystems;
+using UnityEngine.Assertions;
+using System;
 using BuildingUtils;
 
 public enum CellType
@@ -10,6 +12,18 @@ public enum CellType
     None,
     Building,
     Road,
+}
+
+[Serializable]
+public class CellSerial
+{
+    public Vector2Int location;
+    public ZoneType zone_type;
+    public Color color;
+    public CellType cell_type;
+    // FIXME: These should be part of an optional BuildingSerial field
+    public BuildingModel building_model;
+    public Quaternion rotation;
 }
 
 public class Cell : MonoBehaviour
@@ -30,8 +44,11 @@ public class Cell : MonoBehaviour
     public Color color;
     public CellType cell_type;
     public bool walkable;
-    public AudioManager AudioManager;
+
+    private static AudioManager am;
+
     public Building contents;
+
 
     public void SetWalkableAndUpdate(bool is_walkable)
     {
@@ -40,15 +57,13 @@ public class Cell : MonoBehaviour
         if (walkable)
         {
             var nms = gameObject.AddComponent<NavMeshSurface>();
+            Assert.IsNotNull(nms);
             nms.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-            nms.BuildNavMesh();
 
             var nmo = GetComponent<NavMeshObstacle>();
-            if (nmo)
-                nmo.enabled = false;
-            var grid_tile_nmo = AtCoords(location.x, location.y)?.GetComponent<NavMeshObstacle>();
-            if (grid_tile_nmo)
-                grid_tile_nmo.enabled = false;
+            Assert.IsNotNull(nmo);
+            nmo.enabled = false;
+            nms.BuildNavMesh();
         }
         else
         {
@@ -90,6 +105,14 @@ public class Cell : MonoBehaviour
         {
             Cell.building_mode = BuildingMode.PlacingBuilding;
         }
+        if (building_mode == BuildingMode.PlacingBuilding)
+        {
+            creator.SetDropdownValues(CellType.Building);
+        }
+        else if (building_mode == BuildingMode.PlacingRoad)
+        {
+            creator.SetDropdownValues(CellType.Road);
+        }
     }
 
     public void SetZoneTypeAndUpdate(ZoneType zt)
@@ -97,26 +120,6 @@ public class Cell : MonoBehaviour
         zone_type = zt;
         color = GridSystem.ZoneColor(zone_type);
         m_renderer.material.color = color;
-    }
-
-    private bool _TryPushBuilding()
-    {
-        if (contents != null) return false;
-
-        cell_type = CellType.Building;
-        creator.attach_building(this);
-        SetWalkableAndUpdate(true);
-        Building.building_positions.Add(gameObject.transform.position);
-
-        // Play placement sound
-        creator.AudioManager.PlaySFX(creator.AudioManager.placedown);
-
-        return contents != null;
-    }
-
-    public bool TryPushBuilding()
-    {
-        return Buildable() && _TryPushBuilding();
     }
 
     public bool Removable()
@@ -132,38 +135,80 @@ public class Cell : MonoBehaviour
             && contents == null;
     }
 
-    private bool _TryPushRoad()
+    private void PushRoad(BuildingModel model)
     {
         cell_type = CellType.Road;
-        creator.attach_building(this);
+        creator.attach_building(this, model);
+        config_anim();
+
         SetWalkableAndUpdate(true);
-
-        // Play placement sound
-        creator.AudioManager.PlaySFX(creator.AudioManager.placedown);
-
-        return contents != null;
     }
 
-    public bool TryPushRoad()
+    private void config_anim()
     {
-        return Buildable() && _TryPushRoad();
+        Assert.IsNotNull(contents);
+
+        var animation = contents.gameObject.AddComponent<PlacementAnim>();
+
+        animation.Origin = contents.transform.position + Vector3.up * 2;
+        animation.Target = contents.transform.position;
+        animation.AnimSizeOrigin = Vector3.zero;
+        animation.AnimSizeTarget = Vector3.one;
+        animation.AnimStepBy = 0.05f;
+        animation.Postponed = (location.x + location.y) * 0.05f;
+
+        PlacementAnim initial_anim;
+        if (gameObject.TryGetComponent<PlacementAnim>(out initial_anim))
+        {
+            animation.Target = initial_anim.Target;
+        }
+
+        var rends = contents.GetComponentsInChildren<Renderer>();
+        foreach (var rend in rends)
+            rend.enabled = false;
+
+        animation.OnAnimStart = () =>
+        {
+            foreach (var rend in rends)
+                rend.enabled = true;
+        };
+
+        animation.OnAnimOver = () =>
+        {
+            am.PlaySFX(am.placedown);
+        };
+
+        if (!animation.InitAnim())
+        {
+            Debug.LogWarning($"Animation for {contents} not Initialized. It might not play.");
+        }
     }
 
-    public void SetCellTypeAndUpdate(CellType ct)
+    public void FromModelAndUpdate(BuildingModel model)
     {
+        CellType ct = model.as_cell_type();
         if (ct == CellType.Building)
         {
-            TryPushBuilding();
+            PushBuilding(model);
         }
         else if (ct == CellType.Road)
         {
-            TryPushRoad();
+            PushRoad(model);
         }
         else
         {
             cell_type = ct;
             SetWalkableAndUpdate(false);
         }
+    }
+
+    private void PushBuilding(BuildingModel model)
+    {
+        cell_type = CellType.Building;
+        Building.building_positions.Add(transform.position);
+        creator.attach_building(this, model);
+        SetWalkableAndUpdate(true);
+        config_anim();
     }
 
     public static Cell AtCoords(Vector2Int loc)
@@ -311,11 +356,11 @@ public class Cell : MonoBehaviour
             switch (building_mode)
             {
                 case BuildingMode.PlacingBuilding:
-                    TryPushBuilding();
+                    FromModelAndUpdate(creator.buildingDropdown.value.as_building_model());
                     break;
 
                 case BuildingMode.PlacingRoad:
-                    TryPushRoad();
+                    FromModelAndUpdate(creator.buildingDropdown.value.as_road_model());
                     break;
 
                 default:
@@ -332,19 +377,28 @@ public class Cell : MonoBehaviour
     void Awake()
     {
         m_renderer ??= gameObject.GetComponent<Renderer>();
-        AudioManager = GameObject.Find("Audio Manager").GetComponent<AudioManager>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        creator ??= GameObject.Find("BuildingSpawner").GetComponent<CreateBuilding>();
-        all_cells.Add(this);
+        creator ??= GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>();
+        am ??= GameObject.Find("Audio Manager").GetComponent<AudioManager>();
+        Assert.IsNotNull(all_cells, "Cell::Start(): all_cells found null");
+    }
+
+    void OnDestroy()
+    {
     }
 
     // Update is called once per frame
     void Update()
     {
+    }
+
+    internal void register()
+    {
+        Cell.all_cells.Add(this);
     }
 }
 
