@@ -4,6 +4,7 @@ using UrbanPlanning;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Assertions;
+using BuildingUtils;
 
 namespace SavingReloading
 {

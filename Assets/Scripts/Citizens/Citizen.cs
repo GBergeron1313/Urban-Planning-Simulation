@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BuildingUtils;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -145,6 +146,10 @@ namespace Citizens
 
         private void Update()
         {
+        }
+
+        public static int citizen_count() {
+            return nma_citizens.Count;
         }
     }
 }

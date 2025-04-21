@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Citizens;
+using BuildingUtils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -227,7 +227,7 @@ public class GridSystem : MonoBehaviour
             else if (building is not null)
             {
                 focus = building;
-                zone_type = Building.hovering.building_type;
+                zone_type = ZoneType.None;
             }
             else
             {

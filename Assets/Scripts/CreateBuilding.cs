@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BuildingUtils;
 using Citizens;
 using TMPro;
 using UnityEngine;
@@ -122,7 +123,6 @@ public class CreateBuilding : MonoBehaviour
         bs.air_pollution = pollutionSlider.value;
         bs.noise_pollution = noiseSlider.value;
         bs.max_capacity = capacitySlider.value;
-        bs.building_type = cell.zone_type;
         bs.attached_to = cell;
 
         cell.contents = bs;
@@ -169,7 +169,6 @@ public class CreateBuilding : MonoBehaviour
         bs.air_pollution = pollutionSlider.value;
         bs.noise_pollution = noiseSlider.value;
         bs.max_capacity = capacitySlider.value;
-        bs.building_type = zone_type;
 
         prefabs.Add(next_prefab);
 

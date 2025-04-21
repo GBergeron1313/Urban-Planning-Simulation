@@ -1,9 +1,9 @@
 using UnityEngine;
-using Citizens;
 using UnityEngine.AI;
 using System.Collections.Generic;
 using Unity.AI.Navigation;
 using UnityEngine.EventSystems;
+using BuildingUtils;
 
 public enum CellType
 {
