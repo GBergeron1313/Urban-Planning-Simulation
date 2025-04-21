@@ -68,8 +68,8 @@ public class SimCore : MonoBehaviour
             Destroy(gameObject);
         }
 
-        playSimulationButton = GameObject.Find("PLAY").GetComponent<Button>();
-        pauseSimulationButton = GameObject.Find("Pause").GetComponent<Button>();
+        playSimulationButton = GameObject.Find("PlayButton").GetComponent<Button>();
+        pauseSimulationButton = GameObject.Find("PauseButton").GetComponent<Button>();
     }
 
     void Start()

@@ -1,10 +1,8 @@
 using Citizens;
 using System;
 using System.Collections.Generic;
-using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -385,10 +383,10 @@ public class MetricsSystem : MonoBehaviour
                " Average Pollution: " + avgPollution + Environment.NewLine +
                " Max Pollution: " + maxGridPollution + Environment.NewLine +
                "-------------------------------------------------------" + Environment.NewLine +
-               "Pollution Per Citzen: " + stats.GetComponent<CreateBuilding>().polPerCit + "%" + Environment.NewLine +
-               "Noise Per Citzen: " + stats.GetComponent<CreateBuilding>().noisePerCit + "%" + Environment.NewLine;
+               "Pollution Per Citzen: " + Cell.creator.polPerCit + "%" + Environment.NewLine +
+               "Noise Per Citzen: " + Cell.creator.noisePerCit + "%" + Environment.NewLine;
 
-        if(stats.GetComponent<CreateBuilding>().polPerCit >= 30)
+        if (Cell.creator.polPerCit >= 30)
         {
             dataToSave += "Pollution Levels Too High!!!" + Environment.NewLine;
         }
@@ -396,7 +394,7 @@ public class MetricsSystem : MonoBehaviour
         {
             dataToSave += "Pollution at Acceptable Levels" + Environment.NewLine;
         }
-        if (stats.GetComponent<CreateBuilding>().polPerCit >= 30)
+        if (Cell.creator.polPerCit >= 30)
         {
             dataToSave += "Noise Levels Too High!!!!";
         }

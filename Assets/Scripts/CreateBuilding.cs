@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using Citizens;
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -28,13 +27,13 @@ public class CreateBuilding : MonoBehaviour
     public AudioManager AudioManager;
     private void Awake()
     {
-        AudioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+        AudioManager = GameObject.Find("Audio Manager").GetComponent<AudioManager>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        name = "CreateBuilding";
+        name = "BuildingSpawner";
         prefabs = new List<GameObject>();
     }
 
@@ -128,15 +127,17 @@ public class CreateBuilding : MonoBehaviour
 
         cell.contents = bs;
 
-        if(cell.cell_type == CellType.Building)
+        if (cell.cell_type == CellType.Building)
         {
             totalPol += (int)bs.air_pollution;
             totalNoise += (int)bs.noise_pollution;
             totalPop += (int)bs.max_capacity;
-            polPerCit = totalPol / totalPop;
-            noisePerCit = totalNoise / totalPop;
+            if (Citizen.citizens_enabled)
+            {
+                polPerCit = totalPol / totalPop;
+                noisePerCit = totalNoise / totalPop;
+            }
         }
-        
         popCount.text = "Pollution Level: " + totalPol + "\nNoise Level: " + totalNoise + "\nTotal Population: " + totalPop;
 
         prefabs.Add(next_prefab);
@@ -151,7 +152,7 @@ public class CreateBuilding : MonoBehaviour
         AudioManager.PlaySFX(AudioManager.placedown);
 
         if (cell_type == CellType.Building)
-        {          
+        {
             applyBuildingShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
         }
         else if (cell_type == CellType.Road)

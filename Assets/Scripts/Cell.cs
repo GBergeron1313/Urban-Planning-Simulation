@@ -23,7 +23,7 @@ public class Cell : MonoBehaviour
     public static GridSystem grid;
     public static List<Cell> all_cells = new List<Cell>();
 
-    private new Renderer renderer;
+    private Renderer m_renderer;
 
     public Vector2Int location;
     public ZoneType zone_type;
@@ -96,7 +96,7 @@ public class Cell : MonoBehaviour
     {
         zone_type = zt;
         color = GridSystem.ZoneColor(zone_type);
-        renderer.material.color = color;
+        m_renderer.material.color = color;
     }
 
     private bool _TryPushBuilding()
@@ -248,7 +248,7 @@ public class Cell : MonoBehaviour
 
         Color baseColor = GridSystem.ZoneColor(zone_type);
         Color blendedHoverColor = Color.Lerp(baseColor, GridSystem.g_hoverColor, 0.3f);
-        renderer.material.color = blendedHoverColor;
+        m_renderer.material.color = blendedHoverColor;
     }
 
     private void OnMouseExit()
@@ -266,7 +266,7 @@ public class Cell : MonoBehaviour
         }
         hovering = null;
         last_hovered = this;
-        renderer.material.color = GridSystem.ZoneColor(zone_type);
+        m_renderer.material.color = GridSystem.ZoneColor(zone_type);
     }
 
     private void OnMouseOver()
@@ -282,7 +282,7 @@ public class Cell : MonoBehaviour
             hovering = this;
             Color baseColor = GridSystem.ZoneColor(hovering.zone_type);
             Color blendedHoverColor = Color.Lerp(baseColor, GridSystem.g_hoverColor, 0.3f);
-            hovering.renderer.material.color = blendedHoverColor;
+            hovering.m_renderer.material.color = blendedHoverColor;
         }
     }
 
@@ -290,7 +290,7 @@ public class Cell : MonoBehaviour
     {
         if (EventSystem.current.IsPointerOverGameObject()) return;
         if (building_mode != BuildingMode.MarkingZoneType) return;
-        renderer.material.color = GridSystem.ZoneColor(paintbrush);
+        m_renderer.material.color = GridSystem.ZoneColor(paintbrush);
         zone_type = paintbrush;
         dragging = true;
     }
@@ -331,14 +331,14 @@ public class Cell : MonoBehaviour
 
     void Awake()
     {
-        renderer ??= gameObject.GetComponent<Renderer>();
-        AudioManager = GameObject.FindGameObjectWithTag("Audio").GetComponent<AudioManager>();
+        m_renderer ??= gameObject.GetComponent<Renderer>();
+        AudioManager = GameObject.Find("Audio Manager").GetComponent<AudioManager>();
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        creator ??= GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>();
+        creator ??= GameObject.Find("BuildingSpawner").GetComponent<CreateBuilding>();
         all_cells.Add(this);
     }
 
