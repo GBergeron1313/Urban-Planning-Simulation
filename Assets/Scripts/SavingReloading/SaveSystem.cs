@@ -63,7 +63,7 @@ namespace SavingReloading
         {
             ClearCurrentData();
             LoadGridData();
-            /*LoadCitizenData();*/
+            LoadCitizenData();
 
             /*metricsSystem.MetricReload();*/
         }
@@ -73,7 +73,8 @@ namespace SavingReloading
             creator.clearBuildings();
             gridSystem.ClearGridReset();
             Building.ClearBuildings();
-            /*Citizen.ClearCitizens();*/
+            if (Citizen.citizens_enabled)
+                Citizen.ClearCitizens();
         }
 
         private void SaveCurrentCitizenData()
@@ -115,7 +116,6 @@ namespace SavingReloading
 
         private void LoadCitizenData()
         {
-
             string path = Path.Combine(savePath, CitizenDataSaveFileName);
             if (!File.Exists(path))
             {

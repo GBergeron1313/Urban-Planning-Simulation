@@ -154,7 +154,7 @@ public class Cell : MonoBehaviour
         animation.Target = contents.transform.position;
         animation.AnimSizeOrigin = Vector3.zero;
         animation.AnimSizeTarget = Vector3.one;
-        animation.AnimStepBy = 0.05f;
+        animation.AnimStepBy = 0.075f;
         animation.Postponed = (location.x + location.y) * 0.05f;
 
         PlacementAnim initial_anim;

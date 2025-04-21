@@ -194,14 +194,9 @@ public class GridSystem : MonoBehaviour
         show_text();
 
 
-        if (Cell.building_mode == BuildingMode.PlacingBuilding)
-        {
-            buildingUI.SetActive(true);
-        }
-        else
-        {
-            buildingUI.SetActive(false);
-        }
+        buildingUI.SetActive(
+                Cell.building_mode == BuildingMode.PlacingBuilding
+                || Cell.building_mode == BuildingMode.PlacingRoad);
         zoneButton.GetComponentInChildren<TextMeshProUGUI>().text = $"{Cell.paintbrush}";
     }
 
