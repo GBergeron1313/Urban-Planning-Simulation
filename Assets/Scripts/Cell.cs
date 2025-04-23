@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.AI;
 using System.Collections.Generic;
-using Unity.AI.Navigation;
 using UnityEngine.EventSystems;
 using UnityEngine.Assertions;
 using System;
@@ -45,6 +44,8 @@ public class Cell : MonoBehaviour
     public CellType cell_type;
     public bool walkable;
 
+    private NavMeshObstacle nmo;
+
     private static AudioManager am;
 
     public Building contents;
@@ -54,40 +55,9 @@ public class Cell : MonoBehaviour
     {
         walkable = is_walkable;
 
-        if (walkable)
-        {
-            var nms = gameObject.AddComponent<NavMeshSurface>();
-            Assert.IsNotNull(nms);
-            nms.useGeometry = NavMeshCollectGeometry.PhysicsColliders;
-
-            var nmo = GetComponent<NavMeshObstacle>();
-            Assert.IsNotNull(nmo);
-            nmo.enabled = false;
-            nms.BuildNavMesh();
-        }
-        else
-        {
-            NavMeshObstacle nmo;
-            if (!gameObject.TryGetComponent<NavMeshObstacle>(out nmo))
-            {
-                nmo = gameObject.AddComponent<NavMeshObstacle>();
-            }
-            nmo.enabled = true;
-            nmo.carving = true;
-            // The "gridCells", in GridSystem, are rotated quads.
-            // This makes the X and Y dimensions responsible for
-            // width and height. Maybe not in that order, but the
-            // important thing to note is that Z, in the local space,
-            // refers to height. 
-            // This is why nmo.size is:
-            // (0.15, 0.15, 0.5) 
-            // instead of:
-            // (0.15, 0.5, 0.15)
-
-            nmo.size = new Vector3(0.15f, 0.15f, 0.5f);
-            // TODO: Change gridCells and the way they work to more 
-            // idiomatically represent themselves.
-        }
+        if (this.nmo is null)
+            add_and_config_obstacle();
+        this.nmo.enabled = !walkable;
     }
 
     public static void CycleZoneType()
@@ -384,7 +354,15 @@ public class Cell : MonoBehaviour
     {
         creator ??= GameObject.Find("CreateBuilding").GetComponent<CreateBuilding>();
         am ??= GameObject.Find("Audio Manager").GetComponent<AudioManager>();
+        add_and_config_obstacle();
         Assert.IsNotNull(all_cells, "Cell::Start(): all_cells found null");
+    }
+
+    void add_and_config_obstacle()
+    {
+        nmo ??= gameObject.AddComponent<NavMeshObstacle>();
+        nmo.carving = true;
+        nmo.size = new Vector3(0.15f, 0.15f, 0.5f);
     }
 
     void OnDestroy()
