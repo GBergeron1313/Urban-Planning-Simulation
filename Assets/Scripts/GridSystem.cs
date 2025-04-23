@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Citizens;
+using BuildingUtils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -146,11 +146,6 @@ public class GridSystem : MonoBehaviour
                     cell.GetComponent<Renderer>().material = cellMaterial;
                 }
 
-                // Add thin collider for mouse interaction
-                /*BoxCollider collide = cell.AddComponent<BoxCollider>();*/
-                /*// The name "collider" was causing conflicts*/
-                /*collide.size = new Vector3(1, 1, 0.1f);*/
-
                 // Store reference to cell
                 gridCells[x, z] = cell;
 
@@ -159,6 +154,7 @@ public class GridSystem : MonoBehaviour
                 c.location = new Vector2Int(x, z);
                 c.SetZoneTypeAndUpdate(ZoneType.None);
                 c.SetWalkableAndUpdate(false);
+                c.register();
             }
         }
 
@@ -198,14 +194,9 @@ public class GridSystem : MonoBehaviour
         show_text();
 
 
-        if (Cell.building_mode == BuildingMode.PlacingBuilding)
-        {
-            buildingUI.SetActive(true);
-        }
-        else
-        {
-            buildingUI.SetActive(false);
-        }
+        buildingUI.SetActive(
+                Cell.building_mode == BuildingMode.PlacingBuilding
+                || Cell.building_mode == BuildingMode.PlacingRoad);
         zoneButton.GetComponentInChildren<TextMeshProUGUI>().text = $"{Cell.paintbrush}";
     }
 
@@ -215,7 +206,7 @@ public class GridSystem : MonoBehaviour
         {
             string focus;
             int num_cells = Cell.all_cells.Count;
-            var time = SimCore.Instance.simulationClock;
+            var time = SimCore.Time.now;
             var building = Building.hovering?.legible;
             var cell = Cell.hovering?.location.ToString();
             ZoneType zone_type;
@@ -227,7 +218,7 @@ public class GridSystem : MonoBehaviour
             else if (building is not null)
             {
                 focus = building;
-                zone_type = Building.hovering.building_type;
+                zone_type = ZoneType.None;
             }
             else
             {
