@@ -1,7 +1,8 @@
 using System.Collections.Generic;
-using Citizens;
+using BuildingUtils;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.UI;
 
 public class CreateBuilding : MonoBehaviour
@@ -9,7 +10,8 @@ public class CreateBuilding : MonoBehaviour
     public GameObject MainGrid;
 
     public GameObject buildingPrefab;
-    public GameObject[] prefabList;
+    public GameObject[] building_prefabs;
+    public GameObject[] road_prefabs;
 
     public Slider pollutionSlider;
     public Slider noiseSlider;
@@ -24,17 +26,69 @@ public class CreateBuilding : MonoBehaviour
     // Keeping references to prefabs for later removal.
     private List<GameObject> prefabs;
 
-    public AudioManager AudioManager;
-    private void Awake()
-    {
-        AudioManager = GameObject.Find("Audio Manager").GetComponent<AudioManager>();
-    }
-
     // Start is called before the first frame update
     void Start()
     {
-        name = "BuildingSpawner";
+        name = "CreateBuilding";
         prefabs = new List<GameObject>();
+    }
+
+    public void SetDropdownValues(CellType ct)
+    {
+        Assert.IsTrue(ct == CellType.Building || ct == CellType.Road);
+        BuildingModel start, end;
+        if (ct == CellType.Building)
+        {
+            start = (BuildingModel)(((int)BuildingModel.BUILDING_MIN + 1));
+            end = BuildingModel.BUILDING_MAX;
+            buildingDropdown.captionText.SetText(buildingDropdown.value.as_building_model().ToString());
+        }
+        else
+        {
+            start = (BuildingModel)(((int)BuildingModel.ROAD_MIN + 1));
+            end = BuildingModel.ROAD_MAX;
+            buildingDropdown.captionText.SetText(buildingDropdown.value.as_road_model().ToString());
+        }
+        var options = buildingDropdown.options;
+        options.Clear();
+
+        for (; start < end; start++)
+        {
+            options.Add(new TMP_Dropdown.OptionData(start.ToString()));
+        }
+    }
+
+    private int model_as_offset(BuildingModel model, out CellType cell_type)
+    {
+        if (BuildingModel.BUILDING_MIN < model && model < BuildingModel.BUILDING_MAX)
+        {
+            cell_type = CellType.Building;
+            return (int)model - ((int)BuildingModel.BUILDING_MIN + 1);
+        }
+        if (BuildingModel.ROAD_MIN < model && model < BuildingModel.ROAD_MAX)
+        {
+            cell_type = CellType.Road;
+            return (int)model - ((int)BuildingModel.ROAD_MIN + 1);
+        }
+        Debug.LogWarning($"hydrate_model didn't catch model: {model.ToString()}");
+        cell_type = CellType.None;
+        return -1;
+    }
+
+    GameObject hydrate_from_model(BuildingModel model)
+    {
+        int idx = model_as_offset(model, out CellType which);
+        Assert.AreNotEqual(idx, -1);
+        Assert.AreNotEqual(which, CellType.None);
+
+        if (which == CellType.Building)
+        {
+            return Instantiate(building_prefabs[idx]);
+        }
+        else
+        {
+            return Instantiate(road_prefabs[idx]);
+        }
     }
 
     public void clearBuildings()
@@ -46,17 +100,16 @@ public class CreateBuilding : MonoBehaviour
         Start();
     }
 
-    /*public void createBuilding()*/
-    /*{*/
-    /*    print("Building Created");*/
-    /*    var nextBuilding = Instantiate(buildingPrefab);*/
-    /*    prefabs.Add(nextBuilding);*/
-    /*    nextBuilding.transform.position = new Vector3(6.0f, 0.5f, 0.0f);*/
-    /*}*/
-
     private GameObject getCellTypeShape(CellType cell_type)
     {
-        buildingPrefab = prefabList[buildingDropdown.value];
+        if (cell_type.is_road())
+        {
+            buildingPrefab = road_prefabs[((int)buildingDropdown.value.as_road_model())];
+        }
+        else if (cell_type.is_building())
+        {
+            buildingPrefab = building_prefabs[buildingDropdown.value];
+        }
 
         switch (cell_type)
         {
@@ -75,17 +128,6 @@ public class CreateBuilding : MonoBehaviour
     {
         road.transform.Translate(Vector3.down * 2);
         road.transform.localScale.Set(1.0f, 0.1f, 1.0f);
-
-        /*Cell c;*/
-        /*if (!road.TryGetComponent<Cell>(out c))*/
-        /*{*/
-        /*    Debug.Log("Cell wasn't attached. Attaching...");*/
-        /**/
-        /*    c = road.AddComponent<Cell>();*/
-        /*}*/
-        /*c.location = new Vector2Int((int)x, (int)z);*/
-        /*c.cell_type = CellType.Road;*/
-        /*c.SetZoneTypeAndUpdate(zone_type);*/
     }
 
     private void applyBuildingShapeTransformations(GameObject nextBuilding, ZoneType zone_type, int x, int z)
@@ -111,85 +153,100 @@ public class CreateBuilding : MonoBehaviour
         Destroy(g);
     }
 
-    public void attach_building(Cell cell)
+    private void configure_pop_info(Building bs)
     {
-
-        print($"attach_building: {cell.location}, {cell.cell_type}");
-        var next_prefab = getCellTypeShape(cell.cell_type);
-        next_prefab.transform.position = cell.gameObject.transform.position;
-        Building bs = next_prefab.AddComponent<Building>();
-
-        bs.air_pollution = pollutionSlider.value;
-        bs.noise_pollution = noiseSlider.value;
-        bs.max_capacity = capacitySlider.value;
-        bs.building_type = cell.zone_type;
-        bs.attached_to = cell;
-
-        cell.contents = bs;
-
-        if (cell.cell_type == CellType.Building)
+        if (bs.attached_to.cell_type == CellType.Building)
         {
-            totalPol += (int)bs.air_pollution;
-            totalNoise += (int)bs.noise_pollution;
-            totalPop += (int)bs.max_capacity;
-            if (Citizen.citizens_enabled)
+            totalPol += (int)bs.info.air_pollution;
+            totalNoise += (int)bs.info.noise_pollution;
+            totalPop += (int)bs.info.max_capacity;
+            if (totalPop > 0)
             {
                 polPerCit = totalPol / totalPop;
                 noisePerCit = totalNoise / totalPop;
             }
+            popCount.text =
+@$"Pollution Level: {totalPol}
+Noise Level: {totalNoise}
+Total Population: {totalPop}";
         }
-        popCount.text = "Pollution Level: " + totalPol + "\nNoise Level: " + totalNoise + "\nTotal Population: " + totalPop;
+    }
+
+    public void attach_building(Cell cell, BuildingModel model)
+    {
+        print($"attach_building: {cell}, {model}");
+        Assert.IsFalse(cell.cell_type.is_none(), "CellType can't be None when creating a building. Fix it.");
+        var next_prefab = hydrate_from_model(model);
+        next_prefab.transform.position = cell.gameObject.transform.position;
+        Building bs = next_prefab.AddComponent<Building>();
+
+        bs.set_model_update_info(model);
+        bs.make_connection(cell);
+
+        configure_pop_info(bs);
 
         prefabs.Add(next_prefab);
     }
 
-    public GameObject createBuilding(float x, float z, Color color, ZoneType zone_type, CellType cell_type)
-    {
-        print($"CreateBuilding: {x}, {z}, {color}, {zone_type}, {cell_type}");
-        var next_prefab = getCellTypeShape(cell_type);
+    /*    public void attach_building(Cell cell)*/
+    /*    {*/
+    /*        print($"attach_building: {cell.location}, {cell.cell_type}");*/
+    /*        var next_prefab = getCellTypeShape(cell.cell_type);*/
+    /*        next_prefab.transform.position = cell.gameObject.transform.position;*/
+    /*        Building bs = next_prefab.AddComponent<Building>();*/
+    /**/
+    /*        bs.air_pollution = pollutionSlider.value + 1;*/
+    /*        bs.noise_pollution = noiseSlider.value + 1;*/
+    /*        bs.max_capacity = capacitySlider.value + 1;*/
+    /*        bs.attached_to = cell;*/
+    /**/
+    /*        cell.contents = bs;*/
+    /**/
+    /*        if (cell.cell_type == CellType.Building)*/
+    /*        {*/
+    /*            totalPol += (int)bs.air_pollution;*/
+    /*            totalNoise += (int)bs.noise_pollution;*/
+    /*            totalPop += (int)bs.max_capacity;*/
+    /*            polPerCit = totalPol / totalPop;*/
+    /*            noisePerCit = totalNoise / totalPop;*/
+    /*            popCount.text =*/
+    /*@$"Pollution Level: {totalPol}*/
+    /*Noise Level: {totalNoise}*/
+    /*Total Population: {totalPop}";*/
+    /*        }*/
+    /**/
+    /*        prefabs.Add(next_prefab);*/
+    /*    }*/
 
-        // Play placement sound
-        AudioManager.PlaySFX(AudioManager.placedown);
-
-        if (cell_type == CellType.Building)
-        {
-            applyBuildingShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
-        }
-        else if (cell_type == CellType.Road)
-        {
-            applyRoadShapeTransformations(next_prefab, zone_type, (int)x, (int)z);
-        }
-
-        Building bs;
-        if (!next_prefab.TryGetComponent<Building>(out bs))
-        {
-            bs = next_prefab.AddComponent<Building>();
-        }
-
-        bs.air_pollution = pollutionSlider.value;
-        bs.noise_pollution = noiseSlider.value;
-        bs.max_capacity = capacitySlider.value;
-        bs.building_type = zone_type;
-
-        prefabs.Add(next_prefab);
-
-        return next_prefab;
-    }
-
-    public void createBuilding(float x, float z, Color color, ZoneType zone_type)
-    {
-        print($"CreateBuilding: {x}, {z}, {color}, {zone_type}");
-        var nextBuilding = Instantiate(buildingPrefab);
-        nextBuilding.transform.position = new Vector3(x - 4.5f, 0.5f, z - 4.5f);
-        Cell c = nextBuilding.AddComponent<Cell>();
-        c.color = color;
-        c.location = new Vector2Int((int)x, (int)z);
-        c.zone_type = zone_type;
-        c.GetComponent<Renderer>().material.color = color;
-    }
-
+    /*public GameObject createBuilding(float x, float z, Color color, ZoneType zone_type, CellType cell_type)*/
+    /*{*/
+    /*    print($"CreateBuilding: {x}, {z}, {color}, {zone_type}, {cell_type}");*/
+    /*    var next_prefab = getCellTypeShape(cell_type);*/
+    /*    if (cell_type == CellType.Building)*/
+    /*    {*/
+    /*        applyBuildingShapeTransformations(next_prefab, zone_type, (int)x, (int)z);*/
+    /*    }*/
+    /*    else if (cell_type == CellType.Road)*/
+    /*    {*/
+    /*        applyRoadShapeTransformations(next_prefab, zone_type, (int)x, (int)z);*/
+    /*    }*/
+    /**/
+    /*    Building bs;*/
+    /*    if (!next_prefab.TryGetComponent<Building>(out bs))*/
+    /*    {*/
+    /*        bs = next_prefab.AddComponent<Building>();*/
+    /*    }*/
+    /**/
+    /*    bs.air_pollution = pollutionSlider.value;*/
+    /*    bs.noise_pollution = noiseSlider.value;*/
+    /*    bs.max_capacity = capacitySlider.value;*/
+    /**/
+    /*    prefabs.Add(next_prefab);*/
+    /**/
+    /*    return next_prefab;*/
+    /*}*/
     public void checkBuildingType(GameObject buildingPrefab)
     {
-        buildingPrefab = prefabList[buildingDropdown.value];
+        buildingPrefab = building_prefabs[buildingDropdown.value];
     }
 }

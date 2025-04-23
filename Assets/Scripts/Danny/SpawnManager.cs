@@ -1,3 +1,4 @@
+using BuildingUtils;
 using Citizens;
 using UnityEngine;
 /*using UnityEngine.AI;*/
@@ -20,7 +21,7 @@ namespace UrbanPlanning
         {
             name = "SpawnManager";
             npcButton.onClick.AddListener(SpawnNPCs);
-            
+
         }
 
         public void SpawnNPCsFrom(string[] citizen_names, Vector3[] positions, Vector3[] destinations)
@@ -56,7 +57,7 @@ namespace UrbanPlanning
                     .with_position(positions[i])
                     .with_destination(destinations[i])
                     .with_enabled_movement(
-                            SimCore.Instance.sim_state
+                            SimCore.Instance.state
                             == SimState.Running);
             }
 
@@ -95,7 +96,7 @@ namespace UrbanPlanning
                     .with_model((CitizenModel)rand_prefab_idx)
                     .with_position(Building.building_positions[rand_position_idx])
                     .with_enabled_movement(
-                            SimCore.Instance.sim_state
+                            SimCore.Instance.state
                             == SimState.Running);
             }
 

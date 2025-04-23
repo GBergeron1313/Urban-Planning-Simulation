@@ -1,3 +1,4 @@
+using BuildingUtils;
 using Citizens;
 using System;
 using System.Collections.Generic;
@@ -37,38 +38,52 @@ public class MetricsSystem : MonoBehaviour
     private float avgPollution = 0;
     private float maxGridPollution = 0;
 
-    private int frameCount = 0;
+    private float timer = 0;
 
     Dictionary<Citizen, float> pathLengths = new Dictionary<Citizen, float>();
 
     public GameObject stats;
 
-    // Start is called before the first frame update
-    void Start()
+    // Awake 
+    void Awake()
     {
         gridSystem = GetComponent<GridSystem>();
         pollutionSystem = GetComponent<PollutionSystem>();
+    }
 
+    // Start is called before the first frame update
+    void Start()
+    {
     }
 
     // Update is called once per frame
     void Update()
     {
 
-        frameCount++;
+        if (SimCore.Instance.state != SimState.Running)
+        {
+            return;
+        }
+        else
+        {
+            timer += SimCore.Time.time_step;
+        }
 
         CellCount();
         BuildingCount();
-        CitizenCount();
         PollutionCount();
-        CitizenDensityMax();
-        CitizenTravelLength();
-        TravelEfficency();
+        if (Citizen.citizens_enabled)
+        {
+            CitizenCount();
+            CitizenDensityMax();
+            CitizenTravelLength();
+            TravelEfficency();
+        }
 
-        if (frameCount == 500)
+        if (timer >= 6.3f)
         {
             SaveMetricsData();
-            frameCount = 0;
+            timer = 0f;
         }
 
     }
@@ -81,31 +96,21 @@ public class MetricsSystem : MonoBehaviour
         industrialCells = 0;
         restrictedCells = 0;
 
-        for (int x = 0; x < gridSystem.width; x++)
+        foreach (Cell c in Cell.all_cells)
         {
-            for (int y = 0; y < gridSystem.height; y++)
+            switch (c.zone_type)
             {
-                GameObject cellObject = gridSystem.GetCellAt(x, y);
-                Cell cell = cellObject.GetComponent<Cell>();
-
-                if (cell != null)
-                {
-                    switch (cell.zone_type)
-                    {
-                        case ZoneType.Residential: residentialCells++; break;
-                        case ZoneType.Commercial: commericalCells++; break;
-                        case ZoneType.Industrial: industrialCells++; break;
-                        case ZoneType.Restricted: restrictedCells++; break;
-                    }
-                }
-
+                case ZoneType.Residential: residentialCells++; break;
+                case ZoneType.Commercial: commericalCells++; break;
+                case ZoneType.Industrial: industrialCells++; break;
+                case ZoneType.Restricted: restrictedCells++; break;
             }
         }
     }
 
     public void BuildingCount()
     {
-        Debug.Log("Starting building count...");
+        //Debug.Log("Starting building count...");
         residentialBuildings = 0;
         commericalBuildings = 0;
         industrialBuildings = 0;
@@ -116,39 +121,35 @@ public class MetricsSystem : MonoBehaviour
 
         foreach (Building building in buildings)
         {
-            if (building.building_type == ZoneType.Residential)
+            if (building.attached_to.zone_type == ZoneType.Residential)
             {
                 residentialBuildings++;
             }
-            else if (building.building_type == ZoneType.Commercial)
+            else if (building.attached_to.zone_type == ZoneType.Commercial)
             {
                 commericalBuildings++;
             }
-            else if (building.building_type == ZoneType.Industrial)
+            else if (building.attached_to.zone_type == ZoneType.Industrial)
             {
                 industrialBuildings++;
             }
-            else if (building.building_type != ZoneType.Restricted)  // should be removed later
+            else if (building.attached_to.zone_type != ZoneType.Restricted)  // should be removed later
             {
                 restrictedBuildings++;
             }
         }
 
         totalBuildings = residentialBuildings + commericalBuildings + industrialBuildings + restrictedBuildings;
-        Debug.Log($"Building count complete - Residential: {residentialBuildings}, Commercial: {commericalBuildings}, Industrial: {industrialBuildings}, Total: {totalBuildings}");
+        //Debug.Log($"Building count complete - Residential: {residentialBuildings}, Commercial: {commericalBuildings}, Industrial: {industrialBuildings}, Total: {totalBuildings}");
     }
 
     public void CitizenCount()
     {
-        Debug.Log("Starting citizen count...");
+        //Debug.Log("Starting citizen count...");
 
-        totalCitizens = 0;
+        totalCitizens = Citizen.citizen_count();
 
-        Citizen[] citizens = FindObjectsOfType<Citizen>();
-
-        totalCitizens = citizens.Length;
-
-        Debug.Log($"Found {totalCitizens} citizens");
+        //Debug.Log($"Found {totalCitizens} citizens");
     }
 
     public Vector2Int CitizenDensityMax()
@@ -282,7 +283,7 @@ public class MetricsSystem : MonoBehaviour
 
     public void CitizenTravelLength()
     {
-        Debug.Log("Starting citizen travel length calculation...");
+        //Debug.Log("Starting citizen travel length calculation...");
         pathLengths.Clear();
 
         Citizen[] citizens = FindObjectsOfType<Citizen>();
@@ -312,7 +313,7 @@ public class MetricsSystem : MonoBehaviour
             }
         }
 
-        Debug.Log("Starting citizen travel length completed");
+        //Debug.Log("Starting citizen travel length completed");
 
     }
 
@@ -348,9 +349,14 @@ public class MetricsSystem : MonoBehaviour
 
     public void SaveMetricsData()
     {
-        stats = GameObject.Find("CreateBuilding");
+        stats = Cell.creator.gameObject;
 
-        string saveFolder = Path.Combine(Application.dataPath, "MetricsData");
+
+        // Note the change to `Application.persistentDataPath`. 
+        // Using `Application.dataPath`, in the context of saving
+        // data, is not good for the user OR the developer.
+        // I don't want your metric data when I `git pull`.
+        string saveFolder = Path.Combine(Application.persistentDataPath, "MetricsData");
         if (!Directory.Exists(saveFolder))
         {
             Directory.CreateDirectory(saveFolder);
@@ -360,7 +366,6 @@ public class MetricsSystem : MonoBehaviour
         string filePath = Path.Combine(saveFolder, fileName);
 
         string dataToSave =
-
                " Cells: " + totalCells + Environment.NewLine +
                " Residential: " + residentialCells + Environment.NewLine +
                " Commercial: " + commericalCells + Environment.NewLine +
@@ -383,10 +388,10 @@ public class MetricsSystem : MonoBehaviour
                " Average Pollution: " + avgPollution + Environment.NewLine +
                " Max Pollution: " + maxGridPollution + Environment.NewLine +
                "-------------------------------------------------------" + Environment.NewLine +
-               "Pollution Per Citzen: " + Cell.creator.polPerCit + "%" + Environment.NewLine +
-               "Noise Per Citzen: " + Cell.creator.noisePerCit + "%" + Environment.NewLine;
+               "Pollution Per Citzen: " + stats.GetComponent<CreateBuilding>().polPerCit + "%" + Environment.NewLine +
+               "Noise Per Citzen: " + stats.GetComponent<CreateBuilding>().noisePerCit + "%" + Environment.NewLine;
 
-        if (Cell.creator.polPerCit >= 30)
+        if (stats.GetComponent<CreateBuilding>().polPerCit >= 30)
         {
             dataToSave += "Pollution Levels Too High!!!" + Environment.NewLine;
         }
@@ -394,7 +399,7 @@ public class MetricsSystem : MonoBehaviour
         {
             dataToSave += "Pollution at Acceptable Levels" + Environment.NewLine;
         }
-        if (Cell.creator.polPerCit >= 30)
+        if (stats.GetComponent<CreateBuilding>().polPerCit >= 30)
         {
             dataToSave += "Noise Levels Too High!!!!";
         }
@@ -409,7 +414,7 @@ public class MetricsSystem : MonoBehaviour
         try
         {
             File.WriteAllText(filePath, dataToSave);
-            Debug.Log("Metrics Saved to: " + filePath);
+            //Debug.Log("Metrics Saved to: " + filePath);
         }
         catch (Exception ex)
         {

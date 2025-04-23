@@ -29,19 +29,20 @@ public class SimCore : MonoBehaviour
     [SerializeField] private GridSystem gridSystem;
 
     // Simulation state
-    public bool isSimulationRunning = false;
-    private float simulationSpeed = 1f;
-    private float simulationTimer = 0f;
 
     private Button pauseSimulationButton;
     private Button playSimulationButton;
 
-    public float simulationClock = 0f;
-
+    public static class Time
+    {
+        public static float time_step;
+        public static float now;
+    }
 
     public float SimSpeed
     {
-        get { return simulationSpeed; }
+        get;
+        private set;
     }
 
     public ViewMode view_mode
@@ -50,7 +51,7 @@ public class SimCore : MonoBehaviour
         private set;
     }
 
-    public SimState sim_state
+    public SimState state
     {
         get;
         private set;
@@ -62,6 +63,7 @@ public class SimCore : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
+            Instance.SimSpeed = 1f;
         }
         else
         {
@@ -74,16 +76,16 @@ public class SimCore : MonoBehaviour
 
     void Start()
     {
-        // Initialize systems
-        InitializeSystems();
         PauseSimulation();
+        InitializeSystems();
     }
 
     void Update()
     {
-        if (sim_state == SimState.Running)
+        if (Instance.state == SimState.Running)
         {
-            simulationClock += Time.unscaledDeltaTime * simulationSpeed;
+            SimCore.Time.time_step = UnityEngine.Time.unscaledDeltaTime * SimSpeed;
+            SimCore.Time.now += SimCore.Time.time_step;
         }
 
         if (Input.GetKeyDown(KeyCode.V))
@@ -98,20 +100,21 @@ public class SimCore : MonoBehaviour
 
     private void DecreaseSimulationSpeed()
     {
-        simulationSpeed *= 0.5f;
-        simulationSpeed = Mathf.Clamp(simulationSpeed, 0.03125f, 32.0f);
+        SimSpeed *= 0.5f;
+        SimSpeed = Mathf.Clamp(SimSpeed, 0.03125f, 32.0f);
     }
+
     private void IncreaseSimulationSpeed()
     {
-        simulationSpeed *= 2.0f;
-        simulationSpeed = Mathf.Clamp(simulationSpeed, 0.03125f, 32.0f);
+        SimSpeed *= 2.0f;
+        SimSpeed = Mathf.Clamp(SimSpeed, 0.03125f, 32.0f);
     }
 
     private void CycleSimulationStates()
     {
-        sim_state++;
-        if (sim_state >= SimState.TotalSimStates)
-            sim_state = SimState.Default;
+        state++;
+        if (state >= SimState.TotalSimStates)
+            state = SimState.Default;
     }
 
     private void CycleViewModes()
@@ -124,8 +127,7 @@ public class SimCore : MonoBehaviour
     // Time Control Methods
     public void PlaySimulation()
     {
-        sim_state = SimState.Running;
-        isSimulationRunning = true;
+        state = SimState.Running;
         Citizen.EnableMovement(true);
         Debug.Log("Simulation Started");
         playSimulationButton.targetGraphic.color = Color.green;
@@ -136,8 +138,7 @@ public class SimCore : MonoBehaviour
 
     public void PauseSimulation()
     {
-        sim_state = SimState.Paused;
-        isSimulationRunning = false;
+        state = SimState.Paused;
         Citizen.EnableMovement(false);
         Debug.Log("Simulation Paused");
         pauseSimulationButton.targetGraphic.color = Color.green;
@@ -146,16 +147,16 @@ public class SimCore : MonoBehaviour
         playSimulationButton.enabled = true;
     }
 
-    public void SetSimulationSpeed(float speed)
-    {
-        simulationSpeed = Mathf.Clamp(speed, 0.1f, 3f);
-        Time.timeScale = simulationSpeed;
-    }
+    /*public void SetSimulationSpeed(float speed)*/
+    /*{*/
+    /*    SimSpeed = Mathf.Clamp(speed, 0.1f, 3f);*/
+    /*    Time.timeScale = SimSpeed;*/
+    /*}*/
 
     // Core Update Loop
     private void UpdateSimulation()
     {
-        simulationClock += Time.unscaledDeltaTime * simulationSpeed;
+        SimCore.Time.now += UnityEngine.Time.unscaledDeltaTime * SimSpeed;
     }
 
     private void InitializeSystems()

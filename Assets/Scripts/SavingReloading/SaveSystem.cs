@@ -4,6 +4,8 @@ using UrbanPlanning;
 using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.Assertions;
+using System.Collections.Generic;
+using BuildingUtils;
 
 namespace SavingReloading
 {
@@ -61,9 +63,10 @@ namespace SavingReloading
         {
             ClearCurrentData();
             LoadGridData();
-            LoadCitizenData();
-
-            metricsSystem.MetricReload();
+            PlacementAnim.OnAllAnimsOver = () =>
+            {
+                LoadCitizenData();
+            };
         }
 
         private void ClearCurrentData()
@@ -71,7 +74,8 @@ namespace SavingReloading
             creator.clearBuildings();
             gridSystem.ClearGridReset();
             Building.ClearBuildings();
-            Citizen.ClearCitizens();
+            if (Citizen.citizens_enabled)
+                Citizen.ClearCitizens();
         }
 
         private void SaveCurrentCitizenData()
@@ -111,17 +115,18 @@ namespace SavingReloading
             }
         }
 
-        // This is just a pile of trash, this function.
-        // But it does work.
         private void LoadCitizenData()
         {
-
             string path = Path.Combine(savePath, CitizenDataSaveFileName);
+            if (!File.Exists(path))
+            {
+                throw new UnityException("CitizenDataSaveFileName Does not exist");
+            }
             using StreamReader reader = new StreamReader(path);
 
-            string[] citizen_names = new string[SpawnManager.npcCount];
-            Vector3[] destinations = new Vector3[SpawnManager.npcCount];
-            Vector3[] positions = new Vector3[SpawnManager.npcCount];
+            List<string> citizen_names = new List<string>();
+            List<Vector3> destinations = new List<Vector3>();
+            List<Vector3> positions = new List<Vector3>();
 
             SpawnManager spawner = GameObject.Find("SpawnManager").GetComponent<SpawnManager>();
             if (spawner is null)
@@ -134,7 +139,7 @@ namespace SavingReloading
                 string line = reader.ReadLine();
                 if (line is null)
                 {
-                    throw new UnityException("Attempted to Load citizen data: Line was null");
+                    break;
                 }
 
                 string[] name_values = line.Split('=');
@@ -146,11 +151,6 @@ namespace SavingReloading
 
                 string[] pos_dest_velocity_stopped_prefab = values.Split('|');
                 Assert.IsNotNull(pos_dest_velocity_stopped_prefab);
-                string output = "";
-                foreach (var s in pos_dest_velocity_stopped_prefab)
-                {
-                    output += s;
-                }
 
                 string s_pos = pos_dest_velocity_stopped_prefab[0];
                 string s_dest = pos_dest_velocity_stopped_prefab[1];
@@ -164,66 +164,34 @@ namespace SavingReloading
                 int stopped = int.Parse(s_stopped);
                 int prefab_index = int.Parse(s_prefab_index);
 
-                positions[i] = pos;
-                citizen_names[i] = citizen_name;
-                destinations[i] = dest;
+                positions.Add(pos);
+                citizen_names.Add(citizen_name);
+                destinations.Add(dest);
             }
 
-            spawner.SpawnNPCsFrom(citizen_names, positions, destinations);
+            if (positions.Count == 0
+                || citizen_names.Count == 0
+                || destinations.Count == 0)
+            {
+                Debug.LogWarning("No citizens could be spawned.");
+                return;
+            }
+
+            spawner.SpawnNPCsFrom(citizen_names.ToArray(), positions.ToArray(), destinations.ToArray());
         }
 
         private void LoadGridData()
         {
-            string path = Path.Combine(savePath, GridDataSaveFileName);
-            StreamReader reader = new StreamReader(path);
-            string fmt = reader.ReadLine();
-            Assert.AreEqual(fmt, "x,y=zone_type,cell_type");
-            string[] lines = reader.ReadToEnd().Split('\n');
-            reader.Dispose();
-
-            var cells = gridSystem.GetCells();
-            if (cells is null)
+            string exp_path = Path.Combine(savePath, "exp_grid_data.data");
+            var serial_lines = File.ReadAllLines(exp_path);
+            Assert.IsNotNull(serial_lines);
+            Assert.IsNotNull(Cell.all_cells);
+            var idx = 0;
+            foreach (Cell c in Cell.all_cells)
             {
-                throw new UnityException("Couldn't access Cells from SaveSystem");
-            }
-
-            for (int i = 0; i < cells.Count; i++)
-            {
-                string[] cell_serial = lines[i].Split('=');
-                string[] xz = cell_serial[0].Split(',');
-
-                int x = int.Parse(xz[0]);
-                int z = int.Parse(xz[1]);
-
-                var cell = cells[i].GetComponent<Cell>();
-
-                Assert.AreEqual(cell.location.x, x);
-                Assert.AreEqual(cell.location.y, z);
-
-                string[] zt_ct = cell_serial[1].Split(',');
-
-                ZoneType zt = (ZoneType)int.Parse(zt_ct[0]);
-                CellType ct = (CellType)int.Parse(zt_ct[1]);
-
-                cell.SetZoneTypeAndUpdate(zt);
-                cell.SetCellTypeAndUpdate(ct);
-
-                /*switch (ct)*/
-                /*{*/
-                /*    case CellType.Building:*/
-                /*        cell.PushBuilding();*/
-                /*        /*cell.SetWalkableAndUpdate(true);*/
-                /*        break;*/
-                /*    case CellType.Road:*/
-                /*        cell.PushRoad();*/
-                /*        /*cell.SetWalkableAndUpdate(true);*/
-                /*        break;*/
-                /*    case CellType.None:*/
-                /*        /*cell.SetWalkableAndUpdate(false);*/
-                /*        break;*/
-                /*    default:*/
-                /*        throw new UnityException("Default shouldn't ever happen");*/
-                /*}*/
+                Assert.IsNotNull(c);
+                c.from_serial(serial_lines[idx]);
+                idx++;
             }
         }
 
@@ -232,26 +200,19 @@ namespace SavingReloading
             string path = Path.Combine(savePath, GridDataSaveFileName);
             using StreamWriter writer = new StreamWriter(path, false);
             writer.WriteLine($"x,y=zone_type,cell_type");
-            var cells = gridSystem.GetCells();
-            if (cells is null)
-            {
-                throw new UnityException("Cells was null");
-            }
+            using var exp_writer = File.CreateText(Path.Combine(savePath, "exp_grid_data.data"));
 
-            foreach (var building in cells)
+            foreach (Cell cell in Cell.all_cells)
             {
-                var cell = building.GetComponent<Cell>();
-                if (cell is null)
-                {
-                    throw new UnityException($"Cell was null on building: {building}");
-                }
+                exp_writer.WriteLine(cell.into_serial());
+
                 int zt = (int)cell.zone_type;
                 int ct = (int)cell.cell_type;
                 int x = cell.location.x;
                 int z = cell.location.y;
+                int model = ((int?)cell.contents?.model) ?? 0;
                 string output =
-                    $"{x},{z}={zt},{ct}";
-                Debug.Log(output);
+                    $"{x},{z}={zt},{ct},{model}";
                 writer.WriteLine(output);
             }
         }
