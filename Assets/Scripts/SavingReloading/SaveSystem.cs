@@ -63,7 +63,10 @@ namespace SavingReloading
         {
             ClearCurrentData();
             LoadGridData();
-            LoadCitizenData();
+            PlacementAnim.OnAllAnimsOver = () =>
+            {
+                LoadCitizenData();
+            };
 
             /*metricsSystem.MetricReload();*/
         }

@@ -15,6 +15,8 @@ namespace BuildingUtils
         private const float ANIM_STEP_BY_DEFAULT = 0.01f;
         private const int ANIM_STEPS_DEFAULT = 100;
 
+        private int anim_num_playing = 0;
+
         private Vector3 pos_start = default;
         private Vector3 pos_end = default;
 
@@ -30,7 +32,6 @@ namespace BuildingUtils
         private int anim_steps_total = ANIM_STEPS_DEFAULT;
 
         private bool changes_size = false;
-
         private bool anim_playing = false;
 
 
@@ -86,6 +87,11 @@ namespace BuildingUtils
             set => size_end = value;
         }
 
+        public int NumberAnimsPlaying
+        {
+            get => anim_num_playing;
+        }
+
         public float Postponed
         {
             get => delay;
@@ -100,6 +106,12 @@ namespace BuildingUtils
         // You know when these get called.
         public Action OnAnimOver;
         public Action OnAnimStart;
+
+        /// <summary>
+        /// Triggers when all animations are done playing.
+        /// Note: resets to Null after triggering.
+        /// </summary>
+        public static Action OnAllAnimsOver;
 
 
         public bool InitAnim()
@@ -122,14 +134,13 @@ namespace BuildingUtils
         void StartAnim()
         {
             anim_playing = true;
+            anim_num_playing++;
             if (OnAnimStart is not null)
                 OnAnimStart();
         }
 
         void Start()
         {
-            /*pos_start = new Vector3();*/
-            /*pos_end = new Vector3();*/
         }
 
         void FixedUpdate()
@@ -151,6 +162,15 @@ namespace BuildingUtils
                     anim_playing = false;
                     if (OnAnimOver is not null)
                         OnAnimOver();
+                    anim_num_playing--;
+                    if (anim_num_playing == 0)
+                    {
+                        if (OnAllAnimsOver is not null)
+                        {
+                            OnAllAnimsOver();
+                            OnAllAnimsOver = null;
+                        }
+                    }
                 }
 
             }

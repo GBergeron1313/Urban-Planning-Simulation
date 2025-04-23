@@ -36,22 +36,26 @@ namespace Citizens
         private NavMeshAgent agent;
 
         public CitizenModel prefab_idx;
+        Vector3 curr_dest = Vector3.zero;
+        Vector3 start_pos = Vector3.zero;
+        bool? stopped = true;
 
         public Citizen with_destination(Vector3 destination)
         {
-            agent.SetDestination(destination);
+            curr_dest = destination;
             return this;
         }
 
         public Citizen with_enabled_movement(bool enabled)
         {
-            agent.isStopped = !enabled;
+            stopped = !enabled;
             return this;
         }
 
         public Citizen with_position(Vector3 position)
         {
-            agent.Warp(position);
+            transform.position = position;
+            start_pos = position;
             return this;
         }
 
@@ -93,13 +97,24 @@ namespace Citizens
             agent.speed = DefaultCitizenInfo.speed;
             agent.acceleration = DefaultCitizenInfo.acceleration;
             agent.angularSpeed = DefaultCitizenInfo.angular_speed;
+
             nma_citizens.Add(agent);
+
+            if (start_pos != Vector3.zero)
+                agent.Warp(start_pos);
+            if (curr_dest != Vector3.zero)
+                agent.SetDestination(curr_dest);
+            if (agent.isOnNavMesh && stopped.HasValue)
+                agent.isStopped = stopped.Value;
+
+
             last_clock_update = SimCore.Time.now;
         }
 
 
         private void Start()
         {
+
         }
 
         private void UpdateRotation()
@@ -119,7 +134,6 @@ namespace Citizens
             }
         }
 
-        Vector3 curr_dest;
         private void FixedUpdate()
         {
             if (SimCore.Instance.state == SimState.Running)

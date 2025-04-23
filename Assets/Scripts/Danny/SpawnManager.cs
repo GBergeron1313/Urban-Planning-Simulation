@@ -21,7 +21,7 @@ namespace UrbanPlanning
         {
             name = "SpawnManager";
             npcButton.onClick.AddListener(SpawnNPCs);
-            
+
         }
 
         public void SpawnNPCsFrom(string[] citizen_names, Vector3[] positions, Vector3[] destinations)
