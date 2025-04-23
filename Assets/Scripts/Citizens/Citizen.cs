@@ -115,6 +115,8 @@ namespace Citizens
         private void Start()
         {
 
+            gameObject.AddComponent<Routine>();
+
         }
 
         private void UpdateRotation()

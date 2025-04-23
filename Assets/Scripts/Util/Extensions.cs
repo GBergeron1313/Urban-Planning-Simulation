@@ -23,6 +23,33 @@ static class Extensions
         }
     }
 
+    public static bool is_business(this BuildingModel model)
+    {
+        switch (model)
+        {
+            case BuildingModel.Bank:
+            case BuildingModel.Shop:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    public static bool is_residential(this BuildingModel model)
+    {
+        switch (model)
+        {
+            case BuildingModel.House_1:
+            case BuildingModel.House_2:
+            case BuildingModel.House_3:
+            case BuildingModel.Flat_1:
+            case BuildingModel.Flat_2:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public static bool is_building(this CellType ct)
     {
         return ct == CellType.Building;
