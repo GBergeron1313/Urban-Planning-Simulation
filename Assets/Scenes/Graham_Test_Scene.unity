@@ -2001,7 +2001,6 @@ MonoBehaviour:
   polPerCit: 0
   noisePerCit: 0
   popCount: {fileID: 1590776450}
-  AudioManager: {fileID: 0}
 --- !u!4 &418860677
 Transform:
   m_ObjectHideFlags: 0
