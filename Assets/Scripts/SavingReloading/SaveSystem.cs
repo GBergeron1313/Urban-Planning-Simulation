@@ -67,8 +67,6 @@ namespace SavingReloading
             {
                 LoadCitizenData();
             };
-
-            /*metricsSystem.MetricReload();*/
         }
 
         private void ClearCurrentData()
