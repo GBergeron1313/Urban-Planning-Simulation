@@ -148,10 +148,7 @@ public class Cell : MonoBehaviour
             am.PlaySFX(am.placedown);
         };
 
-        if (!animation.InitAnim())
-        {
-            Debug.LogWarning($"Animation for {contents} not Initialized. It might not play.");
-        }
+        animation.InitAnim();
     }
 
     public void FromModelAndUpdate(BuildingModel model)
