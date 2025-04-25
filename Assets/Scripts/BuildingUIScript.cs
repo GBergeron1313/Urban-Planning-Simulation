@@ -28,8 +28,11 @@ public class BuildingUIScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if(pollutionSlider.IsActive())
         pollutionText.text = " " + (int)pollutionSlider.value;
+        if(noiseSlider.IsActive())
         noiseText.text = " " + (int)noiseSlider.value;
+        if(capacitySlider.IsActive())
         capacityText.text = " " + (int)capacitySlider.value;
     }
 }
