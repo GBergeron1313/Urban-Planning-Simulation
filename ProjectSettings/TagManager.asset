@@ -8,6 +8,12 @@ TagManager:
   - Car
   - Audio
   - MouseText
+  - Pollution Slider
+  - Noise Slider
+  - Capacity Slider
+  - Pollution Text
+  - Noise Text
+  - Capacity Text
   layers:
   - Default
   - TransparentFX

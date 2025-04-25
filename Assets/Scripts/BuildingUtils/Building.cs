@@ -137,7 +137,7 @@ namespace BuildingUtils
             }
             hovering = this;
             GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
-            mouseText[0].GetComponent<MouseTestScript>().SetText("Hold Q to Rotate");
+            mouseText[0].GetComponent<MouseTestScript>().SetText("Q + Click: Rotate");
         }
 
         private void OnMouseExit()
