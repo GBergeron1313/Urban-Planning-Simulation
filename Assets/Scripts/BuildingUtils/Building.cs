@@ -136,12 +136,16 @@ namespace BuildingUtils
                 return;
             }
             hovering = this;
+            GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
+            mouseText[0].GetComponent<MouseTestScript>().SetText("Hold Q to Rotate");
         }
 
         private void OnMouseExit()
         {
             hovering = null;
             last_hovered = this;
+            GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
+            mouseText[0].GetComponent<MouseTestScript>().SetText("");
         }
 
         private void OnMouseOver()
@@ -175,7 +179,10 @@ namespace BuildingUtils
                 if (Cell.building_mode == BuildingMode.PlacingBuilding
                     || Cell.building_mode == BuildingMode.PlacingRoad)
                 {
-                    exp_apply_rotation(Rotation.CW90);
+                    if (Input.GetKey(KeyCode.Q))
+                    {
+                        exp_apply_rotation(Rotation.CW90);
+                    }
                     resolve_name();
                 }
             }
