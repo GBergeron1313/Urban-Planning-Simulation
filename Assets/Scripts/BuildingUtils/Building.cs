@@ -210,7 +210,7 @@ namespace BuildingUtils
                         noiseText.text = " " + noise_pollution;
                         capacityText.text = " " + max_capacity;
                         nameText.text = name;
-                        //currentSprite = buildingImages[0];
+                        currentSprite = buildingImages[0];
 
                         if (pollutionSlider.IsActive())
                             pollutionSlider.gameObject.SetActive(false);
