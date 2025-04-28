@@ -20,6 +20,7 @@ public class CreateBuilding : MonoBehaviour
     public TMP_Dropdown buildingDropdown;
 
     public int totalPop, totalPol, totalNoise, polPerCit, noisePerCit;
+    public int buildingCount = 0;
 
     public TextMeshProUGUI popCount;
 
@@ -166,9 +167,9 @@ public class CreateBuilding : MonoBehaviour
                 noisePerCit = totalNoise / totalPop;
             }
             popCount.text =
-@$"Pollution Level: {totalPol}
-Noise Level: {totalNoise}
-Total Population: {totalPop}";
+            @$"Pollution Level: {totalPol}
+            Noise Level: {totalNoise}
+            Total Population: {totalPop}";
         }
     }
 
@@ -182,6 +183,12 @@ Total Population: {totalPop}";
 
         bs.set_model_update_info(model);
         bs.make_connection(cell);
+
+        buildingCount++;
+        bs.name = "Building " + buildingCount;
+        bs.max_capacity = (int)capacitySlider.value;
+        bs.noise_pollution = (int)noiseSlider.value;
+        bs.air_pollution = (int)pollutionSlider.value;
 
         configure_pop_info(bs);
 
