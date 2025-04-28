@@ -2,6 +2,8 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
+using TMPro;
+using UnityEngine.UI;
 
 namespace BuildingUtils
 {
@@ -59,6 +61,7 @@ namespace BuildingUtils
         public static Building hovering;
         public static Building last_hovered;
 
+        public string name;
         public string legible;
         public BuildingInfo info;
         public float air_pollution;
@@ -68,6 +71,16 @@ namespace BuildingUtils
         public Cell attached_to;
         public BuildingModel model;
         /*private Vector3 applied;*/
+        Slider pollutionSlider;
+        Slider noiseSlider;
+        Slider capacitySlider;
+        TextMeshProUGUI pollutionText;
+        TextMeshProUGUI noiseText;
+        TextMeshProUGUI capacityText;
+        TextMeshProUGUI nameText;
+        Sprite currentSprite;
+
+        public Sprite[] buildingImages;
 
         public static void ClearBuildings()
         {
@@ -84,6 +97,14 @@ namespace BuildingUtils
         {
             Assert.IsNotNull(attached_to);
             resolve_name();
+            pollutionSlider = GameObject.FindGameObjectWithTag("Pollution Slider").GetComponent<Slider>();
+            noiseSlider = GameObject.FindGameObjectWithTag("Noise Slider").GetComponent<Slider>();
+            capacitySlider = GameObject.FindGameObjectWithTag("Capacity Slider").GetComponent<Slider>();
+            pollutionText = GameObject.FindGameObjectWithTag("Pollution Text").GetComponent<TextMeshProUGUI>();
+            noiseText = GameObject.FindGameObjectWithTag("Noise Text").GetComponent<TextMeshProUGUI>();
+            capacityText = GameObject.FindGameObjectWithTag("Capacity Text").GetComponent<TextMeshProUGUI>();
+            nameText = GameObject.FindGameObjectWithTag("Building Name Text").GetComponent<TextMeshProUGUI>();
+            currentSprite = GameObject.FindGameObjectWithTag("Building Sprite").GetComponent<Sprite>();
             /*applied = new Vector3();*/
         }
 
@@ -137,7 +158,7 @@ namespace BuildingUtils
             }
             hovering = this;
             GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
-            mouseText[0].GetComponent<MouseTestScript>().SetText("Hold Q to Rotate");
+            mouseText[0].GetComponent<MouseTestScript>().SetText("Q + Click: Rotate");
         }
 
         private void OnMouseExit()
@@ -182,6 +203,21 @@ namespace BuildingUtils
                     if (Input.GetKey(KeyCode.Q))
                     {
                         exp_apply_rotation(Rotation.CW90);
+                    }
+                    else
+                    {
+                        pollutionText.text = " " + air_pollution;
+                        noiseText.text = " " + noise_pollution;
+                        capacityText.text = " " + max_capacity;
+                        nameText.text = name;
+                        //currentSprite = buildingImages[0];
+
+                        if (pollutionSlider.IsActive())
+                            pollutionSlider.gameObject.SetActive(false);
+                        if (noiseSlider.IsActive())
+                            noiseSlider.gameObject.SetActive(false);
+                        if (capacitySlider.IsActive())
+                            capacitySlider.gameObject.SetActive(false); 
                     }
                     resolve_name();
                 }

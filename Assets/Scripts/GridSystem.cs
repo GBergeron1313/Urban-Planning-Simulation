@@ -62,7 +62,7 @@ public class GridSystem : MonoBehaviour
 
     private Button BTN_change_building_mode;
 
-    public GameObject buildingUI;
+    //public GameObject buildingUI;
     public Button zoneButton;
 
     void Awake()
@@ -194,10 +194,10 @@ public class GridSystem : MonoBehaviour
         show_text();
 
 
-        buildingUI.SetActive(
-                Cell.building_mode == BuildingMode.PlacingBuilding
-                || Cell.building_mode == BuildingMode.PlacingRoad);
-        zoneButton.GetComponentInChildren<TextMeshProUGUI>().text = $"{Cell.paintbrush}";
+        //buildingUI.SetActive(
+        //        Cell.building_mode == BuildingMode.PlacingBuilding
+        //        || Cell.building_mode == BuildingMode.PlacingRoad);
+        //zoneButton.GetComponentInChildren<TextMeshProUGUI>().text = $"{Cell.paintbrush}";
     }
 
     private void show_text()
