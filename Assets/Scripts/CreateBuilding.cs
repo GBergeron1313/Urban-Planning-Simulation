@@ -160,9 +160,9 @@ public class CreateBuilding : MonoBehaviour
     {
         if (bs.attached_to.cell_type == CellType.Building)
         {
-            totalPol += (int)bs.info.air_pollution;
-            totalNoise += (int)bs.info.noise_pollution;
-            totalPop += (int)bs.info.max_capacity;
+            totalPol += (int)bs.air_pollution;
+            totalNoise += (int)bs.noise_pollution;
+            totalPop += (int)bs.max_capacity;
             if (totalPop > 0)
             {
                 polPerCit = totalPol / totalPop;
@@ -190,6 +190,7 @@ public class CreateBuilding : MonoBehaviour
         bs.noise_pollution = (int)noiseSlider.value;
         bs.air_pollution = (int)pollutionSlider.value;
         bs.currentSprite = buildingSprites[buildingDropdown.value];
+        bs.roadModel = 11;
 
         configure_pop_info(bs);
 

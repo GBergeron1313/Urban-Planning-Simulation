@@ -85,6 +85,8 @@ namespace BuildingUtils
 
         public Sprite[] buildingImages;
 
+        public int roadModel;
+
         public static void ClearBuildings()
         {
             building_positions.Clear();
@@ -108,6 +110,8 @@ namespace BuildingUtils
             capacityText = GameObject.FindGameObjectWithTag("Capacity Text").GetComponent<TextMeshProUGUI>();
             nameText = GameObject.FindGameObjectWithTag("Building Name Text").GetComponent<TextMeshProUGUI>();
             UIElements = GameObject.FindGameObjectsWithTag("Building UI");
+
+            roadModel = 11;
             //displaySprite = GameObject.FindGameObjectWithTag("Building Sprite").GetComponent<Sprite>();
             /*applied = new Vector3();*/
         }
@@ -210,7 +214,7 @@ namespace BuildingUtils
                     hovering = null;
                 }
                 if (Cell.building_mode == BuildingMode.PlacingBuilding
-                    || Cell.building_mode == BuildingMode.PlacingRoad)
+                    || Cell.building_mode == BuildingMode.PlacingRoad || Cell.building_mode == BuildingMode.None)
                 {
                     if (Input.GetKey(KeyCode.Q))
                     {
@@ -266,7 +270,7 @@ namespace BuildingUtils
         // Update is called once per frame
         void Update()
         {
-
+            
         }
     }
 }
