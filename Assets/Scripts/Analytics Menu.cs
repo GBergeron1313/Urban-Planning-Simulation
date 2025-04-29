@@ -5,7 +5,7 @@ using UnityEngine.UI;
 public class AnalyticsMenu : MonoBehaviour
 {
     public Button toggle;
-    public TextMeshProUGUI text;
+    public TextMeshProUGUI analyticsText;
     public GameObject panel;
     public bool on;
     public TextAsset analytics;
@@ -17,26 +17,29 @@ public class AnalyticsMenu : MonoBehaviour
     {
         toggle.onClick.AddListener(ToggleWindow);
         on = false;
-        text.gameObject.SetActive(false);
+        analyticsText.gameObject.SetActive(false);
         panel.SetActive(false);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (analyticsText.gameObject.active)
+        {
+            analyticsText.text = analytics.text;
+        }
     }
 
     void ToggleWindow()
     {
         if (on)
         {
-            text.gameObject.SetActive(false);
+            analyticsText.gameObject.SetActive(false);
             panel.SetActive(false);
             on = false;
         }else
         {
-            text.gameObject.SetActive(true);
+            analyticsText.gameObject.SetActive(true);
             panel.SetActive(true);
             on = true;
         }

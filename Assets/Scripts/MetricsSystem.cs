@@ -409,7 +409,7 @@ public class MetricsSystem : MonoBehaviour
         }
 
         GameObject analyticMenu = GameObject.Find("Analytics Menu");
-        analyticMenu.GetComponent<AnalyticsMenu>().text.text = dataToSave;
+        analyticMenu.GetComponent<AnalyticsMenu>().analyticsText.text = dataToSave;
 
         try
         {
