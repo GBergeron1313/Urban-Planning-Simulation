@@ -58,6 +58,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2100345786477648002}
   - component: {fileID: 3975886381717800722}
+  - component: {fileID: -4289646569007575736}
   m_Layer: 0
   m_Name: Street_Deadend
   m_TagString: Untagged
@@ -108,6 +109,27 @@ MonoBehaviour:
   hasCrosswalks: 0
   incomming: {fileID: 13479095859982473}
   outgoing: {fileID: 5183172391734285799}
+--- !u!65 &-4289646569007575736
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1120765361980748800}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 1, y: 0.125, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!1 &2943627772085953537
 GameObject:
   m_ObjectHideFlags: 0

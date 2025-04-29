@@ -2168,7 +2168,7 @@ MonoBehaviour:
   - {fileID: 5928032463670676373, guid: 646488162f240a949a4e48ed1686ccda, type: 3}
   - {fileID: 2278821950334863235, guid: 0811cac021ab5f645ae41584a145f4a1, type: 3}
   - {fileID: 8964402343246118786, guid: 6415100e42056474fb95481c5c3046f3, type: 3}
-  npcButton: {fileID: 0}
+  npcButton: {fileID: 1611840890}
   spawnArea: {fileID: 411880940}
   buildingSpawner: {fileID: 0}
 --- !u!4 &346534670
@@ -3409,7 +3409,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 411880941}
         m_TargetAssemblyTypeName: SimCore, Assembly-CSharp
-        m_MethodName: PlaySimulation
+        m_MethodName: PauseSimulation
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

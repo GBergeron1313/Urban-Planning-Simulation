@@ -14,6 +14,7 @@ namespace UrbanPlanning
         public Transform spawnArea; // Assign an area where NPCs will spawn
         public static readonly int npcCount = 100; // Number of NPCs to spawn
         public static bool spawned_and_moving = false;
+        public int spawned_NPCS;
 
         public GameObject buildingSpawner;
 
@@ -21,6 +22,7 @@ namespace UrbanPlanning
         {
             name = "SpawnManager";
             npcButton.onClick.AddListener(SpawnNPCs);
+            spawned_NPCS = 0;
 
         }
 
@@ -32,11 +34,11 @@ namespace UrbanPlanning
                 throw new UnityException("Can't spawn npcs when there are no buildings");
 
             // Don't let them spawn more NPCs
-            npcButton.interactable = false;
-            npcButton.onClick = null;
-            npcButton.enabled = false;
+            //npcButton.interactable = false;
+            //npcButton.onClick = null;
+            //npcButton.enabled = false;
 
-            for (int i = 0; i < buildingSpawner.GetComponent<CreateBuilding>().totalPop; i++)
+            for (int i = spawned_NPCS; i < buildingSpawner.GetComponent<CreateBuilding>().totalPop; i++)
             {
                 string[] name_id_index = citizen_names[i].Split('_');
                 CitizenModel prefab_index = CitizenModel.Parse<CitizenModel>(name_id_index[2]);
@@ -59,7 +61,10 @@ namespace UrbanPlanning
                     .with_enabled_movement(
                             SimCore.Instance.state
                             == SimState.Running);
+                spawned_NPCS++;
             }
+
+            
 
             Citizen.citizens_enabled = true;
         }
@@ -72,11 +77,11 @@ namespace UrbanPlanning
                 throw new UnityException("Can't spawn npcs when there are no buildings");
 
             // Don't let them spawn more NPCs
-            npcButton.interactable = false;
-            npcButton.onClick = null;
-            npcButton.enabled = false;
+            //npcButton.interactable = false;
+            //npcButton.onClick = null;
+            //npcButton.enabled = false;
 
-            for (int i = 0; i < buildingSpawner.GetComponent<CreateBuilding>().totalPop; i++)
+            for (int i = spawned_NPCS; i < buildingSpawner.GetComponent<CreateBuilding>().totalPop; i++)
             {
                 int rand_prefab_idx = Random.Range(0, npcPrefabs.Length);
                 int rand_position_idx = Random.Range(0, Building.building_positions.Count);
@@ -98,6 +103,7 @@ namespace UrbanPlanning
                     .with_enabled_movement(
                             SimCore.Instance.state
                             == SimState.Running);
+                spawned_NPCS++;
             }
 
             Citizen.citizens_enabled = true;
