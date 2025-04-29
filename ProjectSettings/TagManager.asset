@@ -16,6 +16,7 @@ TagManager:
   - Capacity Text
   - Building Name Text
   - Building Sprite
+  - Building UI
   layers:
   - Default
   - TransparentFX

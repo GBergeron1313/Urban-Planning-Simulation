@@ -4,6 +4,7 @@ using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine.UI;
+using Unity.VisualScripting;
 
 namespace BuildingUtils
 {
@@ -78,7 +79,9 @@ namespace BuildingUtils
         TextMeshProUGUI noiseText;
         TextMeshProUGUI capacityText;
         TextMeshProUGUI nameText;
-        Sprite currentSprite;
+        GameObject[] UIElements;
+        public Sprite currentSprite;
+        Sprite displaySprite;
 
         public Sprite[] buildingImages;
 
@@ -104,7 +107,8 @@ namespace BuildingUtils
             noiseText = GameObject.FindGameObjectWithTag("Noise Text").GetComponent<TextMeshProUGUI>();
             capacityText = GameObject.FindGameObjectWithTag("Capacity Text").GetComponent<TextMeshProUGUI>();
             nameText = GameObject.FindGameObjectWithTag("Building Name Text").GetComponent<TextMeshProUGUI>();
-            currentSprite = GameObject.FindGameObjectWithTag("Building Sprite").GetComponent<Sprite>();
+            UIElements = GameObject.FindGameObjectsWithTag("Building UI");
+            //displaySprite = GameObject.FindGameObjectWithTag("Building Sprite").GetComponent<Sprite>();
             /*applied = new Vector3();*/
         }
 
@@ -206,11 +210,21 @@ namespace BuildingUtils
                     }
                     else
                     {
-                        pollutionText.text = " " + air_pollution;
-                        noiseText.text = " " + noise_pollution;
-                        capacityText.text = " " + max_capacity;
+                        pollutionText.text = " " + this.air_pollution;
+                        noiseText.text = " " + this.noise_pollution;
+                        capacityText.text = " " + this.max_capacity;
                         nameText.text = name;
-                        currentSprite = buildingImages[0];
+
+                        pollutionText.gameObject.SetActive(true);
+                        noiseText.gameObject.SetActive(true);
+                        capacityText.gameObject.SetActive(true);
+
+                        for (int i = 0; i < UIElements.Length; i++)
+                        {
+                            UIElements[i].SetActive(true);
+                        }
+
+                        Cell.building_mode = BuildingMode.None;
 
                         if (pollutionSlider.IsActive())
                             pollutionSlider.gameObject.SetActive(false);
