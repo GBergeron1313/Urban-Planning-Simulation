@@ -161,8 +161,16 @@ namespace BuildingUtils
                 return;
             }
             hovering = this;
-            GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
-            mouseText[0].GetComponent<MouseTestScript>().SetText("Q + Click: Rotate");
+            if (Cell.building_mode != BuildingMode.Removal)
+            {
+                GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
+                mouseText[0].GetComponent<MouseTestScript>().SetText("Q + Click: Rotate");
+            }
+            else
+            {
+                GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
+                mouseText[0].GetComponent<MouseTestScript>().SetText("Click to Remove");
+            }
         }
 
         private void OnMouseExit()
@@ -245,6 +253,8 @@ namespace BuildingUtils
             bool r = Building.building_positions.Remove(which.gameObject.transform.position)
                 || Building.building_positions.Remove(which.transform.position);
             print($"Removing {which} {(r ? "Succeeded" : "Failed")}");
+            GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
+            mouseText[0].GetComponent<MouseTestScript>().SetText("");
             Destroy(which.gameObject);
             Destroy(which);
         }

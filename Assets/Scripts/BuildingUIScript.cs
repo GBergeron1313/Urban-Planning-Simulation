@@ -16,7 +16,7 @@ public class BuildingUIScript : MonoBehaviour
     TextMeshProUGUI nameText;
     GameObject[] UIElements;
 
-    public Button building1, building2, building3, building4, building5, building6, building7, road;
+    public Button building1, building2, building3, building4, building5, building6, building7, road, delete;
 
     public TMP_Dropdown buildingDropdown;
 
@@ -52,6 +52,7 @@ public class BuildingUIScript : MonoBehaviour
         building6.onClick.AddListener(() => BuildingButton(5));
         building7.onClick.AddListener(() => BuildingButton(6));
         road.onClick.AddListener(() => BuildingButton(7));
+        delete.onClick.AddListener(() => BuildingButton(8));
     }
 
     // Update is called once per frame
@@ -71,7 +72,7 @@ public class BuildingUIScript : MonoBehaviour
 
         buildingDropdown.value = buttonNumber;
 
-        if (buttonNumber != 7)
+        if (buttonNumber < 7)
         {
             pollutionText.gameObject.SetActive(true);
             noiseText.gameObject.SetActive(true);
@@ -93,12 +94,22 @@ public class BuildingUIScript : MonoBehaviour
             capacityText.gameObject.SetActive(false);
             pollutionSlider.gameObject.SetActive(false);
             noiseSlider.gameObject.SetActive(false);
-            capacitySlider.gameObject.SetActive(false);
-            Cell.building_mode = BuildingMode.PlacingRoad;
-            nameText.text = "Placing Road";
+            capacitySlider.gameObject.SetActive(false);            
+            
             for (int i = 0; i < UIElements.Length; i++)
             {
                 UIElements[i].SetActive(false);
+            }
+
+            if(buttonNumber == 7)
+            {
+                Cell.building_mode = BuildingMode.PlacingRoad;
+                nameText.text = "Placing Road";
+            }
+            else if(buttonNumber == 8)
+            {
+                Cell.building_mode = BuildingMode.Removal;
+                nameText.text = "Removal";
             }
         }
 
