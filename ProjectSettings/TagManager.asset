@@ -17,6 +17,9 @@ TagManager:
   - Building Name Text
   - Building Sprite
   - Building UI
+  - Road Type Text
+  - Next Road
+  - Prev Road
   layers:
   - Default
   - TransparentFX

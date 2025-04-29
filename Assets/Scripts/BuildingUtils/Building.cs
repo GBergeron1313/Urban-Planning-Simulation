@@ -79,6 +79,7 @@ namespace BuildingUtils
         TextMeshProUGUI noiseText;
         TextMeshProUGUI capacityText;
         TextMeshProUGUI nameText;
+        public TextMeshProUGUI roadType;
         GameObject[] UIElements;
         public Sprite currentSprite;
         Sprite displaySprite;
@@ -222,6 +223,12 @@ namespace BuildingUtils
                     }
                     else
                     {
+                        if (GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>())
+                        {
+                            roadType = GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>();
+                            roadType.gameObject.SetActive(false);
+                        }
+
                         pollutionText.text = " " + this.air_pollution;
                         noiseText.text = " " + this.noise_pollution;
                         capacityText.text = " " + this.max_capacity;
@@ -230,6 +237,7 @@ namespace BuildingUtils
                         pollutionText.gameObject.SetActive(true);
                         noiseText.gameObject.SetActive(true);
                         capacityText.gameObject.SetActive(true);
+                        
 
                         for (int i = 0; i < UIElements.Length; i++)
                         {
