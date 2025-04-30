@@ -223,11 +223,7 @@ namespace BuildingUtils
                     }
                     else
                     {
-                        if (GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>())
-                        {
-                            roadType = GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>();
-                            roadType.gameObject.SetActive(false);
-                        }
+                        
 
                         pollutionText.text = " " + this.air_pollution;
                         noiseText.text = " " + this.noise_pollution;
@@ -251,7 +247,13 @@ namespace BuildingUtils
                         if (noiseSlider.IsActive())
                             noiseSlider.gameObject.SetActive(false);
                         if (capacitySlider.IsActive())
-                            capacitySlider.gameObject.SetActive(false); 
+                            capacitySlider.gameObject.SetActive(false);
+
+                        if (GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>())
+                        {
+                            roadType = GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>();
+                            roadType.gameObject.SetActive(false);
+                        }
                     }
                     resolve_name();
                 }
