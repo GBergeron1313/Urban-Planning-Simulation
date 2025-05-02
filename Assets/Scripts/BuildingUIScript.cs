@@ -14,7 +14,7 @@ public class BuildingUIScript : MonoBehaviour
     GameObject[] UIElements;
     public GameObject buildingPanel, roadPanel;
 
-    public Button building1, building2, building3, building4, building5, building6, building7, road, delete, next, prev;
+    public Button building1, building2, building3, building4, building5, building6, building7, road, road2, road3, road4, road5, delete, next, prev;
 
     public TMP_Dropdown buildingDropdown;
 
@@ -43,7 +43,11 @@ public class BuildingUIScript : MonoBehaviour
         building6.onClick.AddListener(() => BuildingButton(5));
         building7.onClick.AddListener(() => BuildingButton(6));
         road.onClick.AddListener(() => BuildingButton(7));
-        delete.onClick.AddListener(() => BuildingButton(8));
+        road2.onClick.AddListener(() => BuildingButton(8));
+        road3.onClick.AddListener(() => BuildingButton(9));
+        road4.onClick.AddListener(() => BuildingButton(10));
+        road5.onClick.AddListener(() => BuildingButton(12));
+        delete.onClick.AddListener(() => BuildingButton(15));
     }
 
     // Update is called once per frame
@@ -165,10 +169,10 @@ public class BuildingUIScript : MonoBehaviour
                 UIElements[i].SetActive(false);
             }
 
-            if(buttonNumber == 7)
+            if(buttonNumber > 6 && buttonNumber < 15)
             {               
                 roadType.text = "Straight Road";
-                buildingDropdown.value = 1;
+                buildingDropdown.value = buttonNumber - 6;
                 roadType.gameObject.SetActive(true);
                 prev.gameObject.SetActive(true);
                 next.gameObject.SetActive(true);
@@ -178,7 +182,7 @@ public class BuildingUIScript : MonoBehaviour
 
                 roadPanel.gameObject.SetActive(false);
             }
-            else if(buttonNumber == 8)
+            else if(buttonNumber == 15)
             {
                 Cell.building_mode = BuildingMode.Removal;
                 nameText.text = "Removal";

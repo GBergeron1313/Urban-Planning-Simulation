@@ -179,7 +179,7 @@ namespace BuildingUtils
             if (Cell.building_mode != BuildingMode.Removal)
             {
                 GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
-                mouseText[0].GetComponent<MouseTestScript>().SetText("Q + Click: Rotate");
+                mouseText[0].GetComponent<MouseTestScript>().SetText("Click: Rotate");
             }
             else
             {
@@ -241,14 +241,13 @@ namespace BuildingUtils
                 if (Cell.building_mode == BuildingMode.PlacingBuilding
                     || Cell.building_mode == BuildingMode.PlacingRoad || Cell.building_mode == BuildingMode.None)
                 {
-                    if (Input.GetKey(KeyCode.Q))
+                    exp_apply_rotation(Rotation.CW90);
+                    /*if (Input.GetKey(KeyCode.Q))
                     {
                         exp_apply_rotation(Rotation.CW90);
                     }
                     else
-                    {
-                        
-
+                    {                      
                         pollutionText.text = " " + this.air_pollution;
                         noiseText.text = " " + this.noise_pollution;
                         capacityText.text = " " + this.max_capacity;
@@ -266,7 +265,7 @@ namespace BuildingUtils
                             roadType = GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>();
                             roadType.gameObject.SetActive(false);
                         }
-                    }
+                    }*/
                     resolve_name();
                 }
             }

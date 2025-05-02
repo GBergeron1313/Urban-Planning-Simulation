@@ -22,7 +22,10 @@ public class TogglePanels : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (!targetPanel.active)
+        {
+            isOpen = false;
+        }
     }
 
     public void TogglePanel()
