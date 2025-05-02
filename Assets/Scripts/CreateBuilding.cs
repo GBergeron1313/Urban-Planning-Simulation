@@ -12,6 +12,7 @@ public class CreateBuilding : MonoBehaviour
     public GameObject buildingPrefab;
     public GameObject[] building_prefabs;
     public GameObject[] road_prefabs;
+    
 
     public Sprite[] buildingSprites;
 
@@ -30,6 +31,7 @@ public class CreateBuilding : MonoBehaviour
     {
         name = "CreateBuilding";
         prefabs = new List<GameObject>();
+        
     }
 
     public void SetDropdownValues(CellType ct)
@@ -156,9 +158,9 @@ public class CreateBuilding : MonoBehaviour
     {
         if (bs.attached_to.cell_type == CellType.Building)
         {
-            totalPol += (int)bs.air_pollution;
-            totalNoise += (int)bs.noise_pollution;
-            totalPop += (int)bs.max_capacity;
+            //totalPol += (int)bs.air_pollution;
+            //totalNoise += (int)bs.noise_pollution;
+            //totalPop += (int)bs.max_capacity;
             if (totalPop > 0)
             {
                 polPerCit = totalPol / totalPop;
@@ -209,6 +211,12 @@ public class CreateBuilding : MonoBehaviour
             default:
                 break;
         }
+
+        if (Cell.building_mode == BuildingMode.PlacingRoad)
+        {
+            bs.zoneType = "Road";
+        }
+
 
         bs.set_model_update_info(model);
         bs.make_connection(cell);

@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine.UI;
 using Unity.VisualScripting;
 using Lean.Transition;
+using UrbanPlanning;
 
 namespace BuildingUtils
 {
@@ -83,6 +84,7 @@ namespace BuildingUtils
         TextMeshProUGUI nameText;
         public TextMeshProUGUI roadType;
         GameObject UIElements, Grid;
+        public GameObject spawner;
 
         float popCounter;
 
@@ -105,16 +107,22 @@ namespace BuildingUtils
         {
             Assert.IsNotNull(attached_to);
             resolve_name();
-            pollutionText = GameObject.FindGameObjectWithTag("Pollution Text").GetComponent<TextMeshProUGUI>();
-            noiseText = GameObject.FindGameObjectWithTag("Noise Text").GetComponent<TextMeshProUGUI>();
-            capacityText = GameObject.FindGameObjectWithTag("Capacity Text").GetComponent<TextMeshProUGUI>();
-            currentCapText = GameObject.FindGameObjectWithTag("Current Text").GetComponent<TextMeshProUGUI>();
-            nameText = GameObject.FindGameObjectWithTag("Building Name Text").GetComponent<TextMeshProUGUI>();
-            UIElements = GameObject.FindGameObjectWithTag("Building UI");
-            Grid = GameObject.FindGameObjectWithTag("Grid");
+            if (zoneType != "Road")
+            {
+                pollutionText = GameObject.FindGameObjectWithTag("Pollution Text").GetComponent<TextMeshProUGUI>();
+                noiseText = GameObject.FindGameObjectWithTag("Noise Text").GetComponent<TextMeshProUGUI>();
+                capacityText = GameObject.FindGameObjectWithTag("Capacity Text").GetComponent<TextMeshProUGUI>();
+                currentCapText = GameObject.FindGameObjectWithTag("Current Text").GetComponent<TextMeshProUGUI>();
+                nameText = GameObject.FindGameObjectWithTag("Building Name Text").GetComponent<TextMeshProUGUI>();
+                UIElements = GameObject.FindGameObjectWithTag("Building UI");
+                Grid = GameObject.FindGameObjectWithTag("Grid");
+                spawner = GameObject.FindGameObjectWithTag("Respawn");
+            }
 
             roadModel = 11;
             current_capacity = 0;
+
+            
             //displaySprite = GameObject.FindGameObjectWithTag("Building Sprite").GetComponent<Sprite>();
             /*applied = new Vector3();*/
         }
@@ -179,13 +187,16 @@ namespace BuildingUtils
                 mouseText[0].GetComponent<MouseTestScript>().SetText("Click to Remove");
             }
 
-            pollutionText.text = " " + this.air_pollution;
-            noiseText.text = " " + this.noise_pollution;
-            capacityText.text = " " + this.max_capacity;
-            currentCapText.text = " " + this.current_capacity;
-            nameText.text = name;
-
-            UIElements.transform.position = new Vector3 (1900, 1000, 0);
+            if (zoneType != "Road")
+            {
+                pollutionText.text = " " + this.air_pollution;
+                noiseText.text = " " + this.noise_pollution;
+                capacityText.text = " " + this.max_capacity;
+                currentCapText.text = " " + this.current_capacity;
+                nameText.text = name;
+                UIElements.transform.position = new Vector3 (1900, 1000, 0);
+            }
+                          
         }
 
         private void OnMouseExit()
@@ -195,7 +206,8 @@ namespace BuildingUtils
             GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
             mouseText[0].GetComponent<MouseTestScript>().SetText("");
 
-            UIElements.transform.position = new Vector3(2500, 1000, 0);
+            if (zoneType != "Road")
+                UIElements.transform.position = new Vector3(2500, 1000, 0);
         }
 
         private void OnMouseOver()
@@ -280,25 +292,35 @@ namespace BuildingUtils
         // Update is called once per frame
         void Update()
         {
-
-            if (Grid.GetComponent<SimCore>().state == SimState.Running)
+            if (zoneType != "Road")
             {
-                if (current_capacity < max_capacity)
+                if (Grid.GetComponent<SimCore>().state == SimState.Running)
                 {
-                    popCounter -= Time.unscaledDeltaTime;
-                    if (popCounter <= 0)
+                    if (current_capacity < max_capacity)
                     {
-                        if (zoneType == "Residential")
+                        popCounter -= Time.unscaledDeltaTime;
+                        if (popCounter <= 0)
                         {
-                            current_capacity++;
-                            air_pollution += Random.Range(0, 3);
-                            noise_pollution += Random.Range(0, 4);
-                        }
+                            if (zoneType == "Residential")
+                            {
+                                current_capacity++;
+                                spawner.GetComponent<CreateBuilding>().totalPop++;
+                                int polNum = Random.Range(0, 3);
+                                air_pollution += polNum;
+                                spawner.GetComponent<CreateBuilding>().totalPol += polNum;
+                                polNum = Random.Range(0, 4);
+                                noise_pollution += polNum;
+                                spawner.GetComponent<CreateBuilding>().totalNoise += polNum;
+                            }
 
-                        popCounter = Random.Range(5, 10);
+                            popCounter = Random.Range(5, 10);
+
+                            GameObject npcSpawner = GameObject.FindGameObjectWithTag("Spawner");
+                            npcSpawner.GetComponent<SpawnManager>().SpawnNPCs();
+                        }
                     }
                 }
-            }
+            }            
         }
     }
 }
