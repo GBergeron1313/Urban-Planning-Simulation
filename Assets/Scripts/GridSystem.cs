@@ -91,7 +91,7 @@ public class GridSystem : MonoBehaviour
         }
 
 
-        zoneButton.onClick.AddListener(Cell.CycleZoneType);
+        //zoneButton.onClick.AddListener(Cell.CycleZoneType);
 
         GenerateGrid();
     }

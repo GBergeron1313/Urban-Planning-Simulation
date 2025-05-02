@@ -44,6 +44,7 @@ namespace BuildingUtils
         public float noise_pollution;
         public float power_usage;
         public float max_capacity;
+        public float current_capacity;
     }
 
     [System.Serializable]
@@ -63,26 +64,25 @@ namespace BuildingUtils
         public static Building last_hovered;
 
         public string name;
+        public string zoneType;
         public string legible;
         public BuildingInfo info;
         public float air_pollution;
         public float noise_pollution;
         public float power_usage;
         public float max_capacity;
+        public float current_capacity;
         public Cell attached_to;
         public BuildingModel model;
         /*private Vector3 applied;*/
-        Slider pollutionSlider;
-        Slider noiseSlider;
-        Slider capacitySlider;
         TextMeshProUGUI pollutionText;
         TextMeshProUGUI noiseText;
         TextMeshProUGUI capacityText;
         TextMeshProUGUI nameText;
         public TextMeshProUGUI roadType;
         GameObject[] UIElements;
-        public Sprite currentSprite;
-        Sprite displaySprite;
+        GameObject Grid;
+        float popCounter;
 
         public Sprite[] buildingImages;
 
@@ -103,16 +103,15 @@ namespace BuildingUtils
         {
             Assert.IsNotNull(attached_to);
             resolve_name();
-            pollutionSlider = GameObject.FindGameObjectWithTag("Pollution Slider").GetComponent<Slider>();
-            noiseSlider = GameObject.FindGameObjectWithTag("Noise Slider").GetComponent<Slider>();
-            capacitySlider = GameObject.FindGameObjectWithTag("Capacity Slider").GetComponent<Slider>();
             pollutionText = GameObject.FindGameObjectWithTag("Pollution Text").GetComponent<TextMeshProUGUI>();
             noiseText = GameObject.FindGameObjectWithTag("Noise Text").GetComponent<TextMeshProUGUI>();
             capacityText = GameObject.FindGameObjectWithTag("Capacity Text").GetComponent<TextMeshProUGUI>();
             nameText = GameObject.FindGameObjectWithTag("Building Name Text").GetComponent<TextMeshProUGUI>();
             UIElements = GameObject.FindGameObjectsWithTag("Building UI");
+            Grid = GameObject.FindGameObjectWithTag("Grid");
 
             roadModel = 11;
+            current_capacity = 0;
             //displaySprite = GameObject.FindGameObjectWithTag("Building Sprite").GetComponent<Sprite>();
             /*applied = new Vector3();*/
         }
@@ -242,13 +241,6 @@ namespace BuildingUtils
 
                         Cell.building_mode = BuildingMode.None;
 
-                        if (pollutionSlider.IsActive())
-                            pollutionSlider.gameObject.SetActive(false);
-                        if (noiseSlider.IsActive())
-                            noiseSlider.gameObject.SetActive(false);
-                        if (capacitySlider.IsActive())
-                            capacitySlider.gameObject.SetActive(false);
-
                         if (GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>())
                         {
                             roadType = GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>();
@@ -280,7 +272,25 @@ namespace BuildingUtils
         // Update is called once per frame
         void Update()
         {
-            
+
+            if (Grid.GetComponent<SimCore>().state == SimState.Running)
+            {
+                if (current_capacity < max_capacity)
+                {
+                    popCounter -= Time.unscaledDeltaTime;
+                    if (popCounter <= 0)
+                    {
+                        if (zoneType == "Residential")
+                        {
+                            current_capacity++;
+                            air_pollution += Random.Range(0, 3);
+                            noise_pollution += Random.Range(0, 4);
+                        }
+
+                        popCounter = Random.Range(5, 10);
+                    }
+                }
+            }
         }
     }
 }

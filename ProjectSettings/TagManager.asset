@@ -20,6 +20,7 @@ TagManager:
   - Road Type Text
   - Next Road
   - Prev Road
+  - Grid
   layers:
   - Default
   - TransparentFX

@@ -13,10 +13,6 @@ public class CreateBuilding : MonoBehaviour
     public GameObject[] building_prefabs;
     public GameObject[] road_prefabs;
 
-    public Slider pollutionSlider;
-    public Slider noiseSlider;
-    public Slider capacitySlider;
-
     public Sprite[] buildingSprites;
 
     public TMP_Dropdown buildingDropdown;
@@ -180,16 +176,46 @@ public class CreateBuilding : MonoBehaviour
         next_prefab.transform.position = cell.gameObject.transform.position;
         Building bs = next_prefab.AddComponent<Building>();
 
+        switch (buildingDropdown.value)
+        {
+            case 1:
+                bs.zoneType = "Commercial";
+                bs.max_capacity = 100;
+                break;
+            case 2:
+                bs.zoneType = "Industrial";
+                bs.max_capacity = 100;
+                break;
+            case 3:
+                bs.zoneType = "Industrial";
+                bs.max_capacity = 100;
+                break;
+            case 4:
+                bs.zoneType = "Residential";
+                bs.max_capacity = 30;
+                break;
+            case 5:
+                bs.zoneType = "Residential";
+                bs.max_capacity = 50;
+                break;
+            case 6:
+                bs.zoneType = "Residential";
+                bs.max_capacity = 100;
+                break;
+            case 7:
+                bs.zoneType = "Commercial";
+                bs.max_capacity = 50;
+                break;
+            default:
+                break;
+        }
+
         bs.set_model_update_info(model);
         bs.make_connection(cell);
 
         
         buildingCount++;
         bs.name = "Building " + buildingCount;
-        bs.max_capacity = (int)capacitySlider.value;
-        bs.noise_pollution = (int)noiseSlider.value;
-        bs.air_pollution = (int)pollutionSlider.value;
-        bs.currentSprite = buildingSprites[buildingDropdown.value];
         bs.roadModel = 11;
 
         configure_pop_info(bs);
