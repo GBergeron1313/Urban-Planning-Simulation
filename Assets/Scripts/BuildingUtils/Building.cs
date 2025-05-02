@@ -5,6 +5,7 @@ using UnityEngine.EventSystems;
 using TMPro;
 using UnityEngine.UI;
 using Unity.VisualScripting;
+using Lean.Transition;
 
 namespace BuildingUtils
 {
@@ -78,10 +79,11 @@ namespace BuildingUtils
         TextMeshProUGUI pollutionText;
         TextMeshProUGUI noiseText;
         TextMeshProUGUI capacityText;
+        TextMeshProUGUI currentCapText;
         TextMeshProUGUI nameText;
         public TextMeshProUGUI roadType;
-        GameObject[] UIElements;
-        GameObject Grid;
+        GameObject UIElements, Grid;
+
         float popCounter;
 
         public Sprite[] buildingImages;
@@ -106,8 +108,9 @@ namespace BuildingUtils
             pollutionText = GameObject.FindGameObjectWithTag("Pollution Text").GetComponent<TextMeshProUGUI>();
             noiseText = GameObject.FindGameObjectWithTag("Noise Text").GetComponent<TextMeshProUGUI>();
             capacityText = GameObject.FindGameObjectWithTag("Capacity Text").GetComponent<TextMeshProUGUI>();
+            currentCapText = GameObject.FindGameObjectWithTag("Current Text").GetComponent<TextMeshProUGUI>();
             nameText = GameObject.FindGameObjectWithTag("Building Name Text").GetComponent<TextMeshProUGUI>();
-            UIElements = GameObject.FindGameObjectsWithTag("Building UI");
+            UIElements = GameObject.FindGameObjectWithTag("Building UI");
             Grid = GameObject.FindGameObjectWithTag("Grid");
 
             roadModel = 11;
@@ -175,6 +178,14 @@ namespace BuildingUtils
                 GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
                 mouseText[0].GetComponent<MouseTestScript>().SetText("Click to Remove");
             }
+
+            pollutionText.text = " " + this.air_pollution;
+            noiseText.text = " " + this.noise_pollution;
+            capacityText.text = " " + this.max_capacity;
+            currentCapText.text = " " + this.current_capacity;
+            nameText.text = name;
+
+            UIElements.transform.position = new Vector3 (1900, 1000, 0);
         }
 
         private void OnMouseExit()
@@ -183,6 +194,8 @@ namespace BuildingUtils
             last_hovered = this;
             GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
             mouseText[0].GetComponent<MouseTestScript>().SetText("");
+
+            UIElements.transform.position = new Vector3(2500, 1000, 0);
         }
 
         private void OnMouseOver()
@@ -231,13 +244,8 @@ namespace BuildingUtils
 
                         pollutionText.gameObject.SetActive(true);
                         noiseText.gameObject.SetActive(true);
-                        capacityText.gameObject.SetActive(true);
+                        capacityText.gameObject.SetActive(true);             
                         
-
-                        for (int i = 0; i < UIElements.Length; i++)
-                        {
-                            UIElements[i].SetActive(true);
-                        }
 
                         Cell.building_mode = BuildingMode.None;
 

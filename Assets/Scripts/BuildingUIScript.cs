@@ -29,11 +29,6 @@ public class BuildingUIScript : MonoBehaviour
         roadType = GameObject.FindGameObjectWithTag("Road Type Text").GetComponent<TextMeshProUGUI>();
         UIElements = GameObject.FindGameObjectsWithTag("Building UI");
 
-        for (int i = 0; i < UIElements.Length; i++)
-        {
-            UIElements[i].SetActive(false);
-        }
-
         pollutionText.gameObject.SetActive(false);
         noiseText.gameObject.SetActive(false);
         capacityText.gameObject.SetActive(false);
@@ -49,12 +44,6 @@ public class BuildingUIScript : MonoBehaviour
         building7.onClick.AddListener(() => BuildingButton(6));
         road.onClick.AddListener(() => BuildingButton(7));
         delete.onClick.AddListener(() => BuildingButton(8));
-
-        prev.onClick.AddListener(PrevRoad);
-        next.onClick.AddListener(NextRoad);
-
-        prev.gameObject.SetActive(false);
-        next.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -195,7 +184,5 @@ public class BuildingUIScript : MonoBehaviour
                 nameText.text = "Removal";
             }
         }
-
-        
     }
 }

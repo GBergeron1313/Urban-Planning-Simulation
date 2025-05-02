@@ -21,6 +21,7 @@ TagManager:
   - Next Road
   - Prev Road
   - Grid
+  - Current Text
   layers:
   - Default
   - TransparentFX

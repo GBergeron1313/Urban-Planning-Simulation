@@ -164,7 +164,7 @@ public class CreateBuilding : MonoBehaviour
                 polPerCit = totalPol / totalPop;
                 noisePerCit = totalNoise / totalPop;
             }
-            popCount.text ="Pollution Level: " + totalPol + "\nNoise Level:" + totalNoise + "\nTotal Population: " + totalPop;
+            //popCount.text ="Pollution Level: " + totalPol + "\nNoise Level:" + totalNoise + "\nTotal Population: " + totalPop;
         }
     }
 
