@@ -11,7 +11,7 @@ public class CarSpawnerButton : MonoBehaviour
 
     private void Start()
     {
-        carButton.onClick.AddListener(SpawnCars);
+        
     }
 
     public void SpawnCars()
