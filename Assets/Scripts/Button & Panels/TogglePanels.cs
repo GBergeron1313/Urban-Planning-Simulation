@@ -37,7 +37,7 @@ public class TogglePanels : MonoBehaviour
         }
     }
 
-    public void OpenPanel()
+    public void OpenPanel()  
     {
         isOpen = true;
         targetPanel.SetActive(true);
