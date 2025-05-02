@@ -311,6 +311,40 @@ namespace BuildingUtils
                                 noise_pollution += polNum;
                                 spawner.GetComponent<CreateBuilding>().totalNoise += polNum;
                             }
+                            if (zoneType == "Commercial")
+                            {
+                                if (spawner.GetComponent<CreateBuilding>().totalPop < max_capacity)
+                                {
+                                    int polNum = Random.Range(1, 3);
+                                    noise_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;
+                                    polNum = Random.Range(0, 2);
+                                    air_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;
+                                }
+                                else
+                                {
+                                    int polNum = Random.Range(1, 3);
+                                    noise_pollution = max_capacity * polNum;
+                                    polNum = Random.Range(0, 2);
+                                    air_pollution = max_capacity * polNum;
+                                }
+                            }
+                            if(zoneType == "Industrial")
+                            {
+                                if(spawner.GetComponent<CreateBuilding>().totalPop < max_capacity)
+                                {
+                                    int polNum = Random.Range(2, 4);
+                                    noise_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;
+                                    polNum = Random.Range(1, 3);
+                                    air_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;
+                                }
+                                else
+                                {
+                                    int polNum = Random.Range(2, 4);
+                                    noise_pollution = max_capacity * polNum;
+                                    polNum = Random.Range(1, 3);
+                                    air_pollution = max_capacity * polNum;
+                                }
+                            }
 
                             popCounter = Random.Range(5, 10);
 

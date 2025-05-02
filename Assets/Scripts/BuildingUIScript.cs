@@ -35,18 +35,18 @@ public class BuildingUIScript : MonoBehaviour
         roadType.gameObject.SetActive(false);
         
 
-        building1.onClick.AddListener(() => BuildingButton(0));
-        building2.onClick.AddListener(() => BuildingButton(1));
-        building3.onClick.AddListener(() => BuildingButton(2));
-        building4.onClick.AddListener(() => BuildingButton(3));
-        building5.onClick.AddListener(() => BuildingButton(4));
-        building6.onClick.AddListener(() => BuildingButton(5));
-        building7.onClick.AddListener(() => BuildingButton(6));
-        road.onClick.AddListener(() => BuildingButton(7));
-        road2.onClick.AddListener(() => BuildingButton(8));
-        road3.onClick.AddListener(() => BuildingButton(9));
-        road4.onClick.AddListener(() => BuildingButton(10));
-        road5.onClick.AddListener(() => BuildingButton(12));
+        building1.onClick.AddListener(() => BuildingButton(1));
+        building2.onClick.AddListener(() => BuildingButton(2));
+        building3.onClick.AddListener(() => BuildingButton(3));
+        building4.onClick.AddListener(() => BuildingButton(4));
+        building5.onClick.AddListener(() => BuildingButton(5));
+        building6.onClick.AddListener(() => BuildingButton(6));
+        building7.onClick.AddListener(() => BuildingButton(7));
+        road.onClick.AddListener(() => BuildingButton(8));
+        road2.onClick.AddListener(() => BuildingButton(9));
+        road3.onClick.AddListener(() => BuildingButton(10));
+        road4.onClick.AddListener(() => BuildingButton(11));
+        road5.onClick.AddListener(() => BuildingButton(13));
         delete.onClick.AddListener(() => BuildingButton(15));
     }
 
@@ -169,10 +169,10 @@ public class BuildingUIScript : MonoBehaviour
                 UIElements[i].SetActive(false);
             }
 
-            if(buttonNumber > 6 && buttonNumber < 15)
+            if(buttonNumber > 7 && buttonNumber < 15)
             {               
                 roadType.text = "Straight Road";
-                buildingDropdown.value = buttonNumber - 6;
+                buildingDropdown.value = buttonNumber - 7;
                 roadType.gameObject.SetActive(true);
                 prev.gameObject.SetActive(true);
                 next.gameObject.SetActive(true);
