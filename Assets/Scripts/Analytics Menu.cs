@@ -24,8 +24,9 @@ public class AnalyticsMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (analyticsText.gameObject.active)
+        if (analyticsText.gameObject.activeSelf)
         {
+
             analyticsText.text = analytics.text;
         }
     }

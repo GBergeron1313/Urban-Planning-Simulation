@@ -59,6 +59,14 @@ namespace SavingReloading
             }
         }
 
+        private void SaveAllData()
+        {
+            lastSaveTime = Time.time;
+            SaveGridData();
+            if (Citizen.citizens_enabled)
+                SaveCurrentCitizenData();
+        }
+
         private void LoadAllData()
         {
             ClearCurrentData();

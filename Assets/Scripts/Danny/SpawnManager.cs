@@ -38,7 +38,7 @@ namespace UrbanPlanning
             //npcButton.onClick = null;
             //npcButton.enabled = false;
 
-            for (int i = spawned_NPCS; i < buildingSpawner.GetComponent<CreateBuilding>().totalPop; i++)
+            for (int i = spawned_NPCS; i < Cell.creator.totalPop; i++)
             {
                 string[] name_id_index = citizen_names[i].Split('_');
                 CitizenModel prefab_index = CitizenModel.Parse<CitizenModel>(name_id_index[2]);
@@ -64,7 +64,36 @@ namespace UrbanPlanning
                 spawned_NPCS++;
             }
 
-            
+
+
+            Citizen.citizens_enabled = true;
+        }
+
+        public void SpawnNPCsAt(Building building, uint how_many)
+        {
+            for (int i = 0; i < how_many; i++)
+            {
+                int rand_prefab_idx = Random.Range(0, npcPrefabs.Length);
+                GameObject npc = Instantiate(
+                        npcPrefabs[rand_prefab_idx],
+                        building.transform.position,
+                        Quaternion.identity);
+
+                // For Saving and reloading, each citizen needs a unique name.
+                // Saving the prefab index is somewhat hacky, but it works for now.
+                // TODO: Make a real "Citizen" class to store this kind of info.
+                npc.name = $"Citizen_{i}_{rand_prefab_idx}";
+
+                npc.tag = "Citizens";
+
+                Citizen citizen = npc.AddComponent<Citizen>()
+                    .with_model((CitizenModel)rand_prefab_idx)
+                    .with_position(building.transform.position)
+                    .with_enabled_movement(
+                            SimCore.Instance.state
+                            == SimState.Running);
+                spawned_NPCS++;
+            }
 
             Citizen.citizens_enabled = true;
         }
@@ -75,11 +104,6 @@ namespace UrbanPlanning
 
             if (Building.building_positions.Count == 0)
                 throw new UnityException("Can't spawn npcs when there are no buildings");
-
-            // Don't let them spawn more NPCs
-            //npcButton.interactable = false;
-            //npcButton.onClick = null;
-            //npcButton.enabled = false;
 
             for (int i = spawned_NPCS; i < buildingSpawner.GetComponent<CreateBuilding>().totalPop; i++)
             {

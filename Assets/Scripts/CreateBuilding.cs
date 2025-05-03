@@ -3,7 +3,6 @@ using BuildingUtils;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.UI;
 
 public class CreateBuilding : MonoBehaviour
 {
@@ -12,7 +11,6 @@ public class CreateBuilding : MonoBehaviour
     public GameObject buildingPrefab;
     public GameObject[] building_prefabs;
     public GameObject[] road_prefabs;
-    
 
     public Sprite[] buildingSprites;
 
@@ -31,7 +29,6 @@ public class CreateBuilding : MonoBehaviour
     {
         name = "CreateBuilding";
         prefabs = new List<GameObject>();
-        
     }
 
     public void SetDropdownValues(CellType ct)
@@ -178,53 +175,47 @@ public class CreateBuilding : MonoBehaviour
         next_prefab.transform.position = cell.gameObject.transform.position;
         Building bs = next_prefab.AddComponent<Building>();
 
-        switch (buildingDropdown.value)
-        {
-            case 1:
-                bs.zoneType = "Commercial";
-                bs.max_capacity = 100;
-                break;
-            case 2:
-                bs.zoneType = "Industrial";
-                bs.max_capacity = 100;
-                break;
-            case 3:
-                bs.zoneType = "Industrial";
-                bs.max_capacity = 100;
-                break;
-            case 4:
-                bs.zoneType = "Residential";
-                bs.max_capacity = 30;
-                break;
-            case 5:
-                bs.zoneType = "Residential";
-                bs.max_capacity = 50;
-                break;
-            case 6:
-                bs.zoneType = "Residential";
-                bs.max_capacity = 100;
-                break;
-            case 7:
-                bs.zoneType = "Commercial";
-                bs.max_capacity = 50;
-                break;
-            default:
-                break;
-        }
-
-        if (Cell.building_mode == BuildingMode.PlacingRoad)
-        {
-            bs.zoneType = "Road";
-        }
-
+        bs.make_connection(cell);
+        /**/
+        /*switch (buildingDropdown.value)*/
+        /*{*/
+        /*    case 1:*/
+        /*        bs.attached_to.zone_type = "Commercial";*/
+        /*        bs.max_capacity = 100;*/
+        /*        break;*/
+        /*    case 2:*/
+        /*        bs.zoneType = "Industrial";*/
+        /*        bs.max_capacity = 100;*/
+        /*        break;*/
+        /*    case 3:*/
+        /*        bs.zoneType = "Industrial";*/
+        /*        bs.max_capacity = 100;*/
+        /*        break;*/
+        /*    case 4:*/
+        /*        bs.zoneType = "Residential";*/
+        /*        bs.max_capacity = 30;*/
+        /*        break;*/
+        /*    case 5:*/
+        /*        bs.zoneType = "Residential";*/
+        /*        bs.max_capacity = 50;*/
+        /*        break;*/
+        /*    case 6:*/
+        /*        bs.zoneType = "Residential";*/
+        /*        bs.max_capacity = 100;*/
+        /*        break;*/
+        /*    case 7:*/
+        /*        bs.zoneType = "Commercial";*/
+        /*        bs.max_capacity = 50;*/
+        /*        break;*/
+        /*    default:*/
+        /*        break;*/
+        /*}*/
 
         bs.set_model_update_info(model);
-        bs.make_connection(cell);
 
-        
         buildingCount++;
         bs.name = "Building " + buildingCount;
-        bs.roadModel = 11;
+        /*bs.roadModel = 11;*/
 
         configure_pop_info(bs);
 

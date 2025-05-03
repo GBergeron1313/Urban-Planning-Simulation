@@ -195,7 +195,15 @@ public class Cell : MonoBehaviour
 
     public static Cell AtCoords(int x, int z)
     {
-        return grid.GetCellAt(x, z).GetComponent<Cell>();
+        try
+        {
+            return grid.GetCellAt(x, z)?.GetComponent<Cell>();
+        }
+        catch (IndexOutOfRangeException ioore)
+        {
+            _ = ioore;
+            return null;
+        }
     }
 
     public override string ToString()
@@ -362,13 +370,75 @@ public class Cell : MonoBehaviour
         nmo.size = new Vector3(0.15f, 0.15f, 0.5f);
     }
 
-    void OnDestroy()
+
+    public void check_neighbors_place_building()
     {
+        t_till_check = 10f;
+        if (!cell_type.is_road())
+        {
+            return;
+        }
+        Cell up, down, left, right;
+        BuildingModel next_model = UnityEngine.Random.value < 0.5 ?
+                    (BuildingModel)UnityEngine.Random.Range(((int)BuildingModel.BUILDING_MIN + 1),
+                        ((int)BuildingModel.BUILDING_MAX))
+                    :
+                    (BuildingModel)UnityEngine.Random.Range(((int)BuildingModel.ROAD_MIN + 1),
+                        ((int)BuildingModel.ROAD_MAX));
+
+        if ((right = AtCoords(location.x + 1, location.y)) is not null
+                && right.Buildable())
+        {
+            if (next_model.as_cell_type().is_road())
+                right.PushRoad(next_model);
+            else
+                right.PushBuilding(next_model);
+            return;
+        }
+        if ((left = AtCoords(location.x - 1, location.y)) is not null
+                && left.Buildable())
+        {
+            if (next_model.as_cell_type().is_road())
+                left.PushRoad(next_model);
+            else
+                left.PushBuilding(next_model);
+            return;
+        }
+        if ((up = AtCoords(location.x, location.y + 1)) is not null
+                && up.Buildable())
+        {
+            if (next_model.as_cell_type().is_road())
+                up.PushRoad(next_model);
+            else
+                up.PushBuilding(next_model);
+            return;
+        }
+        if ((down = AtCoords(location.x, location.y - 1)) is not null
+                && down.Buildable())
+        {
+            if (next_model.as_cell_type().is_road())
+                down.PushRoad(next_model);
+            else
+                down.PushBuilding(next_model);
+            return;
+        }
     }
+
+    private float t_till_check = 10f;
 
     // Update is called once per frame
     void Update()
     {
+        if (SimCore.Instance.state != SimState.Running)
+        {
+            return;
+        }
+        if (t_till_check > 0)
+        {
+            t_till_check -= Time.unscaledDeltaTime;
+            return;
+        }
+        check_neighbors_place_building();
     }
 
     internal void register()

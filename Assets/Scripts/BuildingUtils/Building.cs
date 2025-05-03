@@ -3,9 +3,6 @@ using System.Collections.Generic;
 using UnityEngine.Assertions;
 using UnityEngine.EventSystems;
 using TMPro;
-using UnityEngine.UI;
-using Unity.VisualScripting;
-using Lean.Transition;
 using UrbanPlanning;
 
 namespace BuildingUtils
@@ -65,8 +62,7 @@ namespace BuildingUtils
         public static Building hovering;
         public static Building last_hovered;
 
-        public string name;
-        public string zoneType;
+        /*public string zoneType;*/
         public string legible;
         public BuildingInfo info;
         public float air_pollution;
@@ -90,7 +86,6 @@ namespace BuildingUtils
 
         public Sprite[] buildingImages;
 
-        public int roadModel;
 
         public static void ClearBuildings()
         {
@@ -107,22 +102,21 @@ namespace BuildingUtils
         {
             Assert.IsNotNull(attached_to);
             resolve_name();
-            if (zoneType != "Road")
-            {
-                pollutionText = GameObject.FindGameObjectWithTag("Pollution Text").GetComponent<TextMeshProUGUI>();
-                noiseText = GameObject.FindGameObjectWithTag("Noise Text").GetComponent<TextMeshProUGUI>();
-                capacityText = GameObject.FindGameObjectWithTag("Capacity Text").GetComponent<TextMeshProUGUI>();
-                currentCapText = GameObject.FindGameObjectWithTag("Current Text").GetComponent<TextMeshProUGUI>();
-                nameText = GameObject.FindGameObjectWithTag("Building Name Text").GetComponent<TextMeshProUGUI>();
-                UIElements = GameObject.FindGameObjectWithTag("Building UI");
-                Grid = GameObject.FindGameObjectWithTag("Grid");
-                spawner = GameObject.FindGameObjectWithTag("Respawn");
-            }
+            /*if (attached_to.cell_type != CellType.Road)*/
+            /*{*/
+            /*    pollutionText = GameObject.FindGameObjectWithTag("Pollution Text").GetComponent<TextMeshProUGUI>();*/
+            /*    noiseText = GameObject.FindGameObjectWithTag("Noise Text").GetComponent<TextMeshProUGUI>();*/
+            /*    capacityText = GameObject.FindGameObjectWithTag("Capacity Text").GetComponent<TextMeshProUGUI>();*/
+            /*    currentCapText = GameObject.FindGameObjectWithTag("Current Text").GetComponent<TextMeshProUGUI>();*/
+            /*    nameText = GameObject.FindGameObjectWithTag("Building Name Text").GetComponent<TextMeshProUGUI>();*/
+            /*    UIElements = GameObject.FindGameObjectWithTag("Building UI");*/
+            /*    Grid = GameObject.FindGameObjectWithTag("Grid");*/
+            /*    spawner = GameObject.FindGameObjectWithTag("Respawn");*/
+            /*}*/
 
-            roadModel = 11;
             current_capacity = 0;
 
-            
+
             //displaySprite = GameObject.FindGameObjectWithTag("Building Sprite").GetComponent<Sprite>();
             /*applied = new Vector3();*/
         }
@@ -187,16 +181,16 @@ namespace BuildingUtils
                 mouseText[0].GetComponent<MouseTestScript>().SetText("Click to Remove");
             }
 
-            if (zoneType != "Road")
-            {
-                pollutionText.text = " " + this.air_pollution;
-                noiseText.text = " " + this.noise_pollution;
-                capacityText.text = " " + this.max_capacity;
-                currentCapText.text = " " + this.current_capacity;
-                nameText.text = name;
-                UIElements.transform.position = new Vector3 (1900, 1000, 0);
-            }
-                          
+            /*if (attached_to.cell_type.is_building())*/
+            /*{*/
+            /*    pollutionText.text = " " + info.air_pollution;*/
+            /*    noiseText.text = " " + info.noise_pollution;*/
+            /*    capacityText.text = " " + info.max_capacity;*/
+            /*    currentCapText.text = " " + info.current_capacity;*/
+            /*    nameText.text = name;*/
+            /*    UIElements.transform.position = new Vector3(1900, 1000, 0);*/
+            /*}*/
+
         }
 
         private void OnMouseExit()
@@ -206,8 +200,8 @@ namespace BuildingUtils
             GameObject[] mouseText = GameObject.FindGameObjectsWithTag("MouseText");
             mouseText[0].GetComponent<MouseTestScript>().SetText("");
 
-            if (zoneType != "Road")
-                UIElements.transform.position = new Vector3(2500, 1000, 0);
+            /*if (attached_to.cell_type != CellType.Road)*/
+            /*    UIElements.transform.position = new Vector3(2500, 1000, 0);*/
         }
 
         private void OnMouseOver()
@@ -291,69 +285,72 @@ namespace BuildingUtils
         // Update is called once per frame
         void Update()
         {
-            if (zoneType != "Road")
+            if (attached_to.cell_type == CellType.Road
+                || SimCore.Instance.state != SimState.Running
+                || info.current_capacity >= info.max_capacity)
             {
-                if (Grid.GetComponent<SimCore>().state == SimState.Running)
-                {
-                    if (current_capacity < max_capacity)
-                    {
-                        popCounter -= Time.unscaledDeltaTime;
-                        if (popCounter <= 0)
-                        {
-                            if (zoneType == "Residential")
-                            {
-                                current_capacity++;
-                                spawner.GetComponent<CreateBuilding>().totalPop++;
-                                int polNum = Random.Range(0, 3);
-                                air_pollution += polNum;
-                                spawner.GetComponent<CreateBuilding>().totalPol += polNum;
-                                polNum = Random.Range(0, 4);
-                                noise_pollution += polNum;
-                                spawner.GetComponent<CreateBuilding>().totalNoise += polNum;
-                            }
-                            if (zoneType == "Commercial")
-                            {
-                                if (spawner.GetComponent<CreateBuilding>().totalPop < max_capacity)
-                                {
-                                    int polNum = Random.Range(1, 3);
-                                    noise_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;
-                                    polNum = Random.Range(0, 2);
-                                    air_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;
-                                }
-                                else
-                                {
-                                    int polNum = Random.Range(1, 3);
-                                    noise_pollution = max_capacity * polNum;
-                                    polNum = Random.Range(0, 2);
-                                    air_pollution = max_capacity * polNum;
-                                }
-                            }
-                            if(zoneType == "Industrial")
-                            {
-                                if(spawner.GetComponent<CreateBuilding>().totalPop < max_capacity)
-                                {
-                                    int polNum = Random.Range(2, 4);
-                                    noise_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;
-                                    polNum = Random.Range(1, 3);
-                                    air_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;
-                                }
-                                else
-                                {
-                                    int polNum = Random.Range(2, 4);
-                                    noise_pollution = max_capacity * polNum;
-                                    polNum = Random.Range(1, 3);
-                                    air_pollution = max_capacity * polNum;
-                                }
-                            }
+                return;
+            }
 
-                            popCounter = Random.Range(5, 10);
+            if (popCounter >= 0)
+            {
+                popCounter -= Time.unscaledDeltaTime;
+                return;
+            }
 
-                            GameObject npcSpawner = GameObject.FindGameObjectWithTag("Spawner");
-                            npcSpawner.GetComponent<SpawnManager>().SpawnNPCs();
-                        }
-                    }
-                }
-            }            
+            /*if (attached_to.zone_type == ZoneType.Residential)*/
+            /*{*/
+            /*    current_capacity++;*/
+            /*    spawner.GetComponent<CreateBuilding>().totalPop++;*/
+            /*    int polNum = Random.Range(0, 3);*/
+            /*    air_pollution += polNum;*/
+            /*    spawner.GetComponent<CreateBuilding>().totalPol += polNum;*/
+            /*    polNum = Random.Range(0, 4);*/
+            /*    noise_pollution += polNum;*/
+            /*    spawner.GetComponent<CreateBuilding>().totalNoise += polNum;*/
+            /*}*/
+            /*if (attached_to.zone_type == ZoneType.Commercial)*/
+            /*{*/
+            /*    if (spawner.GetComponent<CreateBuilding>().totalPop < max_capacity)*/
+            /*    {*/
+            /*        int polNum = Random.Range(1, 3);*/
+            /*        noise_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;*/
+            /*        polNum = Random.Range(0, 2);*/
+            /*        air_pollution = spawner.GetComponent<CreateBuilding>().totalPop * polNum;*/
+            /*    }*/
+            /*    else*/
+            /*    {*/
+            /*        int polNum = Random.Range(1, 3);*/
+            /*        noise_pollution = max_capacity * polNum;*/
+            /*        polNum = Random.Range(0, 2);*/
+            /*        air_pollution = max_capacity * polNum;*/
+            /*    }*/
+            /*}*/
+            /*if (attached_to.zone_type == ZoneType.Industrial)*/
+            /*{*/
+            /*    if (Cell.creator.totalPop < max_capacity)*/
+            /*    {*/
+            /*        int polNum = Random.Range(2, 4);*/
+            /*        noise_pollution = Cell.creator.totalPop * polNum;*/
+            /*        polNum = Random.Range(1, 3);*/
+            /*        air_pollution = Cell.creator.totalPop * polNum;*/
+            /*    }*/
+            /*    else*/
+            /*    {*/
+            /*        int polNum = Random.Range(2, 4);*/
+            /*        noise_pollution = max_capacity * polNum;*/
+            /*        polNum = Random.Range(1, 3);*/
+            /*        air_pollution = max_capacity * polNum;*/
+            /*    }*/
+            /*}*/
+
+            popCounter = Random.Range(5, 10);
+
+            int num_to_spawn = Random.Range(0, (int)Mathf.Abs(info.current_capacity - info.max_capacity));
+            info.current_capacity += num_to_spawn;
+
+            GameObject npcSpawner = GameObject.FindGameObjectWithTag("Spawner");
+            npcSpawner.GetComponent<SpawnManager>().SpawnNPCsAt(this, (uint)num_to_spawn);
         }
     }
 }
