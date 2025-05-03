@@ -3,6 +3,8 @@ using UnityEngine;
 
 static class Extensions
 {
+
+
     public static CellType as_cell_type(this BuildingModel model)
     {
         if (BuildingModel.BUILDING_MIN < model && model < BuildingModel.BUILDING_MAX)
@@ -20,6 +22,42 @@ static class Extensions
         else
         {
             throw new UnityException($"UNREACHABLE: Does BuildingModel.as_cell_type({model}) make sense?");
+        }
+    }
+
+    public static BuildingModel as_model_from_neighbor_count(this int neighbors)
+    {
+        switch (neighbors)
+        {
+            case 1:
+                return BuildingModel.Deadend;
+            case 2:
+                return BuildingModel.Straight;
+            case 3:
+                return BuildingModel.ThreeWay;
+            case 4:
+                return BuildingModel.FourWay;
+            default:
+                return BuildingModel.NONE;
+        }
+
+    }
+
+    public static int appropriate_neighbor_count(this BuildingModel model)
+    {
+        switch (model)
+        {
+            case BuildingModel.Deadend:
+                return 1;
+            case BuildingModel.Curve:
+            case BuildingModel.Straight:
+                return 2;
+            case BuildingModel.ThreeWay:
+                return 3;
+            case BuildingModel.FourWay:
+                return 4;
+            default:
+                return 1;
         }
     }
 

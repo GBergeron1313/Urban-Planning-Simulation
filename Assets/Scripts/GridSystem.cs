@@ -1,8 +1,5 @@
-using System.Collections.Generic;
 using BuildingUtils;
-using TMPro;
 using UnityEngine;
-using UnityEngine.Assertions;
 using UnityEngine.UI;
 
 public enum ZoneType
@@ -165,17 +162,40 @@ public class GridSystem : MonoBehaviour
         }
     }
 
+    private float t_last_rot_model_check = 10f;
 
     /// Updates grid state each frame
     public void Update()
     {
+        if (t_last_rot_model_check > 0)
+        {
+            t_last_rot_model_check -= Time.unscaledDeltaTime;
+        }
+        else
+        {
+            t_last_rot_model_check = 10f;
+            check_rot_model();
+        }
         HandleGridInteraction();
+    }
 
+    private void check_rot_model()
+    {
+        var roads = Cell.all_cells.FindAll((Cell c) => c.cell_type.is_road());
+        foreach (var road in roads)
+        {
+            int neighbors = road.number_of_neighbors();
+            if (neighbors != road.contents.model.appropriate_neighbor_count())
+            {
+                BuildingModel next_model = neighbors.as_model_from_neighbor_count();
+                road.change_model_to(next_model);
+            }
+        }
     }
 
     void HandleGridInteraction()
     {
-        // Cycles between PlacingBuilding, MarkingZoneType, and None
+        // Cycles between PlacingBuilding, PlacingRoad, MarkingZoneType, and None
         var e = Input.GetKeyDown(KeyCode.E);
 
         // Cycles paintbrush settings for ZoneType assignment
@@ -192,123 +212,46 @@ public class GridSystem : MonoBehaviour
         }
 
         show_text();
-
-
-        //buildingUI.SetActive(
-        //        Cell.building_mode == BuildingMode.PlacingBuilding
-        //        || Cell.building_mode == BuildingMode.PlacingRoad);
-        //zoneButton.GetComponentInChildren<TextMeshProUGUI>().text = $"{Cell.paintbrush}";
     }
 
     private void show_text()
     {
-        if (SimCore.Instance.view_mode == ViewMode.Default)
+        if (SimCore.Instance.view_mode != ViewMode.Default)
         {
-            string focus;
-            int num_cells = Cell.all_cells.Count;
-            var time = SimCore.Time.now;
-            var building = Building.hovering?.legible;
-            var cell = Cell.hovering?.location.ToString();
-            ZoneType zone_type;
-            if (cell is not null)
-            {
-                focus = cell;
-                zone_type = Cell.hovering.zone_type;
-            }
-            else if (building is not null)
-            {
-                focus = building;
-                zone_type = ZoneType.None;
-            }
-            else
-            {
-                focus = "N/A";
-                zone_type = ZoneType.None;
-            }
-
-            text_display.text =
-                $"Time: {time}\n" +
-                $"Focus: {focus}\n" +
-                $"Zone Type: {zone_type}\n" +
-                $"Paintbrush: {Cell.paintbrush}\n" +
-                $"Building Placement Mode: {Cell.building_mode}\n" +
-                $"# Cells: {num_cells}\n" +
-                $"# Buildings: {Building.building_positions.Count}";
+            text_display.text = "";
+            return;
+        }
+        string focus;
+        int num_cells = Cell.all_cells.Count;
+        var time = SimCore.Time.now;
+        var building = Building.hovering?.legible;
+        var cell = Cell.hovering?.location.ToString();
+        ZoneType zone_type;
+        if (cell is not null)
+        {
+            focus = cell;
+            zone_type = Cell.hovering.zone_type;
+        }
+        else if (building is not null)
+        {
+            focus = building;
+            zone_type = ZoneType.None;
         }
         else
         {
-            text_display.text = "";
+            focus = "N/A";
+            zone_type = ZoneType.None;
         }
 
+        text_display.text =
+            $"Time: {time}\n" +
+            $"Focus: {focus}\n" +
+            $"Zone Type: {zone_type}\n" +
+            $"Paintbrush: {Cell.paintbrush}\n" +
+            $"Building Placement Mode: {Cell.building_mode}\n" +
+            $"# Cells: {num_cells}\n" +
+            $"# Buildings: {Building.building_positions.Count}";
     }
-
-    public List<GameObject> GetBuildings()
-    {
-        if (filledCells is null || gridCells is null) return null;
-        List<GameObject> buildings = new List<GameObject>();
-
-
-
-        for (int x = 0; x < width; x++)
-        {
-            for (int z = 0; z < height; z++)
-            {
-                if (filledCells[x, z])
-                {
-                    buildings.Add(gridCells[x, z]);
-                }
-            }
-        }
-
-        return buildings;
-    }
-
-    public List<GameObject> GetCells()
-    {
-        if (filledCells is null || gridCells is null) return null;
-        Assert.AreEqual(filledCells.GetLength(0), width);
-        Assert.AreEqual(filledCells.GetLength(1), height);
-        List<GameObject> cells = new List<GameObject>();
-
-        for (int x = 0; x < width; x++)
-        {
-            for (int z = 0; z < height; z++)
-            {
-                cells.Add(gridCells[x, z]);
-            }
-        }
-
-        return cells;
-    }
-
-
-    /// Assigns a zone type to a grid cell
-    /*public void SetZone(int x, int z, ZoneType zoneType)*/
-    /*{*/
-    /*    zoneGrid[x, z] = zoneType;*/
-    /*}*/
-
-
-    /// Updates the cell color based on its zone type
-    /*public void UpdateCellColor(GameObject cell, int x, int z)*/
-    /*{*/
-    /*    Color zoneColor = GetZoneColor(zoneGrid[x, z]);*/
-    /*    cell.GetComponent<Renderer>().material.color = zoneColor;*/
-    /*}*/
-
-
-    /// Returns the color associated with a zone type
-    /*public Color GetZoneColor(ZoneType zoneType)*/
-    /*{*/
-    /*    switch (zoneType)*/
-    /*    {*/
-    /*        case ZoneType.Residential: return residentialZoneColor;*/
-    /*        case ZoneType.Commercial: return commercialZoneColor;*/
-    /*        case ZoneType.Industrial: return industrialZoneColor;*/
-    /*        case ZoneType.Restricted: return restrictedZoneColor;*/
-    /*        default: return defaultMaterial.color;*/
-    /*    }*/
-    /*}*/
 
     public static Color ZoneColor(ZoneType zoneType)
     {
@@ -322,13 +265,6 @@ public class GridSystem : MonoBehaviour
         }
     }
 
-    ///Returns the Zone type of a cell
-    public ZoneType GetZoneType(int x, int z)
-    {
-        return zoneGrid[x, z];
-    }
-
-
     /// Returns the GameObject at the specified grid coordinates
     public GameObject GetCellAt(int x, int z)
     {
@@ -338,39 +274,5 @@ public class GridSystem : MonoBehaviour
         }
 
         return null;
-    }
-
-    /// Checks if a cell is filled or restricted
-    /// Returns true if cell is filled, restricted, or out of bounds
-    public bool isCellFilled(int x, int z)
-    {
-        if (x >= 0 && x < width && z >= 0 && z < height && zoneGrid[x, z] != ZoneType.Restricted)
-        {
-            return filledCells[x, z];
-        }
-
-        return true; // Return true for out of bounds or restricted zones to prevent building
-    }
-
-    /// Marks a cell as filled if it's within grid bounds
-    public void fillCell(int x, int z)
-    {
-        if (x >= 0 && x < width && z >= 0 && z < height)
-        {
-            filledCells[x, z] = true;
-        }
-        else
-        {
-            throw new UnityException($"Attempted to Fill Cell {x}, {z}");
-        }
-    }
-
-    /// Marks a cell as empty if you move somthing off the cell
-    public void emptyCell(int x, int z)
-    {
-        if (x >= 0 && x < width && z >= 0 && z < height)
-        {
-            filledCells[x, z] = false;
-        }
     }
 }

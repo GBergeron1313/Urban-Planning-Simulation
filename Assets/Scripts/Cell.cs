@@ -68,6 +68,7 @@ public class Cell : MonoBehaviour
             Cell.paintbrush = ZoneType.Residential;
         }
     }
+
     public static void CycleBuildingMode()
     {
         Cell.building_mode++;
@@ -370,6 +371,65 @@ public class Cell : MonoBehaviour
         nmo.size = new Vector3(0.15f, 0.15f, 0.5f);
     }
 
+    public CellType?[] get_neighboring_cell_types()
+    {
+        return new CellType?[] {
+            AtCoords(location.x + 1, location.y)?.cell_type,
+            AtCoords(location.x - 1, location.y)?.cell_type,
+            AtCoords(location.x, location.y + 1)?.cell_type,
+            AtCoords(location.x, location.y - 1)?.cell_type,
+        };
+    }
+
+    private bool try_get_neighbor_where(Predicate<Cell> pred, out Cell neighbor)
+    {
+        return ((pred(neighbor = AtCoords(location.x + 1, location.y))) ||
+                (pred(neighbor = AtCoords(location.x - 1, location.y))) ||
+                (pred(neighbor = AtCoords(location.x, location.y + 1))) ||
+                (pred(neighbor = AtCoords(location.x, location.y - 1))));
+    }
+
+    private bool try_get_neighbor_with_cell_type(CellType ct, out Cell neighbor)
+    {
+        return (((neighbor = AtCoords(location.x + 1, location.y))?.cell_type == ct) ||
+                ((neighbor = AtCoords(location.x - 1, location.y))?.cell_type == ct) ||
+                ((neighbor = AtCoords(location.x, location.y + 1))?.cell_type == ct) ||
+                ((neighbor = AtCoords(location.x, location.y - 1))?.cell_type == ct));
+    }
+
+    public int number_of_neighbors()
+    {
+        int num = 0;
+        num += ((AtCoords(location.x + 1, location.y))?.contents is not null ? 1 : 0);
+        num += ((AtCoords(location.x - 1, location.y))?.contents is not null ? 1 : 0);
+        num += ((AtCoords(location.x, location.y + 1))?.contents is not null ? 1 : 0);
+        num += ((AtCoords(location.x, location.y - 1))?.contents is not null ? 1 : 0);
+        return num;
+    }
+
+    public bool change_model_to(BuildingModel new_model)
+    {
+        if (!contents)
+        {
+            return false;
+            /*throw new UnityException("'change_model_to' called on a cell without a building");*/
+        }
+        if (new_model == contents.model)
+        {
+            return false;
+            /*throw new UnityException("'change_model_to' called, but the model wouldn't be different");*/
+        }
+
+        Building.DestroyBuilding(contents);
+        cell_type = new_model.as_cell_type();
+        if (new_model.as_cell_type().is_road())
+            PushRoad(new_model);
+        else if (new_model.as_cell_type().is_building())
+            PushBuilding(new_model);
+
+
+        return contents is not null;
+    }
 
     public void check_neighbors_place_building()
     {
@@ -378,49 +438,42 @@ public class Cell : MonoBehaviour
         {
             return;
         }
-        Cell up, down, left, right;
         BuildingModel next_model = UnityEngine.Random.value < 0.5 ?
-                    (BuildingModel)UnityEngine.Random.Range(((int)BuildingModel.BUILDING_MIN + 1),
-                        ((int)BuildingModel.BUILDING_MAX))
-                    :
-                    (BuildingModel)UnityEngine.Random.Range(((int)BuildingModel.ROAD_MIN + 1),
-                        ((int)BuildingModel.ROAD_MAX));
+            (BuildingModel)UnityEngine.Random.Range(((int)BuildingModel.BUILDING_MIN + 1),
+                    ((int)BuildingModel.BUILDING_MAX))
+            :
+            (BuildingModel)UnityEngine.Random.Range(((int)BuildingModel.ROAD_MIN + 1),
+                    ((int)BuildingModel.ROAD_MAX));
 
-        if ((right = AtCoords(location.x + 1, location.y)) is not null
-                && right.Buildable())
+
+        Cell origin;
+
+
+        if (try_get_neighbor_where((Cell c) => c is not null && c.Buildable(), out origin))
         {
+            int neighbor_count = number_of_neighbors();
+
             if (next_model.as_cell_type().is_road())
-                right.PushRoad(next_model);
+            {
+                switch (neighbor_count)
+                {
+                    case 1:
+                        change_model_to(BuildingModel.Straight);
+                        break;
+                    case 2:
+                        change_model_to(BuildingModel.ThreeWay);
+                        break;
+                    case 3:
+                    case 4:
+                        change_model_to(BuildingModel.FourWay);
+                        break;
+                    default:
+                        break;
+                }
+                origin.PushRoad(next_model);
+            }
             else
-                right.PushBuilding(next_model);
-            return;
-        }
-        if ((left = AtCoords(location.x - 1, location.y)) is not null
-                && left.Buildable())
-        {
-            if (next_model.as_cell_type().is_road())
-                left.PushRoad(next_model);
-            else
-                left.PushBuilding(next_model);
-            return;
-        }
-        if ((up = AtCoords(location.x, location.y + 1)) is not null
-                && up.Buildable())
-        {
-            if (next_model.as_cell_type().is_road())
-                up.PushRoad(next_model);
-            else
-                up.PushBuilding(next_model);
-            return;
-        }
-        if ((down = AtCoords(location.x, location.y - 1)) is not null
-                && down.Buildable())
-        {
-            if (next_model.as_cell_type().is_road())
-                down.PushRoad(next_model);
-            else
-                down.PushBuilding(next_model);
-            return;
+                origin.PushBuilding(next_model);
         }
     }
 

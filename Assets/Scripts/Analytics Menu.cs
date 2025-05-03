@@ -7,16 +7,15 @@ public class AnalyticsMenu : MonoBehaviour
     public Button toggle;
     public TextMeshProUGUI analyticsText;
     public GameObject panel;
-    public bool on;
-    public TextAsset analytics;
+    public bool showing;
     public GameObject stats;
 
-    
+
     // Start is called before the first frame update
     void Start()
     {
         toggle.onClick.AddListener(ToggleWindow);
-        on = false;
+        showing = false;
         analyticsText.gameObject.SetActive(false);
         panel.SetActive(false);
     }
@@ -24,25 +23,12 @@ public class AnalyticsMenu : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (analyticsText.gameObject.activeSelf)
-        {
-
-            analyticsText.text = analytics.text;
-        }
     }
 
     void ToggleWindow()
     {
-        if (on)
-        {
-            analyticsText.gameObject.SetActive(false);
-            panel.SetActive(false);
-            on = false;
-        }else
-        {
-            analyticsText.gameObject.SetActive(true);
-            panel.SetActive(true);
-            on = true;
-        }
+        analyticsText.gameObject.SetActive(showing);
+        panel.SetActive(showing);
+        showing = !showing;
     }
 }

@@ -265,7 +265,16 @@ namespace BuildingUtils
             }
         }
 
-        private static void DestroyBuilding(Building which)
+        public static void DestroyBuildingFast(Building which)
+        {
+            bool r = Building.building_positions.Remove(which.gameObject.transform.position)
+                || Building.building_positions.Remove(which.transform.position);
+            print($"Removing {which} {(r ? "Succeeded" : "Failed")}");
+            Destroy(which.gameObject);
+            Destroy(which);
+        }
+
+        public static void DestroyBuilding(Building which)
         {
             which.attached_to.cell_type = CellType.None;
             which.attached_to.SetWalkableAndUpdate(false);

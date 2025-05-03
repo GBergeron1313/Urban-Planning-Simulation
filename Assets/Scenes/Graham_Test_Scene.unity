@@ -13181,8 +13181,7 @@ MonoBehaviour:
   toggle: {fileID: 1040195887}
   analyticsText: {fileID: 22242666}
   panel: {fileID: 652473116}
-  on: 0
-  analytics: {fileID: 4900000, guid: 113dd451d2653314b9a8e7555b103baa, type: 3}
+  showing: 0
   stats: {fileID: 0}
 --- !u!1 &1721046097
 GameObject:
