@@ -438,7 +438,18 @@ public class Cell : MonoBehaviour
         {
             return;
         }
-        BuildingModel next_model = UnityEngine.Random.value < 0.5 ?
+
+        var model_rand_influence = 0.5f;
+        var surroundings = get_neighboring_cell_types();
+        foreach (var ct in surroundings)
+        {
+            if (ct.HasValue)
+            {
+                model_rand_influence -= ct.Value.is_building() ? 0.25f : 0f;
+                model_rand_influence += ct.Value.is_road() ? 0.25f : 0f;
+            }
+        }
+        BuildingModel next_model = UnityEngine.Random.Range(0f, 1f) < model_rand_influence ?
             (BuildingModel)UnityEngine.Random.Range(((int)BuildingModel.BUILDING_MIN + 1),
                     ((int)BuildingModel.BUILDING_MAX))
             :

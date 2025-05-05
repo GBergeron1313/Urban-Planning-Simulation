@@ -91,6 +91,7 @@ public class GridSystem : MonoBehaviour
         //zoneButton.onClick.AddListener(Cell.CycleZoneType);
 
         GenerateGrid();
+        InvokeRepeating("check_rot_model", 5f, 10f);
     }
 
     public void ClearGridReset()
