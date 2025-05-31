@@ -91,7 +91,7 @@ public class GridSystem : MonoBehaviour
         //zoneButton.onClick.AddListener(Cell.CycleZoneType);
 
         GenerateGrid();
-        InvokeRepeating("check_rot_model", 5f, 10f);
+        /*InvokeRepeating("check_rot_model", 5f, 10f);*/
     }
 
     public void ClearGridReset()
@@ -163,36 +163,38 @@ public class GridSystem : MonoBehaviour
         }
     }
 
-    private float t_last_rot_model_check = 10f;
+    /*private float t_last_rot_model_check = 10f;*/
 
     /// Updates grid state each frame
     public void Update()
     {
-        if (t_last_rot_model_check > 0)
-        {
-            t_last_rot_model_check -= Time.unscaledDeltaTime;
-        }
-        else
-        {
-            t_last_rot_model_check = 10f;
-            check_rot_model();
-        }
+
+        /*if (t_last_rot_model_check > 0)*/
+        /*{*/
+        /*    t_last_rot_model_check -= Time.unscaledDeltaTime;*/
+        /*}*/
+        /*else*/
+        /*{*/
+        /*    t_last_rot_model_check = 10f;*/
+        /*    check_rot_model();*/
+        /*}*/
+
         HandleGridInteraction();
     }
 
-    private void check_rot_model()
-    {
-        var roads = Cell.all_cells.FindAll((Cell c) => c.cell_type.is_road());
-        foreach (var road in roads)
-        {
-            int neighbors = road.number_of_neighbors();
-            if (neighbors != road.contents.model.appropriate_neighbor_count())
-            {
-                BuildingModel next_model = neighbors.as_model_from_neighbor_count();
-                road.change_model_to(next_model);
-            }
-        }
-    }
+    /*private void check_rot_model()*/
+    /*{*/
+    /*    var roads = Cell.all_cells.FindAll((Cell c) => c.cell_type.is_road());*/
+    /*    foreach (var road in roads)*/
+    /*    {*/
+    /*        int neighbors = road.number_of_neighbors();*/
+    /*        if (neighbors != road.contents.model.appropriate_neighbor_count())*/
+    /*        {*/
+    /*            BuildingModel next_model = neighbors.as_model_from_neighbor_count();*/
+    /*            road.change_model_to(next_model);*/
+    /*        }*/
+    /*    }*/
+    /*}*/
 
     void HandleGridInteraction()
     {
